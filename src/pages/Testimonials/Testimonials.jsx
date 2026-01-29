@@ -102,11 +102,11 @@ const Compare = () => {
               Water Comparison
             </span>
           </div>
-          
+
           <h1 className="text-3xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6" style={{ color: `var(--color-surface)`, fontFamily: `var(--font-heading)` }}>
             UNIXA vs Regular Water
           </h1>
-          
+
           <p className="text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
             Discover the difference between regular tap water and UNIXA's advanced purification technology
           </p>
@@ -257,7 +257,7 @@ const Compare = () => {
           <div className="health-bubble health-bubble-2"></div>
           <div className="health-bubble health-bubble-3"></div>
         </div>
-        
+
         <style dangerouslySetInnerHTML={{
           __html: `
             .health-bubble {
@@ -314,7 +314,7 @@ const Compare = () => {
               <p className="text-lg leading-relaxed mb-8" style={{ color: `var(--color-text-muted)` }}>
                 From improved skin health to better kidney function, pure water impacts every aspect of your body's performance and longevity.
               </p>
-              
+
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 rounded-xl text-center" style={{ backgroundColor: `var(--color-surface)`, border: `2px solid var(--color-border)` }}>
                   <h4 className="font-bold text-2xl mb-2" style={{ color: `var(--color-accent)` }}>100%</h4>
@@ -326,7 +326,7 @@ const Compare = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="relative">
               <div className="aspect-square rounded-2xl overflow-hidden" style={{ background: `linear-gradient(45deg, rgba(132, 204, 22, 0.2), rgba(6, 182, 212, 0.2))` }}>
                 <div className="w-full h-full flex items-center justify-center">

@@ -6,13 +6,10 @@ import { debounce, throttle } from '../../utils/performance';
 // Lazy load all heavy components
 const Footer = lazy(() => import('../../components/layout/Footer'));
 const LadduCard = lazy(() => import('../../components/cards/LadduCard'));
-const LazyVideoReviews = lazy(() => import('../../components/sections/LazyVideoReviews'));
 const HeroSlider = lazy(() => import('../../components/Slider/HeroSlider'));
-const BrandAdvertisement = lazy(() => import('../../components/sections/BrandAdvertisement'));
 import Loader from '../../components/common/Loader';
 
 // Import images directly
-import water1 from '../../assets/images/water1.webp';
 import water2 from '../../assets/images/water2.webp';
 
 
@@ -247,7 +244,6 @@ const Home = memo(() => {
       </section>
 
       {/* Our Technology Section */}
-      {/* Our Technology Section */}
       <section ref={addToRefs} className="scroll-section bg-[var(--color-surface)] py-20 px-8 md:px-24 relative z-20 overflow-hidden mb-2" id="technology">
 
         <div className="max-w-7xl mx-auto relative z-10">
@@ -267,7 +263,7 @@ const Home = memo(() => {
             <div className="flex flex-col gap-6 h-full justify-center">
               <div className="relative group overflow-hidden rounded-[40px] shadow-2xl aspect-square">
                 <Suspense fallback={<div className="w-full h-full bg-[var(--color-muted)] animate-pulse rounded-[40px]"></div>}>
-                  <img src={water1} alt="Advanced Water Purification Technology" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 brightness-90 group-hover:brightness-100" loading="lazy" />
+                  <img src={water2} alt="Advanced Water Purification Technology" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 brightness-90 group-hover:brightness-100" loading="lazy" />
                 </Suspense>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-6 left-8">
@@ -351,19 +347,6 @@ const Home = memo(() => {
           </div>
         </div>
       </section>
-
-
-      {/* <Suspense fallback={
-        <div className="py-20 px-8 md:px-24 bg-white text-center border-y border-[var(--color-secondary)]/10">
-          <div className="max-w-7xl mx-auto flex flex-col items-center">
-            <Loader text="Loading Loved Stories..." />
-          </div>
-        </div>
-      }>
-        <LazyVideoReviews addToRefs={addToRefs} isHomePage={true} />
-      </Suspense> */}
-
-      {/* As Seen On - Media Coverage Section */}
 
 
       {/* Why Choose Our Water Purifiers Section */}
@@ -579,16 +562,6 @@ const Home = memo(() => {
           </div>
         </div>
       </section>
-
-      {/* <Suspense fallback={
-        <div className="py-20 px-4 md:px-24 bg-zinc-950 flex flex-col items-center justify-center border-y border-[var(--color-secondary)]/20">
-          <Loader text="Crafting Brand Legacy..." />
-        </div>
-      }>
-        <BrandAdvertisement addToRefs={addToRefs} />
-      </Suspense> */}
-
-
 
       <Suspense fallback={<div className="h-64 bg-[var(--color-surface)] animate-pulse border-t border-[var(--color-secondary)]/10"></div>}>
         <Footer />
