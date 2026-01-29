@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronDown } from 'lucide-react';
-import { createUserApi } from '../../api/user';
+// import { createUserApi } from '../../api/user';
 import { saveToken } from '../../utils/auth';
 import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar/Navbar';
@@ -86,26 +86,16 @@ const Registration = () => {
         if (Object.keys(newErrors).length === 0) {
             setIsLoading(true);
             try {
-                const payload = {
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    email: formData.email,
-                    phone: formData.phone,
-                    password: formData.password,
-                    gender: formData.gender.toLowerCase()
-                };
+                // Simulated Local Registration
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
-                const response = await createUserApi(payload);
-
-                if (response.token) {
-                    saveToken(response.token);
-                    toast.success('Registration successful!');
-                    navigate('/');
-                }
+                const mockToken = "static-token-12345";
+                saveToken(mockToken);
+                toast.success('Registration successful (Static Mode)!');
+                navigate('/');
             } catch (error) {
                 console.error('Registration failed:', error);
-                const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
-                toast.error(errorMessage);
+                toast.error('Registration failed. Please try again.');
             } finally {
                 setIsLoading(false);
             }
@@ -174,9 +164,9 @@ const Registration = () => {
                                         value={formData.firstName}
                                         onChange={handleChange}
                                         className={`w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.firstName ? 'border-red-500' : ''}`}
-                                        style={{ 
-                                            backgroundColor: `white`, 
-                                            border: `1px solid ${errors.firstName ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`, 
+                                        style={{
+                                            backgroundColor: `white`,
+                                            border: `1px solid ${errors.firstName ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
                                             color: `var(--color-text)`
                                         }}
                                         placeholder="Enter first name"
@@ -195,9 +185,9 @@ const Registration = () => {
                                         value={formData.lastName}
                                         onChange={handleChange}
                                         className={`w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.lastName ? 'border-red-500' : ''}`}
-                                        style={{ 
-                                            backgroundColor: `white`, 
-                                            border: `1px solid ${errors.lastName ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`, 
+                                        style={{
+                                            backgroundColor: `white`,
+                                            border: `1px solid ${errors.lastName ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
                                             color: `var(--color-text)`
                                         }}
                                         placeholder="Enter last name"
@@ -218,9 +208,9 @@ const Registration = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         className={`w-full pl-12 pr-12 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.password ? 'border-red-500' : ''}`}
-                                        style={{ 
-                                            backgroundColor: `white`, 
-                                            border: `1px solid ${errors.password ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`, 
+                                        style={{
+                                            backgroundColor: `white`,
+                                            border: `1px solid ${errors.password ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
                                             color: `var(--color-text)`
                                         }}
                                         placeholder="Enter password"
@@ -249,9 +239,9 @@ const Registration = () => {
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
                                         className={`w-full pl-12 pr-12 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                                        style={{ 
-                                            backgroundColor: `white`, 
-                                            border: `1px solid ${errors.confirmPassword ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`, 
+                                        style={{
+                                            backgroundColor: `white`,
+                                            border: `1px solid ${errors.confirmPassword ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
                                             color: `var(--color-text)`
                                         }}
                                         placeholder="Confirm password"
@@ -282,9 +272,9 @@ const Registration = () => {
                                         value={formData.phone}
                                         onChange={handleChange}
                                         className={`w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.phone ? 'border-red-500' : ''}`}
-                                        style={{ 
-                                            backgroundColor: `white`, 
-                                            border: `1px solid ${errors.phone ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`, 
+                                        style={{
+                                            backgroundColor: `white`,
+                                            border: `1px solid ${errors.phone ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
                                             color: `var(--color-text)`
                                         }}
                                         placeholder="Enter 10-digit phone number"
@@ -301,9 +291,9 @@ const Registration = () => {
                                         type="button"
                                         onClick={() => setShowGenderDropdown(!showGenderDropdown)}
                                         className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all text-left flex items-center justify-between ${errors.gender ? 'border-red-500' : ''}`}
-                                        style={{ 
-                                            backgroundColor: `white`, 
-                                            border: `1px solid ${errors.gender ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`, 
+                                        style={{
+                                            backgroundColor: `white`,
+                                            border: `1px solid ${errors.gender ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
                                             color: `var(--color-text)`
                                         }}
                                     >
@@ -356,9 +346,9 @@ const Registration = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     className={`w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.email ? 'border-red-500' : ''}`}
-                                    style={{ 
-                                        backgroundColor: `white`, 
-                                        border: `1px solid ${errors.email ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`, 
+                                    style={{
+                                        backgroundColor: `white`,
+                                        border: `1px solid ${errors.email ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
                                         color: `var(--color-text)`
                                     }}
                                     placeholder="Enter your email"
@@ -371,8 +361,8 @@ const Registration = () => {
                             type="submit"
                             disabled={isLoading}
                             className="w-full py-3 rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-xl transform hover:scale-[1.02]"
-                            style={{ 
-                                backgroundColor: `var(--color-secondary)`, 
+                            style={{
+                                backgroundColor: `var(--color-secondary)`,
                                 color: `white`,
                                 background: `linear-gradient(135deg, var(--color-secondary) 0%, rgba(6, 182, 212, 0.8) 100%)`
                             }}

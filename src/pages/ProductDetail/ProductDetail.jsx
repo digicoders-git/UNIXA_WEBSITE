@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
+import UnixaBrand from '../../components/common/UnixaBrand';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -13,7 +14,7 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    // Static Data for Products (Japanese Hybrid Technology Models)
+    // Static Data for Products (Pure Hybrid Technology Models)
     const staticProducts = [
         {
             _id: '1',
@@ -34,7 +35,7 @@ const ProductDetail = () => {
         {
             _id: '2',
             name: 'NanoPure Smart',
-            img: 'https://images.unsplash.com/photo-1544006659-f0b21884cb1d?q=80&w=2070&auto=format&fit=crop',
+            img: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop',
             price: 25000,
             finalPrice: 19999,
             discountPercent: 20,
@@ -66,7 +67,7 @@ const ProductDetail = () => {
         {
             _id: '4',
             name: 'AquaZen Elite',
-            img: 'https://images.unsplash.com/photo-1517646288020-0be1574cc9e5?q=80&w=2070&auto=format&fit=crop',
+            img: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop',
             price: 55000,
             finalPrice: 49999,
             discountPercent: 9,
@@ -153,7 +154,7 @@ const ProductDetail = () => {
                     {/* Image Section */}
                     <div className="relative group rounded-[4rem] bg-gradient-to-br from-slate-50 to-blue-50/30 p-12 lg:p-24 flex items-center justify-center overflow-hidden border border-blue-100/50 shadow-2xl shadow-blue-500/5">
                         <img
-                            src={product.img}
+                            src={product.img || product.mainImage?.url}
                             alt={product.name}
                             className="w-full max-w-md h-auto object-contain relative z-10 transition-transform duration-1000 group-hover:scale-110"
                         />
@@ -204,7 +205,7 @@ const ProductDetail = () => {
                             )}
                         </div>
 
-                        <p className="text-slate-500 leading-relaxed mb-8 text-lg font-medium">
+                        <p className="text-slate-500 leading-relaxed mb-8 text-lg font-medium font-[var(--font-body)]">
                             {product.description}
                         </p>
 

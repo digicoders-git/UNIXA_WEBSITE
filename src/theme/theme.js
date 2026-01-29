@@ -9,13 +9,13 @@ export const theme = {
     muted: "#F8FAFC",       // Section Background Light
     surface: "#FFFFFF",     // Pure White Foundation
     lightBlue: "#F0F9FF",   // Soft Water-themed BG
-    border: "rgba(14, 165, 233, 0.12)", // Subtle Blue tint
-    shadow: "rgba(0, 0, 0, 0.04)",     // Minimalist Elevation
+    border: "rgba(15, 23, 42, 0.08)", // Slightly more visible slate border
+    shadow: "rgba(0, 0, 0, 0.06)",     // Refined elevation
   },
   fonts: {
-    heading: "'Outfit', sans-serif",
-    body: "'Inter', sans-serif",
-    accent: "'Inter', sans-serif"
+    heading: "'Poppins', sans-serif",
+    body: "'Poppins', sans-serif",
+    accent: "'Poppins', sans-serif"
   }
 };
 

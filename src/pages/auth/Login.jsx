@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-import { loginUserApi } from '../../api/user';
+// import { loginUserApi } from '../../api/user';
 import { saveToken } from '../../utils/auth';
 import Footer from '../../components/layout/Footer';
 import Navbar from '../../components/Navbar/Navbar';
@@ -34,16 +34,17 @@ const Login = () => {
 
         setIsLoading(true);
         try {
-            const response = await loginUserApi(formData);
-            if (response.token) {
-                saveToken(response.token);
-                toast.success('Login successful!');
-                navigate('/');
-            }
+            // Simulated local login delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Allow any login for static version
+            const mockToken = "static-token-12345";
+            saveToken(mockToken);
+            toast.success('Login successful (Static Mode)!');
+            navigate('/');
         } catch (error) {
             console.error("Login Error:", error);
-            const errorMessage = error.response?.data?.message || 'Something went wrong. Please try again.';
-            toast.error(errorMessage);
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -104,9 +105,9 @@ const Login = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all"
-                                    style={{ 
-                                        backgroundColor: `white`, 
-                                        border: `1px solid rgba(6, 182, 212, 0.2)`, 
+                                    style={{
+                                        backgroundColor: `white`,
+                                        border: `1px solid rgba(6, 182, 212, 0.2)`,
                                         color: `var(--color-text)`
                                     }}
                                     placeholder="Enter your email"
@@ -125,9 +126,9 @@ const Login = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     className="w-full pl-12 pr-12 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all"
-                                    style={{ 
-                                        backgroundColor: `white`, 
-                                        border: `1px solid rgba(6, 182, 212, 0.2)`, 
+                                    style={{
+                                        backgroundColor: `white`,
+                                        border: `1px solid rgba(6, 182, 212, 0.2)`,
                                         color: `var(--color-text)`
                                     }}
                                     placeholder="Enter your password"
@@ -150,8 +151,8 @@ const Login = () => {
                             type="submit"
                             disabled={isLoading}
                             className="w-full py-3 rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-xl transform hover:scale-[1.02]"
-                            style={{ 
-                                backgroundColor: `var(--color-secondary)`, 
+                            style={{
+                                backgroundColor: `var(--color-secondary)`,
                                 color: `white`,
                                 background: `linear-gradient(135deg, var(--color-secondary) 0%, rgba(6, 182, 212, 0.8) 100%)`
                             }}

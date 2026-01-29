@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X, PhoneCall } from 'lucide-react';
+import UnixaBrand from '../common/UnixaBrand';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,8 +20,8 @@ const Navbar = () => {
     const navLinks = [
         { to: "/", label: "Home" },
         { to: "/purifiers", label: "Purifiers" },
-        { to: "/about", label: "Technology" },
-        { to: "/testimonials", label: "Reviews" },
+        { to: "/about", label: "About Us" },
+        { to: "/testimonials", label: "Compare" },
         { to: "/contact", label: "Support" },
     ];
 
@@ -37,7 +38,7 @@ const Navbar = () => {
                         <img src="/sks-logo.png" alt="Logo" className="w-full h-full object-contain" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-xl md:text-2xl font-black tracking-tight leading-none text-[var(--color-secondary)]">UNIXA</span>
+                        <UnixaBrand className="text-xl md:text-2xl" />
                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase mt-1 text-[var(--color-primary)]">Pure Water</span>
                     </div>
                 </div>

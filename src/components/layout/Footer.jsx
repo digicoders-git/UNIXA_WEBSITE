@@ -1,5 +1,6 @@
-import { Mail, Phone, MapPin, Heart, Shield, FileText, Link as LinkIcon, Youtube, Instagram, MessageCircle, Droplets } from 'lucide-react';
+import { Mail, Phone, MapPin, Heart, Instagram, Youtube, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import UnixaBrand from '../common/UnixaBrand';
 
 const Footer = () => {
   return (
@@ -19,13 +20,13 @@ const Footer = () => {
                 <img src="/sks-logo.png" alt="UNIXA" className="w-16 h-16 object-contain" />
               </div>
               <div>
-                <h3 className="text-4xl font-black tracking-tighter !text-white font-[var(--font-heading)]">UNIXA</h3>
+                <UnixaBrand className="text-4xl" color="white" />
                 <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">Pure Water Solutions</p>
               </div>
             </div>
 
             <p className="text-xl leading-relaxed text-slate-300 max-w-md font-medium">
-              Revolutionizing hydration with Japan-inspired technology. We bring the longevity of advanced water purification to every Indian household.
+              Revolutionizing hydration with premium technology. We bring the longevity of advanced water purification to every Indian household.
             </p>
 
             <div className="flex gap-5">
@@ -110,7 +111,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 pt-4">
           <p className="text-sm font-bold text-slate-300">
-            © 2025 <span className="text-white">UNIXA Pure Water</span>. All rights reserved.
+            © {new Date().getFullYear()} <UnixaBrand className="text-sm" color="white" />. All rights reserved.
           </p>
           <div className="flex items-center gap-3 text-sm">
             <span className="text-slate-500 font-medium">Crafted with</span>

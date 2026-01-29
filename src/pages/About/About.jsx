@@ -1,9 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { Droplets, Shield, Award, Truck, RotateCcw, FileText, CheckCircle, Zap, Filter, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Footer from '../../components/layout/Footer';
+import UnixaBrand from '../../components/common/UnixaBrand';
+import ourMissionImg from '../../assets/images/ourMissson.webp';
 
-const About = () => {
+const About = memo(() => {
   const sectionRefs = useRef([]);
 
   useEffect(() => {
@@ -32,444 +34,203 @@ const About = () => {
   };
 
   return (
-    <div style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-text)`, fontFamily: `var(--font-body)` }} className="min-h-screen -mt-12">
+    <div className="bg-[var(--color-surface)] text-[var(--color-text)] font-[var(--font-body)] overflow-x-hidden">
 
-      {/* Hero Section */}
-      <section className="relative py-8 md:py-12 px-6 text-center overflow-hidden rounded-b-[40px] md:rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
-        {/* Animated Bubbles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="bubble bubble-1"></div>
-          <div className="bubble bubble-2"></div>
-          <div className="bubble bubble-3"></div>
-          <div className="bubble bubble-4"></div>
-          <div className="bubble bubble-5"></div>
-          <div className="bubble bubble-6"></div>
+      {/* Hero Section - Matched to Purifiers/Home Premium Feel */}
+      <section className="relative pt-20 pb-12 md:pt-24 md:pb-16 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]">
+        {/* High Visibility Water Bubbles */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-blue-300/40 border border-white/40 blur-[0.5px] animate-float-bubble"
+              style={{
+                width: `${Math.random() * 50 + 15}px`,
+                height: `${Math.random() * 50 + 15}px`,
+                left: `${Math.random() * 100}%`,
+                bottom: `-${Math.random() * 20 + 20}%`,
+                animationDuration: `${Math.random() * 4 + 4}s`,
+                animationDelay: `${Math.random() * 5}s`
+              }}
+            />
+          ))}
         </div>
 
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            .bubble {
-              position: absolute;
-              border-radius: 50%;
-              animation: float-bubble 15s infinite ease-in-out;
-            }
-            .bubble-1 {
-              width: 60px;
-              height: 60px;
-              background: rgba(248, 250, 252, 0.15);
-              left: 10%;
-              top: 20%;
-              animation-delay: 0s;
-            }
-            .bubble-2 {
-              width: 40px;
-              height: 40px;
-              background: rgba(248, 250, 252, 0.12);
-              right: 15%;
-              top: 30%;
-              animation-delay: 3s;
-            }
-            .bubble-3 {
-              width: 80px;
-              height: 80px;
-              background: rgba(248, 250, 252, 0.18);
-              left: 70%;
-              bottom: 30%;
-              animation-delay: 6s;
-            }
-            .bubble-4 {
-              width: 50px;
-              height: 50px;
-              background: rgba(248, 250, 252, 0.10);
-              right: 60%;
-              bottom: 40%;
-              animation-delay: 9s;
-            }
-            .bubble-5 {
-              width: 30px;
-              height: 30px;
-              background: rgba(248, 250, 252, 0.14);
-              left: 30%;
-              top: 40%;
-              animation-delay: 12s;
-            }
-            .bubble-6 {
-              width: 70px;
-              height: 70px;
-              background: rgba(248, 250, 252, 0.16);
-              right: 30%;
-              top: 60%;
-              animation-delay: 2s;
-            }
+        <style>{`
             @keyframes float-bubble {
-              0%, 100% {
-                transform: translateY(0) scale(1);
-                opacity: 0.4;
-              }
-              50% {
-                transform: translateY(-40px) scale(1.2);
-                opacity: 0.7;
-              }
+                0% { transform: translateY(0) scale(1); opacity: 0; }
+                20% { opacity: 0.4; }
+                80% { opacity: 0.4; }
+                100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
             }
-          `
-        }} />
+            .animate-float-bubble {
+                animation: float-bubble linear infinite;
+            }
+        `}</style>
 
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-2 mb-4 md:mb-6">
-            <Droplets className="w-6 h-6 md:w-8 md:h-8" style={{ color: `var(--color-surface)` }} />
-            <span className="font-semibold text-xs md:text-sm uppercase tracking-wider" style={{ color: `var(--color-surface)` }}>
+        <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+          <div className="inline-flex items-center gap-3 px-5 py-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 rounded-full mx-auto">
+            <Droplets className="w-5 h-5 text-[var(--color-primary)]" />
+            <span className="text-[12px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">
               Pure Water Solutions
             </span>
           </div>
-          
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6" style={{ color: `var(--color-accent)`, fontFamily: `var(--font-heading)` }}>
-            About UNIXA
+
+          <h1 className="text-4xl md:text-8xl font-bold tracking-tighter leading-none">
+            About <UnixaBrand className="text-4xl md:text-8xl" /> <span className="text-[var(--color-primary)]">Legacy</span>
           </h1>
-          
-          <p className="text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
-            Leading the revolution in water purification technology with innovative solutions for healthier living
+
+          <p className="text-slate-600 text-sm md:text-xl max-w-2xl mx-auto leading-relaxed font-semibold">
+            Leading the revolution in water purification technology with innovative solutions for healthier living.
           </p>
-          
-          {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-4 md:gap-8 mt-8 md:mt-12">
-            <div className="flex items-center gap-2 backdrop-blur-sm px-4 md:px-6 py-2 md:py-3 rounded-full" style={{ backgroundColor: `var(--color-surface)15`, border: `1px solid var(--color-surface)30` }}>
-              <Shield className="w-4 h-4 md:w-5 md:h-5" style={{ color: `var(--color-muted)` }} />
-              <span className="font-bold text-sm md:text-base" style={{ color: `var(--color-muted)` }}>ISO Certified</span>
-            </div>
-            <div className="flex items-center gap-2 backdrop-blur-sm px-4 md:px-6 py-2 md:py-3 rounded-full" style={{ backgroundColor: `var(--color-surface)15`, border: `1px solid var(--color-surface)30` }}>
-              <Award className="w-4 h-4 md:w-5 md:h-5" style={{ color: `var(--color-muted)` }} />
-              <span className="font-bold text-sm md:text-base" style={{ color: `var(--color-muted)` }}>Industry Leader</span>
-            </div>
-          </div>
         </div>
+
+        {/* Section Separator Overlay */}
+        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[var(--color-primary)]/10 to-transparent pointer-events-none" />
       </section>
 
-      {/* Our Mission */}
-      <section ref={addToRefs} className="scroll-section py-12 px-6 md:px-12 relative" style={{ backgroundColor: `var(--color-surface)`}}>
-        {/* Background Bubbles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="mission-bubble mission-bubble-1"></div>
-          <div className="mission-bubble mission-bubble-2"></div>
-          <div className="mission-bubble mission-bubble-3"></div>
-          <div className="mission-bubble mission-bubble-4"></div>
-        </div>
-        
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            .mission-bubble {
-              position: absolute;
-              border-radius: 50%;
-              animation: float-mission 20s infinite ease-in-out;
-            }
-            .mission-bubble-1 {
-              width: 150px;
-              height: 150px;
-              background: rgba(10, 40, 106, 0.08);
-              left: 8%;
-              top: 10%;
-              animation-delay: 0s;
-            }
-            .mission-bubble-2 {
-              width: 100px;
-              height: 100px;
-              background: rgba(6, 182, 212, 0.12);
-              right: 15%;
-              top: 20%;
-              animation-delay: 5s;
-            }
-            .mission-bubble-3 {
-              width: 80px;
-              height: 80px;
-              background: rgba(132, 204, 22, 0.10);
-              left: 70%;
-              bottom: 25%;
-              animation-delay: 10s;
-            }
-            .mission-bubble-4 {
-              width: 120px;
-              height: 120px;
-              background: rgba(10, 40, 106, 0.06);
-              left: 20%;
-              bottom: 15%;
-              animation-delay: 15s;
-            }
-            @keyframes float-mission {
-              0%, 100% {
-                transform: translate(0, 0) scale(1);
-                opacity: 0.4;
-              }
-              50% {
-                transform: translate(15px, -25px) scale(1.15);
-                opacity: 0.6;
-              }
-            }
-          `
-        }} />
-        
+      {/* Our Mission - Updated with ourMissionImg and Clean CSS */}
+      <section ref={addToRefs} className="py-12 px-6 md:px-24 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>
-                Our Mission
-              </h2>
-              <p className="text-lg leading-relaxed mb-6" style={{ color: `var(--color-text-muted)` }}>
-                At UNIXA, we're committed to revolutionizing water purification technology. Our advanced filtration systems ensure every drop of water you consume is pure, safe, and healthy for you and your family.
-              </p>
-              <p className="text-lg leading-relaxed mb-8" style={{ color: `var(--color-text-muted)` }}>
-                With cutting-edge RO technology, UV sterilization, and multi-stage filtration, we deliver water that exceeds international quality standards while being environmentally sustainable.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-6">
-                <div className="p-6 rounded-xl" style={{ backgroundColor: `var(--color-surface)`, border: `2px solid var(--color-border)` }}>
-                  <h4 className="font-bold text-2xl mb-2" style={{ color: `var(--color-secondary)` }}>15+</h4>
-                  <p className="text-sm" style={{ color: `var(--color-text-muted)` }}>Years of Excellence</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h2 className="text-3xl md:text-6xl font-bold text-[var(--color-secondary)] tracking-tighter uppercase leading-none">
+                  Our <span className="text-[var(--color-primary)]">Mission</span>
+                </h2>
+                <div className="w-16 h-1.5 bg-[var(--color-primary)] rounded-full"></div>
+              </div>
+
+              <div className="space-y-6">
+                <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed">
+                  At <UnixaBrand className="text-base" />, we're committed to revolutionizing water purification technology. Our systems ensure every drop of water you consume is pure, safe, and mineral-rich.
+                </p>
+                <p className="text-base text-slate-400 font-medium leading-relaxed">
+                  With cutting-edge RO technology, UV sterilization, and multi-stage filtration, we deliver water that exceeds international quality standards while being environmentally sustainable.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8">
+                <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="font-bold text-4xl mb-2 text-[var(--color-secondary)]">15+</h4>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary)]">Years of Excellence</p>
                 </div>
-                <div className="p-6 rounded-xl" style={{ backgroundColor: `var(--color-surface)`, border: `2px solid var(--color-border)` }}>
-                  <h4 className="font-bold text-2xl mb-2" style={{ color: `var(--color-secondary)` }}>99.9%</h4>
-                  <p className="text-sm" style={{ color: `var(--color-text-muted)` }}>Purification Rate</p>
+                <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="font-bold text-4xl mb-2 text-[var(--color-secondary)]">99.9%</h4>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary)]">Purification Rate</p>
                 </div>
               </div>
             </div>
-            
+
             <div className="relative">
-              <div className="aspect-square rounded-2xl overflow-hidden" style={{ background: `linear-gradient(45deg, var(--color-primary)20, var(--color-secondary)20)` }}>
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <Filter className="w-24 h-24 mx-auto mb-4" style={{ color: `var(--color-primary)` }} />
-                    <h3 className="text-xl font-bold" style={{ color: `var(--color-primary)` }}>Advanced Filtration</h3>
-                    <p className="text-sm mt-2" style={{ color: `var(--color-text-muted)` }}>Multi-stage purification process</p>
-                  </div>
-                </div>
+              <div className="rounded-[40px] overflow-hidden shadow-2xl border-4 border-white transform hover:scale-[1.02] transition-transform duration-700">
+                <img
+                  src={ourMissionImg}
+                  alt="Our Mission"
+                  className="w-full h-auto object-cover"
+                />
               </div>
+              {/* Decorative background glow */}
+              <div className="absolute -z-10 -top-10 -right-10 w-64 h-64 bg-[var(--color-primary)]/10 blur-[100px] rounded-full" />
+              <div className="absolute -z-10 -bottom-10 -left-10 w-64 h-64 bg-cyan-400/10 blur-[100px] rounded-full" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Why Choose UNIXA */}
-      <section ref={addToRefs} className="scroll-section py-12 px-6 md:px-12" style={{ backgroundColor: `var(--color-surface)`, borderTop: `1px solid var(--color-border)` }}>
+      {/* Why Choose Section - Updated UI */}
+      <section ref={addToRefs} className="py-20 px-8 md:px-24 bg-slate-50 border-y border-slate-100">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>
-              Why Choose UNIXA?
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter uppercase text-[var(--color-secondary)]">
+              Why Choose <UnixaBrand />?
             </h2>
-            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: `var(--color-secondary)` }}></div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition-all duration-300" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `var(--color-primary)15` }}>
-                <Droplets className="w-10 h-10" style={{ color: `var(--color-primary)` }} />
-              </div>
-              <h3 className="text-xl font-bold mb-4" style={{ color: `var(--color-primary)` }}>Advanced RO Technology</h3>
-              <p style={{ color: `var(--color-text-muted)` }}>State-of-the-art reverse osmosis system removes 99.9% of contaminants, ensuring crystal clear water.</p>
-            </div>
-            
-            <div className="text-center p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition-all duration-300" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `var(--color-secondary)15` }}>
-                <Shield className="w-10 h-10" style={{ color: `var(--color-secondary)` }} />
-              </div>
-              <h3 className="text-xl font-bold mb-4" style={{ color: `var(--color-primary)` }}>UV Sterilization</h3>
-              <p style={{ color: `var(--color-text-muted)` }}>Powerful UV-C light eliminates bacteria, viruses, and other harmful microorganisms completely.</p>
-            </div>
-            
-            <div className="text-center p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition-all duration-300" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: `var(--color-accent)15` }}>
-                <CheckCircle className="w-10 h-10" style={{ color: `var(--color-accent)` }} />
-              </div>
-              <h3 className="text-xl font-bold mb-4" style={{ color: `var(--color-primary)` }}>Smart Monitoring</h3>
-              <p style={{ color: `var(--color-text-muted)` }}>IoT-enabled systems with real-time water quality monitoring and filter replacement alerts.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Technology Section */}
-      <section ref={addToRefs} className="scroll-section py-12 px-6 md:px-12" style={{ background: `linear-gradient(135deg, var(--color-primary)05, var(--color-secondary)05)` }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="p-6 rounded-xl text-center" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                  <Zap className="w-12 h-12 mx-auto mb-4" style={{ color: `var(--color-accent)` }} />
-                  <h4 className="font-bold mb-2" style={{ color: `var(--color-primary)` }}>Energy Efficient</h4>
-                  <p className="text-sm" style={{ color: `var(--color-text-muted)` }}>Low power consumption</p>
-                </div>
-                <div className="p-6 rounded-xl text-center" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                  <Filter className="w-12 h-12 mx-auto mb-4" style={{ color: `var(--color-secondary)` }} />
-                  <h4 className="font-bold mb-2" style={{ color: `var(--color-primary)` }}>Multi-Stage</h4>
-                  <p className="text-sm" style={{ color: `var(--color-text-muted)` }}>7-stage purification</p>
-                </div>
-                <div className="p-6 rounded-xl text-center" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                  <Shield className="w-12 h-12 mx-auto mb-4" style={{ color: `var(--color-primary)` }} />
-                  <h4 className="font-bold mb-2" style={{ color: `var(--color-primary)` }}>Safe & Secure</h4>
-                  <p className="text-sm" style={{ color: `var(--color-text-muted)` }}>Child safety locks</p>
-                </div>
-                <div className="p-6 rounded-xl text-center" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                  <Award className="w-12 h-12 mx-auto mb-4" style={{ color: `var(--color-accent)` }} />
-                  <h4 className="font-bold mb-2" style={{ color: `var(--color-primary)` }}>Certified</h4>
-                  <p className="text-sm" style={{ color: `var(--color-text-muted)` }}>ISI & NSF approved</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="order-1 lg:order-2">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>
-                Cutting-Edge Technology
-              </h2>
-              <p className="text-lg leading-relaxed mb-6" style={{ color: `var(--color-text-muted)` }}>
-                Our water purifiers incorporate the latest technological innovations to deliver unparalleled water quality. From smart sensors to automated cleaning cycles, every feature is designed for your convenience.
-              </p>
-              <p className="text-lg leading-relaxed" style={{ color: `var(--color-text-muted)` }}>
-                Experience the future of water purification with UNIXA's intelligent systems that adapt to your usage patterns and maintain optimal performance automatically.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Commitments */}
-      <section ref={addToRefs} className="scroll-section py-12 px-6 md:px-12 relative" style={{ backgroundColor: `var(--color-surface)` }}>
-        {/* Background Bubbles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="commitment-bubble commitment-bubble-1"></div>
-          <div className="commitment-bubble commitment-bubble-2"></div>
-          <div className="commitment-bubble commitment-bubble-3"></div>
-        </div>
-        
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            .commitment-bubble {
-              position: absolute;
-              border-radius: 50%;
-              animation: float-commitment 18s infinite ease-in-out;
-            }
-            .commitment-bubble-1 {
-              width: 120px;
-              height: 120px;
-              background: var(--color-primary)10;
-              left: 5%;
-              top: 15%;
-              animation-delay: 0s;
-            }
-            .commitment-bubble-2 {
-              width: 80px;
-              height: 80px;
-              background: var(--color-secondary)15;
-              right: 10%;
-              top: 25%;
-              animation-delay: 6s;
-            }
-            .commitment-bubble-3 {
-              width: 100px;
-              height: 100px;
-              background: var(--color-accent)10;
-              left: 50%;
-              bottom: 20%;
-              animation-delay: 12s;
-            }
-            @keyframes float-commitment {
-              0%, 100% {
-                transform: translate(0, 0) scale(1);
-                opacity: 0.3;
-              }
-              50% {
-                transform: translate(20px, -30px) scale(1.1);
-                opacity: 0.5;
-              }
-            }
-          `
-        }} />
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>
-              Our Commitments
-            </h2>
-            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: `var(--color-secondary)` }}></div>
+            <div className="w-20 h-1.5 bg-[var(--color-primary)] mx-auto rounded-full"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: 'Free Installation', icon: Truck, desc: 'Professional installation and setup at your doorstep with 1-year warranty.' },
-              { title: 'Service Guarantee', icon: RotateCcw, desc: '24/7 customer support with quick response and hassle-free maintenance.' },
-              { title: 'Quality Assurance', icon: FileText, desc: 'Rigorous quality testing and certification for every product we deliver.' }
-            ].map((commitment, index) => {
-              const IconComponent = commitment.icon;
-              return (
-                <div
-                  key={index}
-                  className="p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition-all duration-300 text-center group"
-                  style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}
-                >
-                  <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform" style={{ backgroundColor: `var(--color-secondary)15` }}>
-                    <IconComponent className="w-10 h-10" style={{ color: `var(--color-secondary)` }} />
-                  </div>
-                  <h4 className="font-bold text-xl mb-4" style={{ color: `var(--color-primary)` }}>{commitment.title}</h4>
-                  <p style={{ color: `var(--color-text-muted)` }}>{commitment.desc}</p>
+              { icon: <Droplets />, title: "Advanced RO", desc: "State-of-the-art reverse osmosis system removes 99.9% of contaminants." },
+              { icon: <Shield />, title: "UV Guard", desc: "Powerful UV-C light eliminates bacteria and harmful microorganisms." },
+              { icon: <CheckCircle />, title: "Smart IQ", desc: "IoT-enabled systems for real-time water quality and filter monitoring." }
+            ].map((feature, i) => (
+              <div key={i} className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
+                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-[var(--color-primary)] mb-8 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
+                  {React.cloneElement(feature.icon, { size: 32 })}
                 </div>
-              );
-            })}
+                <h3 className="text-xl font-bold mb-4 text-[var(--color-secondary)] uppercase tracking-tight">{feature.title}</h3>
+                <p className="text-slate-500 font-medium leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Policies Section */}
-      <section ref={addToRefs} className="scroll-section py-12 px-6 md:px-12" style={{ backgroundColor: `var(--color-muted)`, borderTop: `1px solid var(--color-border)` }}>
+      {/* Technology - Industrial Clean Look Matched to Home */}
+      <section ref={addToRefs} className="py-20 px-8 md:px-24 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>
-              Our Policies
-            </h2>
-            <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: `var(--color-secondary)` }}></div>
-            <p className="mt-4 text-lg" style={{ color: `var(--color-text-muted)` }}>Learn about our customer-friendly policies and terms</p>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="order-2 lg:order-1 grid grid-cols-2 gap-4">
+              {[
+                { icon: <Zap />, title: "Energy Hub", sub: "Eco-friendly power" },
+                { icon: <Filter />, title: "11-Stage", sub: "Nano Filtration" },
+                { icon: <Shield />, title: "Child Lock", sub: "Safety First" },
+                { icon: <Award />, title: "Certified", sub: "ISI Approved" }
+              ].map((item, i) => (
+                <div key={i} className="p-8 rounded-3xl bg-slate-50 border border-slate-100 text-center hover:bg-white hover:shadow-lg transition-all">
+                  <div className="text-[var(--color-primary)] mb-4 flex justify-center">{React.cloneElement(item.icon, { size: 32 })}</div>
+                  <h4 className="font-bold text-[var(--color-secondary)] text-sm uppercase tracking-widest">{item.title}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{item.sub}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="order-1 lg:order-2 space-y-8">
+              <div className="space-y-4">
+                <h4 className="text-[var(--color-primary)] font-bold uppercase tracking-[0.4em] text-xs">High-Precision</h4>
+                <h2 className="text-3xl md:text-5xl font-bold text-[var(--color-secondary)] tracking-tight uppercase leading-none">
+                  CUTTING-EDGE <br /><span className="text-[var(--color-primary)] underline decoration-4 underline-offset-8">TECH</span>
+                </h2>
+              </div>
+              <p className="text-lg text-slate-500 font-medium leading-relaxed">
+                Our water purifiers incorporate the latest innovations. From smart sensors to automated cleaning cycles, every feature is designed for absolute purity.
+              </p>
+              <div className="flex items-center gap-4 text-[var(--color-primary)]">
+                <div className="w-12 h-px bg-[var(--color-primary)]/30"></div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Future of Hydration</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Policies - Clean Row View Matched to Home/Purifiers */}
+      <section ref={addToRefs} className="py-20 px-8 md:px-24 bg-slate-50 border-t border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-3xl md:text-6xl font-bold text-[var(--color-secondary)] tracking-tighter uppercase leading-none">Our <span className="text-[var(--color-primary)]">Policies</span></h2>
+            <div className="w-20 h-1.5 bg-[var(--color-primary)] mx-auto rounded-full"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Return Policy */}
-            <Link to="/return-policy" className="group">
-              <div className="p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition-all duration-300 text-center h-full" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform" style={{ backgroundColor: `rgba(132, 204, 22, 0.15)` }}>
-                  <RotateCcw className="w-10 h-10" style={{ color: `var(--color-accent)` }} />
+            {[
+              { to: "/return-policy", icon: <RotateCcw />, title: "Return Policy", desc: "Easy 30-day returns and exchanges." },
+              { to: "/shipping-policy", icon: <Truck />, title: "Shipping Policy", desc: "Fast and secure Pan-India delivery." },
+              { to: "/terms-of-service", icon: <FileText />, title: "Terms of Service", desc: "Our platform rules and conditions." }
+            ].map((p, i) => (
+              <Link key={i} to={p.to} className="group h-full">
+                <div className="bg-white p-10 rounded-[4rem] border border-slate-200 h-full flex flex-col items-center text-center hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                  <div className="w-20 h-20 rounded-[2rem] bg-slate-50 flex items-center justify-center text-[var(--color-primary)] mb-8 shadow-inner group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all transform group-hover:rotate-6">
+                    {React.cloneElement(p.icon, { size: 32 })}
+                  </div>
+                  <h3 className="text-lg font-bold text-[var(--color-secondary)] uppercase tracking-tight mb-4">{p.title}</h3>
+                  <p className="text-sm text-slate-400 font-medium mb-8 flex-grow">{p.desc}</p>
+                  <div className="inline-flex items-center gap-2 text-[var(--color-primary)] font-bold text-xs uppercase tracking-widest group-hover:gap-4 transition-all">
+                    Learn More <ArrowRight size={16} />
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold mb-4" style={{ color: `var(--color-primary)` }}>Return Policy</h3>
-                <p className="mb-6" style={{ color: `var(--color-text-muted)` }}>Easy returns and exchanges within 30 days. Customer satisfaction is our priority.</p>
-                <div className="flex items-center justify-center gap-2 group-hover:gap-3 transition-all" style={{ color: `var(--color-secondary)` }}>
-                  <span className="font-semibold">Learn More</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </Link>
-
-            {/* Shipping Policy */}
-            <Link to="/shipping-policy" className="group">
-              <div className="p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition-all duration-300 text-center h-full" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform" style={{ backgroundColor: `rgba(6, 182, 212, 0.15)` }}>
-                  <Truck className="w-10 h-10" style={{ color: `var(--color-secondary)` }} />
-                </div>
-                <h3 className="text-xl font-bold mb-4" style={{ color: `var(--color-primary)` }}>Shipping Policy</h3>
-                <p className="mb-6" style={{ color: `var(--color-text-muted)` }}>Fast and secure delivery across India. Free installation and setup included.</p>
-                <div className="flex items-center justify-center gap-2 group-hover:gap-3 transition-all" style={{ color: `var(--color-secondary)` }}>
-                  <span className="font-semibold">Learn More</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </Link>
-
-            {/* Terms of Service */}
-            <Link to="/terms-of-service" className="group">
-              <div className="p-8 rounded-2xl shadow-lg hover:-translate-y-2 transition-all duration-300 text-center h-full" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform" style={{ backgroundColor: `rgba(10, 40, 106, 0.15)` }}>
-                  <FileText className="w-10 h-10" style={{ color: `var(--color-primary)` }} />
-                </div>
-                <h3 className="text-xl font-bold mb-4" style={{ color: `var(--color-primary)` }}>Terms of Service</h3>
-                <p className="mb-6" style={{ color: `var(--color-text-muted)` }}>Our terms and conditions for using UNIXA products and services.</p>
-                <div className="flex items-center justify-center gap-2 group-hover:gap-3 transition-all" style={{ color: `var(--color-secondary)` }}>
-                  <span className="font-semibold">Learn More</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </Link>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -477,6 +238,7 @@ const About = () => {
       <Footer />
     </div>
   );
-};
+});
 
+About.displayName = 'About';
 export default About;
