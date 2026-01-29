@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, memo, useCallback, lazy, Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import { Shield, Droplets, Leaf, Heart as HeartIcon, Star, Award, Users, Zap, Activity, Sparkles, RefreshCw, Settings, Phone, Wrench, Clock } from 'lucide-react';
 import { listProductsApi } from '../../api/product';
 import { debounce, throttle } from '../../utils/performance';

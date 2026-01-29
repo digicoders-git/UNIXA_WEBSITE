@@ -5,7 +5,7 @@ import { ShoppingCart, CheckCircle, Heart } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 
-const ProductCard = memo(({ product }) => {
+const LadduCard = memo(({ product }) => {
     const navigate = useNavigate();
     const [added, setAdded] = useState(false);
 
@@ -172,7 +172,7 @@ const ProductCard = memo(({ product }) => {
     );
 });
 
-ProductCard.displayName = 'ProductCard';
+LadduCard.displayName = 'LadduCard';
 
-export default ProductCard;
+export default LadduCard;
 
