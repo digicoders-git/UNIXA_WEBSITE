@@ -3,9 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft, Star, Package, Truck, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
-import kesarLaddu from '../../assets/images/kesar-laddu.png';
-import nariyalLaddu from '../../assets/images/nariyal-laddu.png';
-import heroLaddus from '../../assets/images/hero-laddus.png';
 
 import { getProductApi } from '../../api/product';
 import { addToCartApi } from '../../api/cart';
@@ -29,7 +26,7 @@ const ProductDetail = () => {
                 setProduct({
                     id: p._id,
                     name: p.name,
-                    img: p.mainImage?.url || kesarLaddu,
+                    img: p.mainImage?.url,
                     price: p.price,
                     finalPrice: p.finalPrice,
                     discountPercent: p.discountPercent,
@@ -155,7 +152,7 @@ const ProductDetail = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                         {/* Product Image */}
                         <div className="p-8 md:p-16 flex items-center justify-center relative overflow-hidden" style={{ background: `linear-gradient(135deg, var(--color-primary)/5, var(--color-secondary)/5)` }}>
-                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: `url(${heroLaddus})`, backgroundSize: 'cover', filter: 'blur(20px)' }}></div>
+                            <div className="absolute inset-0 opacity-10" style={{ backgroundSize: 'cover', filter: 'blur(20px)' }}></div>
                             <div className="absolute inset-0" style={{ background: `radial-gradient(circle at center, rgba(10, 40, 106, 0.1) 0%, transparent 70%)` }}></div>
                             <img
                                 src={product.img}

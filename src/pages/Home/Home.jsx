@@ -137,60 +137,41 @@ const Home = memo(() => {
       </Suspense>
 
       {/* Our Water Purifiers Section */}
-      <section ref={addToRefs} className="scroll-section py-12 px-8 md:px-24 text-center bg-[var(--color-surface)] relative z-10 shadow-sm border-y border-[var(--color-secondary)]/10 overflow-hidden -mt-2" id="products">
-        {/* Decorative Bubbles for This Section */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-          <div className="home-bubble home-bubble-1"></div>
-          <div className="home-bubble home-bubble-2"></div>
-          <div className="home-bubble home-bubble-3"></div>
+      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 text-center bg-[var(--color-surface)] relative z-10 shadow-sm overflow-hidden" id="products">
+        {/* Decorative Wave Background */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none opacity-5">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-24">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.43,147.3,126.33,212.21,116.36,251.35,110.37,285.95,95.15,321.39,56.44Z" className="fill-[var(--color-primary)]"></path>
+          </svg>
         </div>
 
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            .home-bubble {
-              position: absolute;
-              background: var(--color-secondary);
-              border-radius: 50%;
-              opacity: 0.1;
-              animation: float-bubble 25s infinite ease-in-out;
-            }
-            .home-bubble-1 { width: 150px; height: 150px; left: 5%; top: 10%; animation-delay: 0s; }
-            .home-bubble-2 { width: 250px; height: 250px; right: -5%; top: 40%; animation-delay: 4s; }
-            .home-bubble-3 { width: 100px; height: 100px; left: 40%; bottom: 5%; animation-delay: 2s; }
-            @keyframes float-bubble {
-              0%, 100% { transform: translate(0, 0) scale(1); }
-              50% { transform: translate(40px, -60px) scale(1.1); }
-            }
-          `
-        }} />
-
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="inline-block px-4 py-1.5 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-6 border border-[var(--color-secondary)]/20">
-            Premium Water Purifiers
+          <div className="inline-block px-4 py-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-6 border border-[var(--color-primary)]/20">
+            Premium Alkaline Water Ionizers
           </div>
-          <h2 className="text-4xl md:text-7xl text-[var(--color-secondary)] mb-6 font-bold font-[var(--font-heading)] drop-shadow-sm">Pure Water Solutions</h2>
-          <p className="italic text-[var(--color-text-muted)] mb-16 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">Advanced filtration technology ensuring every drop is pure, safe, and healthy for your family.</p>
+          <h2 className="text-4xl md:text-7xl text-[var(--color-secondary)] mb-6 font-bold font-[var(--font-heading)] drop-shadow-sm">Explore Our Products</h2>
+          <p className="text-[var(--color-text-muted)] mb-16 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">Discover the perfect alkaline water solution for your home, engineered for Indian water conditions.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-14 px-2 sm:px-4">
             {isLoading ? (
-              Array.from({ length: 6 }).map((_, index) => (
+              Array.from({ length: 3 }).map((_, index) => (
                 <div key={index} className="h-96 bg-[var(--color-muted)] rounded-xl animate-pulse"></div>
               ))
             ) : (
-              products.slice(0, 6).map((item) => (
+              products.slice(0, 3).map((item) => (
                 <div key={item._id} className="h-full transform hover:-translate-y-2 transition-transform duration-300">
                   <Suspense fallback={<div className="h-96 bg-[var(--color-muted)] rounded-xl animate-pulse"></div>}>
                     <LadduCard
                       product={{
                         id: item._id,
                         name: item.name,
-                        img: item.mainImage?.url || '/src/assets/images/besan-laddu.png',
+                        img: item.mainImage?.url,
                         price: item.price,
                         finalPrice: item.finalPrice,
                         discountPercent: item.discountPercent,
                         priceStr: `₹${item.finalPrice}`,
                         description: item.description,
-                        category: item.category?.name || 'Traditional'
+                        category: item.category?.name || 'Alkaline'
                       }}
                     />
                   </Suspense>
@@ -198,12 +179,56 @@ const Home = memo(() => {
               ))
             )}
           </div>
+        </div>
+      </section>
 
-          {!isLoading && products.length === 0 && (
-            <div className="py-20 flex flex-col items-center">
-              <p className="text-[var(--color-text-muted)] font-medium">No products available</p>
+      {/* Our Philosophy/Introduction Section */}
+      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 bg-[var(--color-muted)]/30 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="relative">
+              <div className="absolute -top-10 -left-10 w-40 h-40 bg-[var(--color-primary)]/10 rounded-full blur-3xl"></div>
+              <img src={water2} alt="Unixa Philosophy" className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/3]" />
+              <div className="absolute -bottom-6 -right-6 bg-white p-8 rounded-2xl shadow-xl z-20 hidden md:block border border-[var(--color-primary)]/20">
+                <p className="text-4xl font-bold text-[var(--color-primary)] mb-1">25+</p>
+                <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Years of Purity</p>
+              </div>
             </div>
-          )}
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h4 className="text-[var(--color-primary)] font-bold uppercase tracking-[0.4em] text-sm">Our Philosophy</h4>
+                <h2 className="text-3xl md:text-5xl font-bold font-[var(--font-heading)] leading-tight">
+                  Water that is <span className="text-[var(--color-primary)]">crafted for you</span>, crafted by you
+                </h2>
+              </div>
+              <p className="text-lg text-[var(--color-text-muted)] leading-relaxed">
+                Unixa HydroLife Ionized Water Machines are engineered for Indian water sources, offering efficient filtration and ionization to ensure that every drop is pure, alkaline, and rich in antioxidants.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="mt-1 bg-[var(--color-primary)]/10 p-2 rounded-lg">
+                    <Shield className="w-5 h-5 text-[var(--color-primary)]" />
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-lg mb-1">Unixa Philosophy</h5>
+                    <p className="text-sm text-[var(--color-text-muted)]">Achieving purity begins with achieving Zero Compromise in everything we do.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="mt-1 bg-[var(--color-secondary)]/10 p-2 rounded-lg">
+                    <Droplets className="w-5 h-5 text-[var(--color-secondary)]" />
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-lg mb-1">#CraftYourWater</h5>
+                    <p className="text-sm text-[var(--color-text-muted)]">Catering to different pH ranges of water along with an enhanced water taste.</p>
+                  </div>
+                </div>
+              </div>
+              <Link to="/contact" className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-[var(--color-secondary)] transition-all">
+                Learn More About Us <RefreshCw className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -385,7 +410,7 @@ const Home = memo(() => {
       </section>
 
       {/* Why Drink Unixa HydroLife Water Section */}
-      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 bg-gradient-to-br from-[var(--color-primary)]/5 to-[var(--color-secondary)]/5 relative z-10">
+      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 bg-gradient-to-br from-[var(--color-primary)]/5 via-white to-[var(--color-secondary)]/5 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-block px-4 py-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-6 border border-[var(--color-primary)]/20">
@@ -396,40 +421,40 @@ const Home = memo(() => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] group hover:scale-105">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
+              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <Activity className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Immunity Booster</h3>
-              <h4 className="text-sm font-semibold text-[var(--color-primary)] mb-3 uppercase tracking-wide">Free Radical Scavengers</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">The antioxidant water from Hydrolife help neutralize free radicals by donating electrons and stabilize the molecule.</p>
+              <h4 className="text-xs font-bold text-[var(--color-primary)] mb-3 uppercase tracking-widest">Free Radical Scavengers</h4>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">The antioxidant water from HydroLife helps neutralize free radicals by donating electrons and stabilizing molecules.</p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] group hover:scale-105">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-secondary)] to-[var(--color-accent)] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
+              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-secondary)] to-[var(--color-accent)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Create Wellness</h3>
-              <h4 className="text-sm font-semibold text-[var(--color-secondary)] mb-3 uppercase tracking-wide">Immunity Powerhouse</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">The ionization process enriches the water with optimum minerals and antioxidants that improves your immune system.</p>
+              <h4 className="text-xs font-bold text-[var(--color-secondary)] mb-3 uppercase tracking-widest">Immunity Powerhouse</h4>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">The ionization process enriches the water with optimum minerals and antioxidants that improve your immune system.</p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] group hover:scale-105">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-primary)] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
+              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-primary)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <RefreshCw className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Antioxidizing</h3>
-              <h4 className="text-sm font-semibold text-[var(--color-accent)] mb-3 uppercase tracking-wide">Ultra Hydration</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">The water hydrates at the cellular level, supporting your body's natural detox processes and helping you feel your best all day long.</p>
+              <h4 className="text-xs font-bold text-[var(--color-accent)] mb-3 uppercase tracking-widest">Ultra Hydration</h4>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">HydroLife water hydrates at the cellular level, supporting natural detox processes and helping you feel your best.</p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] group hover:scale-105">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
+              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <HeartIcon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Low TDS Healthy Water</h3>
-              <h4 className="text-sm font-semibold text-[var(--color-primary)] mb-3 uppercase tracking-wide">Lifelong Investment</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">ZeroB Hydrolife is an investment in your well-being. The water ionizer provides hydration, balance body pH and maintain peak wellness every day.</p>
+              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Low TDS Water</h3>
+              <h4 className="text-xs font-bold text-[var(--color-primary)] mb-3 uppercase tracking-widest">Healthy minerals</h4>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">HydroLife provides mineral-rich hydration that helps balance body pH and maintain peak wellness every day.</p>
             </div>
           </div>
         </div>

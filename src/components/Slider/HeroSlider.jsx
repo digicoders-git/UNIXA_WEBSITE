@@ -31,7 +31,7 @@ const HeroSlider = memo(() => {
     }, [fetchSliders]);
 
     // custom slider 
-    let customSlider = [waterslider1,waterslider2]
+    let customSlider = [waterslider1, waterslider2]
 
     if (loading) {
         return (
@@ -75,16 +75,16 @@ const HeroSlider = memo(() => {
                             <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-[4%] md:pb-[5%]">
                                 <div className="px-4 flex flex-row justify-center items-center gap-3 md:gap-8 opacity-0 animate-slide-up" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
                                     <Link
-                                        to="/laddus"
-                                        className="inline-flex items-center justify-center px-3 py-1.5 md:px-10 md:py-4 bg-[var(--color-secondary)] text-[var(--color-text)] rounded-full text-[9px] md:text-xl font-bold shadow-xl hover:scale-105 transition-transform"
+                                        to="/shop"
+                                        className="inline-flex items-center justify-center px-4 py-2 md:px-10 md:py-4 bg-[var(--color-primary)] text-white rounded-full text-[10px] md:text-xl font-bold shadow-xl hover:scale-105 transition-all hover:bg-[var(--color-secondary)]"
                                     >
-                                        Order Now
+                                        Explore Products
                                     </Link>
                                     <Link
-                                        to="/about"
-                                        className="inline-flex items-center justify-center px-3 py-1.5 md:px-10 md:py-4 bg-white/40 backdrop-blur-md border border-white/20 text-black rounded-full text-[9px] md:text-xl font-bold shadow-lg hover:scale-105 transition-transform"
+                                        to="/contact"
+                                        className="inline-flex items-center justify-center px-4 py-2 md:px-10 md:py-4 bg-white/20 backdrop-blur-md border border-white/30 text-white rounded-full text-[10px] md:text-xl font-bold shadow-lg hover:scale-105 transition-all hover:bg-white/40"
                                     >
-                                        Our Story
+                                        Book Free Demo
                                     </Link>
                                 </div>
                             </div>
