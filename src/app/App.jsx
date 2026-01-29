@@ -1,52 +1,55 @@
-import { RouterProvider } from "react-router-dom";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { ThemeProvider } from "../context/ThemeContext";
-import { CartProvider } from "../context/CartContext";
-import { router } from "./routes";
-import { Suspense, useEffect } from "react";
-import { isTokenValid, removeToken } from "../utils/auth";
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from '../components/layout/Layout';
+import Loader from '../components/common/Loader';
 
-// Loading component
-const AppLoader = () => (
-  <div className="min-h-screen bg-[var(--color-surface)] flex items-center justify-center">
-    <div className="text-center">
-      <div className="w-16 h-16 border-4 border-[var(--color-secondary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-[var(--color-text)] font-medium">Loading UNIXA...</p>
-    </div>
-  </div>
-);
+// Lazy loaded pages
+const Home = lazy(() => import('../pages/Home/Home'));
+const Purifiers = lazy(() => import('../pages/Purifiers/Purifiers'));
+const About = lazy(() => import('../pages/About/About'));
+const Testimonials = lazy(() => import('../pages/Testimonials/Testimonials'));
+const Contact = lazy(() => import('../pages/Contact/Contact'));
+const ProductDetail = lazy(() => import('../pages/ProductDetail/ProductDetail'));
+const Shop = lazy(() => import('../pages/Shop/Shop'));
+const Profile = lazy(() => import('../pages/auth/Profile'));
+const Orders = lazy(() => import('../pages/Orders/Orders'));
+const Login = lazy(() => import('../pages/auth/Login'));
+const Registration = lazy(() => import('../pages/auth/Registration'));
+const ReturnPolicy = lazy(() => import('../pages/Policies/ReturnPolicy'));
+const ShippingPolicy = lazy(() => import('../pages/Policies/ShippingPolicy'));
+const TermsOfService = lazy(() => import('../pages/Policies/TermsOfService'));
+const NotFound = lazy(() => import('../pages/NotFound/NotFound'));
 
 function App() {
-  useEffect(() => {
-    // Check token validity on app load
-    if (!isTokenValid()) {
-      removeToken();
-    }
-  }, []);
-
-  return (
-    <ThemeProvider>
-      <CartProvider>
-        <Suspense fallback={<AppLoader />}>
-          <RouterProvider router={router} />
-        </Suspense>
-        <ToastContainer 
-          position="top-right" 
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          limit={3}
-          style={{ zIndex: 9999 }}
-        />
-      </CartProvider>
-    </ThemeProvider>
-  );
+    return (
+        <Router>
+            <Suspense fallback={
+                <div className="h-screen w-screen flex items-center justify-center bg-white">
+                    <Loader text="Loading Experience..." />
+                </div>
+            }>
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<Home />} />
+                        <Route path="purifiers" element={<Purifiers />} />
+                        <Route path="about" element={<About />} />
+                        <Route path="testimonials" element={<Testimonials />} />
+                        <Route path="contact" element={<Contact />} />
+                        <Route path="product/:id" element={<ProductDetail />} />
+                        <Route path="shop" element={<Shop />} />
+                        <Route path="profile" element={<Profile />} />
+                        <Route path="orders" element={<Orders />} />
+                        <Route path="login" element={<Login />} />
+                        <Route path="register" element={<Registration />} />
+                        <Route path="return-policy" element={<ReturnPolicy />} />
+                        <Route path="shipping-policy" element={<ShippingPolicy />} />
+                        <Route path="terms-of-service" element={<TermsOfService />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Route>
+                </Routes>
+            </Suspense>
+        </Router>
+    );
 }
 
 export default App;

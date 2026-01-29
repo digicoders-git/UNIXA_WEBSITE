@@ -1,21 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --color-primary: #0EA5E9; /* Vibrant Water Blue */
-  --color-secondary: #0369A1; /* Deep Ocean Blue */
-  --color-accent: #38BDF8; /* Light Sky Blue */
-  --color-text: #0F172A; /* Slate Dark */
-  --color-text-muted: #64748B; /* Slate Gray */
-  --color-muted: #F1F5F9; /* Very Light Gray/Blue */
-  --color-surface: #FFFFFF; /* Pure White */
-  --color-dark: #020617; /* Near Black */
-  --color-border: rgba(14, 165, 233, 0.15);
-  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-primary: #0EA5E9;
+  --color-secondary: #0F172A;
+  --color-accent: #38BDF8;
+  --color-text: #1E293B;
+  --color-text-muted: #64748B;
+  --color-muted: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-bg-light: #F0F9FF;
+  --color-border: rgba(14, 165, 233, 0.12);
+  --color-shadow: rgba(0, 0, 0, 0.04);
 
-  /* Fonts */
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Poppins', sans-serif;
-  --font-accent: 'Poppins', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 html,
@@ -26,10 +25,11 @@ body {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-primary);
+  background-color: var(--color-surface);
   color: var(--color-text);
   overflow-x: hidden;
-  transition: background-color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom Scrollbar */
@@ -38,17 +38,18 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-primary);
+  background: var(--color-muted);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-muted);
+  background: #CBD5E1;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-secondary);
+  background: var(--color-primary);
 }
+
 
 h1,
 h2,
@@ -57,12 +58,9 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
-  color: var(--color-text);
+  color: inherit;
 }
 
-.font-accent {
-  font-family: var(--font-accent);
-}
 
 /* Scroll Animation Logic */
 .scroll-section {

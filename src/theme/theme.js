@@ -1,19 +1,21 @@
 export const theme = {
   colors: {
-    primary: "#0a286a",     // Royal Blue (Brand)
-    secondary: "#06B6D4",   // Cyan
-    accent: "#84CC16",      // Lime Green (CTA)
-    text: "#111827",        // Charcoal (Primary text)
-    textMuted: "#6B7280",   // Muted text (gray-500 equivalent)
-    muted: "#CBD5E1",       // Gray (Border/Muted)
-    surface: "#F8FAFC",     // Cloud White (Background)
-    dark: "#1A1A1A",        // Dark surface for footer/etc
-    border: "rgba(37, 99, 235, 0.1)", // Subtle royal blue border
-    shadow: "rgba(0, 0, 0, 0.08)",     // Subtle soft shadow
+    primary: "#0EA5E9",     // Crystal Water Blue
+    secondary: "#0F172A",   // Professional Deep Slate
+    accent: "#38BDF8",      // Sky Blue Sparkle
+    success: "#10B981",     // Pure Mint
+    text: "#1E293B",        // Slate 800 (Clean Typography)
+    textMuted: "#64748B",   // Slate 500
+    muted: "#F8FAFC",       // Section Background Light
+    surface: "#FFFFFF",     // Pure White Foundation
+    lightBlue: "#F0F9FF",   // Soft Water-themed BG
+    border: "rgba(14, 165, 233, 0.12)", // Subtle Blue tint
+    shadow: "rgba(0, 0, 0, 0.04)",     // Minimalist Elevation
   },
   fonts: {
-    heading: "'Poppins', sans-serif",
-    body: "'Poppins', sans-serif",
-    accent: "'Poppins', sans-serif"
+    heading: "'Outfit', sans-serif",
+    body: "'Inter', sans-serif",
+    accent: "'Inter', sans-serif"
   }
 };
+

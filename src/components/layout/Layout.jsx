@@ -9,7 +9,7 @@ const Layout = () => {
     const isHome = location.pathname === "/";
 
     return (
-        <div className={`min-h-screen bg-[var(--color-primary)] font-[var(--font-body)] ${isHome ? '' : 'pt-24 md:pt-28'}`}>
+        <div className="min-h-screen bg-[var(--color-surface)] font-[var(--font-body)] pt-[68px] md:pt-[74px]">
             <ScrollToTop />
             <Navbar />
             <main>

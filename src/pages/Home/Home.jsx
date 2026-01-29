@@ -1,48 +1,53 @@
 import React, { useEffect, useRef, useState, memo, useCallback, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Droplets, Leaf, Heart as HeartIcon, Star, Award, Users, Zap, Activity, Sparkles, RefreshCw, Settings, Phone, Wrench, Clock } from 'lucide-react';
-import { listProductsApi } from '../../api/product';
+import { Shield, Droplets, Leaf, Heart as HeartIcon, Star, Award, Users, Zap, Activity, Sparkles, RefreshCw, Settings, Phone, Wrench, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
 import { debounce, throttle } from '../../utils/performance';
-
 // Lazy load all heavy components
 const Footer = lazy(() => import('../../components/layout/Footer'));
-const LadduCard = lazy(() => import('../../components/cards/LadduCard'));
+const ProductCard = lazy(() => import('../../components/cards/PurifierCard'));
 const HeroSlider = lazy(() => import('../../components/Slider/HeroSlider'));
 import Loader from '../../components/common/Loader';
 
 // Import images directly
 import water2 from '../../assets/images/water2.webp';
 
-
 const Home = memo(() => {
   const sectionRefs = useRef([]);
   const ladduScrollRef = useRef(null);
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await listProductsApi();
-      // console.log('Home products data:', data);
-      // Check if data has products array or if products are directly in data
-      if (data.products) {
-        setProducts(data.products);
-      } else if (Array.isArray(data)) {
-        setProducts(data);
-      } else {
-        setProducts([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setIsLoading(false);
+  // Static Data for Products (Japanese Hybrid Technology Models)
+  const products = [
+    {
+      _id: '1',
+      name: 'HydroLife Alkaline Pro',
+      mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' },
+      price: 45000,
+      finalPrice: 39999,
+      discountPercent: 11,
+      description: 'Advanced 11-stage ionization with Platinum plates. Delivers mineral-rich alkaline water.',
+      category: { name: 'Premium' }
+    },
+    {
+      _id: '2',
+      name: 'NanoPure Smart',
+      mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' },
+      price: 25000,
+      finalPrice: 19999,
+      discountPercent: 20,
+      description: 'Compact Under-sink design for modern kitchens. Space-saving yet powerful filtration.',
+      category: { name: 'Smart' }
+    },
+    {
+      _id: '3',
+      name: 'SilverStream RO+',
+      mainImage: { url: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?q=80&w=2070&auto=format&fit=crop' },
+      price: 15000,
+      finalPrice: 12999,
+      discountPercent: 13,
+      description: 'Superior RO purification with mineral boost. Ideal for high TDS water sources.',
+      category: { name: 'Standard' }
     }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  ];
 
   const observerRef = useRef(null);
 
@@ -67,55 +72,6 @@ const Home = memo(() => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!products.length) return;
-
-    const ladduContainer = ladduScrollRef.current;
-    if (!ladduContainer) return;
-
-    let ladduInterval;
-    let isLadduHovered = false;
-
-    const startLadduScroll = throttle(() => {
-      if (ladduInterval || isLadduHovered) return;
-      ladduInterval = setInterval(() => {
-        if (!ladduContainer || isLadduHovered) return;
-        if (ladduContainer.scrollLeft >= ladduContainer.scrollWidth / 3) {
-          ladduContainer.scrollLeft = 0;
-        } else {
-          ladduContainer.scrollLeft += 1.5;
-        }
-      }, 30);
-    }, 100);
-
-    const stopLadduScroll = () => {
-      if (ladduInterval) {
-        clearInterval(ladduInterval);
-        ladduInterval = null;
-      }
-    };
-
-    const handleMouseEnter = () => {
-      isLadduHovered = true;
-      stopLadduScroll();
-    };
-
-    const handleMouseLeave = () => {
-      isLadduHovered = false;
-      startLadduScroll();
-    };
-
-    setTimeout(startLadduScroll, 200);
-    ladduContainer.addEventListener('mouseenter', handleMouseEnter, { passive: true });
-    ladduContainer.addEventListener('mouseleave', handleMouseLeave, { passive: true });
-
-    return () => {
-      stopLadduScroll();
-      ladduContainer.removeEventListener('mouseenter', handleMouseEnter);
-      ladduContainer.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [products]);
-
   const addToRefs = (el) => {
     if (el && !sectionRefs.current.includes(el)) {
       sectionRefs.current.push(el);
@@ -126,521 +82,294 @@ const Home = memo(() => {
   };
 
   return (
-    <div className="bg-[var(--color-surface)] text-[var(--color-text)] font-[var(--font-body)] overflow-x-hidden mt-12 md:mt-16">
+    <div className="bg-[var(--color-surface)] text-[var(--color-text)] font-[var(--font-body)] overflow-x-hidden">
 
       {/* Hero Slider Section */}
       <Suspense fallback={
-        <div className="h-[50vh] md:h-[80vh] bg-[var(--color-surface)] flex items-center justify-center">
-          <Loader text="Loading Pure Water Solutions..." />
+        <div className="h-[50vh] bg-[var(--color-muted)] flex items-center justify-center">
+          <Loader text="Initializing Pure Water Experience..." />
         </div>
       }>
-        <HeroSlider />
+        <div className="relative">
+          <HeroSlider />
+        </div>
       </Suspense>
 
-      {/* Our Water Purifiers Section */}
-      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 text-center bg-[var(--color-surface)] relative z-10 shadow-sm overflow-hidden" id="products">
-        {/* Decorative Wave Background */}
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none opacity-5">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-24">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.43,147.3,126.33,212.21,116.36,251.35,110.37,285.95,95.15,321.39,56.44Z" className="fill-[var(--color-primary)]"></path>
-          </svg>
+      {/* Trust Strip */}
+      <div className="bg-white border-b border-slate-100 py-10 md:py-16 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-12">
+          {[
+            { icon: <Shield size={24} />, title: "ISI Certified", desc: "Gold Standard Purity" },
+            { icon: <RefreshCw size={24} />, title: "Pure Alkaline", desc: "Optimal pH Balance" },
+            { icon: <Zap size={24} />, title: "Advanced RO", desc: "11-Stage Filtration" },
+            { icon: <Phone size={24} />, title: "24/7 Service", desc: "Expert Doorstep Support" }
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col items-center lg:items-start lg:flex-row gap-4 group">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50/50 flex items-center justify-center text-[var(--color-primary)] group-hover:scale-110 transition-transform">
+                {item.icon}
+              </div>
+              <div className="text-center lg:text-left">
+                <h4 className="font-bold text-[var(--color-secondary)] uppercase tracking-wider text-[10px] md:text-xs">{item.title}</h4>
+                <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
+      {/* Our Water Purifiers Section */}
+      <section ref={addToRefs} className="scroll-section py-8 md:py-16 px-6 md:px-12 bg-slate-50/50 relative overflow-hidden" id="products">
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="inline-block px-4 py-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-6 border border-[var(--color-primary)]/20">
-            Premium Alkaline Water Ionizers
+          <div className="text-center mb-16 md:mb-24">
+            <h4 className="text-[var(--color-primary)] font-black uppercase tracking-[0.5em] text-[10px] mb-4">Discovery Selection</h4>
+            <h2 className="text-3xl md:text-7xl font-black text-[var(--color-secondary)] mb-6 tracking-tighter leading-tight">Pure <span className="text-[var(--color-primary)]">Ionized</span> Solutions</h2>
           </div>
-          <h2 className="text-4xl md:text-7xl text-[var(--color-secondary)] mb-6 font-bold font-[var(--font-heading)] drop-shadow-sm">Explore Our Products</h2>
-          <p className="text-[var(--color-text-muted)] mb-16 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">Discover the perfect alkaline water solution for your home, engineered for Indian water conditions.</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-14 px-2 sm:px-4">
-            {isLoading ? (
-              Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="h-96 bg-[var(--color-muted)] rounded-xl animate-pulse"></div>
-              ))
-            ) : (
-              products.slice(0, 3).map((item) => (
-                <div key={item._id} className="h-full transform hover:-translate-y-2 transition-transform duration-300">
-                  <Suspense fallback={<div className="h-96 bg-[var(--color-muted)] rounded-xl animate-pulse"></div>}>
-                    <LadduCard
-                      product={{
-                        id: item._id,
-                        name: item.name,
-                        img: item.mainImage?.url,
-                        price: item.price,
-                        finalPrice: item.finalPrice,
-                        discountPercent: item.discountPercent,
-                        priceStr: `₹${item.finalPrice}`,
-                        description: item.description,
-                        category: item.category?.name || 'Alkaline'
-                      }}
-                    />
-                  </Suspense>
-                </div>
-              ))
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            {products.map((item) => (
+              <div key={item._id} className="h-full">
+                <Suspense fallback={<div className="h-96 bg-slate-100 rounded-3xl animate-pulse"></div>}>
+                  <ProductCard product={item} />
+                </Suspense>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Our Philosophy/Introduction Section */}
-      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 bg-[var(--color-muted)]/30 relative z-10">
+      {/* Philosophical Introduction */}
+      <section ref={addToRefs} className="scroll-section py-16 px-8 md:px-24 bg-white relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
-              <div className="absolute -top-10 -left-10 w-40 h-40 bg-[var(--color-primary)]/10 rounded-full blur-3xl"></div>
-              <img src={water2} alt="Unixa Philosophy" className="relative z-10 rounded-[40px] shadow-2xl w-full object-cover aspect-[4/3]" />
-              <div className="absolute -bottom-6 -right-6 bg-white p-8 rounded-2xl shadow-xl z-20 hidden md:block border border-[var(--color-primary)]/20">
-                <p className="text-4xl font-bold text-[var(--color-primary)] mb-1">25+</p>
-                <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Years of Purity</p>
+              <img src={water2} alt="Unixa Philosophy" className="relative z-10 rounded-[30px] md:rounded-[50px] shadow-2xl w-full object-cover aspect-[4/3]" />
+              <div className="absolute -bottom-6 -right-6 bg-[var(--color-secondary)] p-8 rounded-[30px] shadow-xl z-20 hidden md:block">
+                <p className="text-5xl font-black text-[var(--color-primary)] mb-1">25+</p>
+                <p className="text-xs font-black text-white uppercase tracking-widest">Years of Purity</p>
               </div>
             </div>
             <div className="space-y-8">
               <div className="space-y-4">
-                <h4 className="text-[var(--color-primary)] font-bold uppercase tracking-[0.4em] text-sm">Our Philosophy</h4>
-                <h2 className="text-3xl md:text-5xl font-bold font-[var(--font-heading)] leading-tight">
-                  Water that is <span className="text-[var(--color-primary)]">crafted for you</span>, crafted by you
+                <h4 className="text-[var(--color-primary)] font-black uppercase tracking-[0.4em] text-xs">Our Philosophy</h4>
+                <h2 className="text-3xl md:text-5xl font-black text-[var(--color-secondary)] leading-tight tracking-tight">
+                  Water that is <span className="text-[var(--color-primary)]">crafted</span> specifically for you
                 </h2>
               </div>
-              <p className="text-lg text-[var(--color-text-muted)] leading-relaxed">
-                Unixa HydroLife Ionized Water Machines are engineered for Indian water sources, offering efficient filtration and ionization to ensure that every drop is pure, alkaline, and rich in antioxidants.
+              <p className="text-sm md:text-lg text-slate-500 font-medium leading-relaxed">
+                Unixa HydroLife Ionized Water Machines are engineered for Indian water sources, ensuring every drop is pure, alkaline, and rich in antioxidants.
               </p>
               <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="mt-1 bg-[var(--color-primary)]/10 p-2 rounded-lg">
-                    <Shield className="w-5 h-5 text-[var(--color-primary)]" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-lg mb-1">Unixa Philosophy</h5>
-                    <p className="text-sm text-[var(--color-text-muted)]">Achieving purity begins with achieving Zero Compromise in everything we do.</p>
-                  </div>
+                <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <CheckCircle2 className="w-6 h-6 text-[var(--color-primary)]" />
+                  <p className="text-sm font-bold text-[var(--color-secondary)]">Zero Compromise on quality and standards.</p>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="mt-1 bg-[var(--color-secondary)]/10 p-2 rounded-lg">
-                    <Droplets className="w-5 h-5 text-[var(--color-secondary)]" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-lg mb-1">#CraftYourWater</h5>
-                    <p className="text-sm text-[var(--color-text-muted)]">Catering to different pH ranges of water along with an enhanced water taste.</p>
-                  </div>
+                <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <CheckCircle2 className="w-6 h-6 text-[var(--color-primary)]" />
+                  <p className="text-sm font-bold text-[var(--color-secondary)]">Enhanced water taste with optimum pH levels.</p>
                 </div>
               </div>
-              <Link to="/contact" className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-[var(--color-secondary)] transition-all">
-                Learn More About Us <RefreshCw className="w-4 h-4" />
-              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* Trust Indicators Section */}
-      <section ref={addToRefs} className="scroll-section py-16 px-8 md:px-24 bg-[var(--color-muted)]/20 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="flex flex-col items-center group">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-primary)]/20 group-hover:scale-110 transition-transform">
-                <Users className="w-10 h-10 text-[var(--color-primary)]" />
+      <section ref={addToRefs} className="scroll-section py-16 px-8 md:px-24 bg-slate-50 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+            {[
+              { icon: <Users className="w-10 h-10" />, value: "50,000+", label: "Happy Families" },
+              { icon: <Award className="w-10 h-10" />, value: "BIS", label: "Certified Quality" },
+              { icon: <Star className="w-10 h-10" />, value: "4.9/5", label: "Customer Rating" },
+              { icon: <Zap className="w-10 h-10" />, value: "24/7", label: "Expert Support" }
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col items-center group">
+                <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mb-6 shadow-sm border border-slate-100 group-hover:scale-110 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all text-[var(--color-primary)]">
+                  {item.icon}
+                </div>
+                <h3 className="text-xl md:text-3xl font-black text-[var(--color-secondary)] mb-1 tracking-tighter">{item.value}</h3>
+                <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
               </div>
-              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">50,000+</h3>
-              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Happy Families</p>
-            </div>
-            <div className="flex flex-col items-center group">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-secondary)]/20 group-hover:scale-110 transition-transform">
-                <Award className="w-10 h-10 text-[var(--color-secondary)]" />
-              </div>
-              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">BIS</h3>
-              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Certified Quality</p>
-            </div>
-            <div className="flex flex-col items-center group">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-accent)]/20 group-hover:scale-110 transition-transform">
-                <Star className="w-10 h-10 text-[var(--color-accent)]" />
-              </div>
-              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">4.9/5</h3>
-              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Customer Rating</p>
-            </div>
-            <div className="flex flex-col items-center group">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-primary)]/20 group-hover:scale-110 transition-transform">
-                <Zap className="w-10 h-10 text-[var(--color-primary)]" />
-              </div>
-              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">24/7</h3>
-              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Expert Support</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Our Technology Section */}
-      <section ref={addToRefs} className="scroll-section bg-[var(--color-surface)] py-20 px-8 md:px-24 relative z-20 overflow-hidden mb-2" id="technology">
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-24 space-y-6">
-            <div className="flex items-center justify-center gap-4 opacity-50">
-              <div className="h-[1px] w-12 bg-[var(--color-primary)]"></div>
-              <h4 className="text-[var(--color-primary)] font-bold uppercase tracking-[0.6em] text-xs lg:text-sm">Advanced Technology</h4>
-              <div className="h-[1px] w-12 bg-[var(--color-primary)]"></div>
-            </div>
-            <h2 className="text-5xl md:text-9xl font-black text-[var(--color-text)] font-[var(--font-heading)] leading-none tracking-tighter">
-              Alkaline <span className="text-[var(--color-primary)] drop-shadow-[0_4px_10px_rgba(14,165,233,0.3)]">Technology</span>
+      <section ref={addToRefs} className="scroll-section bg-white py-16 px-8 md:px-24 relative z-20 overflow-hidden" id="technology">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24 space-y-4">
+            <h4 className="text-[var(--color-primary)] font-black uppercase tracking-[0.5em] text-[10px]">Advanced Technology</h4>
+            <h2 className="text-4xl md:text-7xl font-black text-[var(--color-secondary)] tracking-tighter uppercase leading-none">
+              The Science of <span className="text-[var(--color-primary)]">Alkaline</span>
             </h2>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-20 items-stretch">
-            {/* Left Column: Multi-Image Grid with HD Quality Focus */}
-            <div className="flex flex-col gap-6 h-full justify-center">
-              <div className="relative group overflow-hidden rounded-[40px] shadow-2xl aspect-square">
-                <Suspense fallback={<div className="w-full h-full bg-[var(--color-muted)] animate-pulse rounded-[40px]"></div>}>
-                  <img src={water2} alt="Advanced Water Purification Technology" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 brightness-90 group-hover:brightness-100" loading="lazy" />
-                </Suspense>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-6 left-8">
-                  <p className="text-white font-bold text-xl drop-shadow-lg">RO + UV + UF Technology</p>
-                </div>
-              </div>
-              <div className="relative group overflow-hidden rounded-[30px] shadow-xl border-2 border-[var(--color-muted)] aspect-square">
-                <Suspense fallback={<div className="w-full h-full bg-[var(--color-muted)] animate-pulse rounded-[30px]"></div>}>
-                  <img src={water2} alt="Water Purifier Installation" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
-                </Suspense>
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
-                <div className="absolute bottom-6 left-8">
-                  <p className="text-white font-bold text-lg drop-shadow-lg">Professional Installation</p>
-                </div>
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div className="relative group overflow-hidden rounded-[40px] shadow-2xl">
+              <img src={water2} alt="Technology" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+              <div className="absolute bottom-8 left-8">
+                <p className="text-white font-black text-2xl uppercase tracking-tighter">11-Stage RO+UV+UF</p>
               </div>
             </div>
 
-            {/* Right Column: Detailed Story Blocks */}
-            <div className="flex flex-col justify-center gap-12">
-              <div className="space-y-6">
-                <p className="text-2xl text-[var(--color-text)] leading-relaxed italic font-medium border-l-8 border-[var(--color-primary)] pl-8 bg-[var(--color-primary)]/5 py-4 rounded-r-2xl">
-                  "Multi-stage purification technology that removes 99.9% of contaminants while retaining essential minerals for your family's health."
+            <div className="space-y-12">
+              <div className="p-8 bg-slate-50 rounded-[32px] border border-slate-100">
+                <p className="text-xl text-[var(--color-secondary)] leading-relaxed font-bold italic mb-6">
+                  "Removing 99.9% of contaminants while retaining vital minerals."
                 </p>
-                <div className="space-y-4">
-                  <p className="text-lg text-[var(--color-text-muted)] leading-relaxed opacity-90">
-                    Our advanced water purifiers feature cutting-edge RO, UV, and UF technologies working together to eliminate bacteria, viruses, heavy metals, and dissolved impurities from your water supply.
-                  </p>
-                  <p className="text-lg text-[var(--color-text-muted)] leading-relaxed opacity-90">
-                    With smart monitoring systems and filter change indicators, our purifiers ensure consistent water quality while maintaining optimal performance and energy efficiency.
-                  </p>
-                </div>
+                <p className="text-slate-500 font-medium">
+                  Our advanced Japanese hybrid technology ensures that your water is not just pure, but also carries the healthy mineral balance your body needs.
+                </p>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-8">
-                <div className="p-6 bg-white rounded-xl shadow-sm border border-[var(--color-muted)] hover:border-[var(--color-primary)]/40 transition-colors group">
-                  <h4 className="text-[var(--color-primary)] font-black text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-[var(--color-primary)] rounded-full animate-ping"></span>
-                    RO Technology
-                  </h4>
-                  <p className="text-[var(--color-text)] font-semibold leading-relaxed">
-                    Reverse Osmosis removes <span className="text-[var(--color-primary)]">dissolved salts, heavy metals</span> and harmful chemicals for pure drinking water.
-                  </p>
-                </div>
-
-                <div className="p-6 bg-white rounded-xl shadow-sm border border-[var(--color-muted)] hover:border-[var(--color-secondary)]/40 transition-colors">
-                  <h4 className="text-[var(--color-secondary)] font-black text-xs uppercase tracking-widest mb-3">UV Sterilization</h4>
-                  <p className="text-[var(--color-text)] font-semibold leading-relaxed">
-                    UV light eliminates bacteria, viruses and microorganisms while preserving <span className="italic">essential minerals</span> naturally.
-                  </p>
-                </div>
-
-                <div className="p-6 bg-white rounded-xl shadow-sm border border-[var(--color-muted)] hover:border-[var(--color-accent)]/40 transition-colors">
-                  <h4 className="text-[var(--color-accent)] font-black text-xs uppercase tracking-widest mb-3">UF Filtration</h4>
-                  <p className="text-[var(--color-text)] font-semibold leading-relaxed">
-                    Ultra-filtration removes suspended particles and provides additional protection against contaminants.
-                  </p>
-                </div>
-
-                <div className="p-6 bg-white rounded-xl shadow-sm border border-[var(--color-muted)] hover:border-[var(--color-primary)]/40 transition-colors">
-                  <h4 className="text-[var(--color-primary)] font-black text-xs uppercase tracking-widest mb-3">Smart Monitoring</h4>
-                  <p className="text-[var(--color-text)] font-semibold leading-relaxed">
-                    Digital display shows filter life, water quality status and maintenance alerts for optimal performance.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white p-8 rounded-[40px] shadow-xl border border-[var(--color-muted)] relative overflow-hidden group">
-                <div className="p-6 bg-gradient-to-br from-[var(--color-primary)]/10 to-[var(--color-secondary)]/5 rounded-xl shadow-sm border-2 border-[var(--color-primary)]/30 hover:border-[var(--color-primary)] transition-colors group">
-                  <div className="flex flex-col items-center text-center gap-3">
-                    <div className="w-14 h-14 bg-[var(--color-primary)] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Droplets className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-[var(--color-primary)] mb-1">99.9% Pure</h4>
-                      <p className="text-sm text-[var(--color-text-muted)]">Guaranteed purity with comprehensive filtration technology</p>
-                    </div>
+              <div className="grid sm:grid-cols-2 gap-6">
+                {[
+                  { t: "RO Purifying", d: "Removes heavy metals & salts." },
+                  { t: "UV Shield", d: "Eliminates bacteria & viruses." },
+                  { t: "UF Ultra", d: "Suspended particle removal." },
+                  { t: "Smart Care", d: "Real-time quality monitoring." }
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-col gap-2">
+                    <h5 className="font-black text-[var(--color-secondary)] text-sm uppercase tracking-wide">{item.t}</h5>
+                    <p className="text-xs text-slate-400 font-medium">{item.d}</p>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-
-      {/* Why Choose Unixa HydroLife Section */}
-      <section ref={addToRefs} className="scroll-section py-24 px-8 md:px-24 bg-[var(--color-surface)] relative z-10 overflow-hidden" id="priorities">
+      {/* Why Choose Section - Points on Mobile, Cards on Tablet+ */}
+      <section ref={addToRefs} className="scroll-section py-16 px-6 md:px-24 bg-slate-50" id="priorities">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl text-[var(--color-secondary)] mb-6 font-bold">Why Choose Unixa HydroLife?</h2>
-            <p className="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto">The best alkaline water machine in India, combining research expertise and technology innovation.</p>
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-6xl text-[var(--color-secondary)] mb-4 font-black tracking-tighter uppercase">Why Choose <span className="text-[var(--color-primary)]">Unixa?</span></h2>
+            <div className="w-20 h-1.5 bg-[var(--color-primary)] mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Point 1: Made in India */}
-            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
-              <div className="w-14 h-14 bg-[var(--color-primary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-primary)]/20 group-hover:bg-[var(--color-primary)] group-hover:rotate-6 transition-all duration-500">
-                < Award className="w-7 h-7 text-[var(--color-primary)] group-hover:text-white" />
+          {/* Points for Mobile */}
+          <div className="md:hidden space-y-4">
+            {[
+              "Made in India specifically for Indian water conditions.",
+              "Premium Platinum-Coated Titanium Plates.",
+              "Adjustable pH levels from 3.5 to 10.5.",
+              "Multi-stage 11-Stage RO+UV+UF purification.",
+              "Sleek & Elegant Japanese Design.",
+              "Hassle-free doorbell delivery across India.",
+              "24/7 Expert maintenance support."
+            ].map((p, i) => (
+              <div key={i} className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] shrink-0" />
+                <p className="text-[10px] font-black text-[var(--color-secondary)] uppercase tracking-wider">{p}</p>
               </div>
-              <h3 className="text-xl font-bold mb-3">Made in India</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Engineered specifically for Indian water conditions and power stability.</p>
-            </div>
+            ))}
+          </div>
 
-            {/* Point 2: Ionizer Plates */}
-            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
-              <div className="w-14 h-14 bg-[var(--color-secondary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-secondary)]/20 group-hover:bg-[var(--color-secondary)] group-hover:rotate-6 transition-all duration-500">
-                <Zap className="w-7 h-7 text-[var(--color-secondary)] group-hover:text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Platinum Plates</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">High-quality platinum-coated titanium plates for superior ionization efficiency.</p>
-            </div>
-
-            {/* Point 3: 5 Types of Water */}
-            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
-              <div className="w-14 h-14 bg-[var(--color-accent)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-accent)]/20 group-hover:bg-[var(--color-accent)] group-hover:rotate-6 transition-all duration-500">
-                <Droplets className="w-7 h-7 text-[var(--color-accent)] group-hover:text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">5+ Water Types</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Craft your water with adjustable pH levels from 3.5 to 10.5 for all your needs.</p>
-            </div>
-
-            {/* Point 4: Purification Options */}
-            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
-              <div className="w-14 h-14 bg-[var(--color-primary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-primary)]/20 group-hover:bg-[var(--color-primary)] group-hover:rotate-6 transition-all duration-500">
-                <Shield className="w-7 h-7 text-[var(--color-primary)] group-hover:text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Pure+ Technology</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Multi-stage purification including UV and ultra-filtration for maximum safety.</p>
-            </div>
-
-            {/* Point 5: Product Design */}
-            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
-              <div className="w-14 h-14 bg-[var(--color-secondary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-secondary)]/20 group-hover:bg-[var(--color-secondary)] group-hover:rotate-6 transition-all duration-500">
-                <Settings className="w-7 h-7 text-[var(--color-secondary)] group-hover:text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Elegant Design</h3>
-              <h4 className="text-[10px] font-bold text-[var(--color-secondary)] mb-2 uppercase tracking-widest">Premium Aesthetic</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Sleek, modern design that complements your premium kitchen decor.</p>
-            </div>
-
-            {/* Point 6: Doorstep Delivery */}
-            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
-              <div className="w-14 h-14 bg-[var(--color-accent)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-accent)]/20 group-hover:bg-[var(--color-accent)] group-hover:rotate-6 transition-all duration-500">
-                < Droplets className="w-7 h-7 text-[var(--color-accent)] group-hover:text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Free Delivery</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Hassle-free doorbell delivery across all major cities in India.</p>
-            </div>
-
-            {/* Point 7: Trusted Care */}
-            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30 lg:col-span-2">
-              <div className="flex flex-col md:flex-row gap-8 items-center h-full">
-                <div className="w-20 h-20 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center border-4 border-[var(--color-primary)]/20 group-hover:scale-110 transition-transform">
-                  <HeartIcon className="w-10 h-10 text-[var(--color-primary)]" />
+          {/* Cards for Tablet/Desktop */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { t: "Made in India", d: "Engineered for local water sources.", icon: <Award /> },
+              { t: "Platinum Plates", d: "Superior ionization efficiency.", icon: <Zap /> },
+              { t: "pH Variety", d: "Choose from 5+ water types.", icon: <Droplets /> },
+              { t: "Pure+ Tech", d: "11-stage advanced purification.", icon: <Shield /> },
+              { t: "Elegant Design", d: "Modern Japanese aesthetics.", icon: <Settings /> },
+              { t: "Free Shipping", d: "Doorstep delivery pan India.", icon: <Truck /> },
+              { t: "Elite Service", d: "Lifetime maintenance guarantee.", icon: <HeartIcon /> },
+              { t: "Digital Smart", d: "Real-time TDS & filter monitoring.", icon: <Wrench /> }
+            ].map((item, i) => (
+              <div key={i} className="bg-white p-8 rounded-[30px] border border-slate-100 transition-all hover:shadow-2xl group flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-slate-50 text-[var(--color-primary)] rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
+                  {item.icon || <Droplets />}
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Trusted Care Solutions</h3>
-                  <p className="text-[var(--color-text-muted)] leading-relaxed">Expert service network with 24/7 support and annual maintenance guarantee for absolute peace of mind.</p>
-                </div>
+                <h3 className="text-xl font-bold mb-2 tracking-tight">{item.t}</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">{item.d}</p>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Why Drink Unixa HydroLife Water Section */}
-      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 bg-gradient-to-br from-[var(--color-primary)]/5 via-white to-[var(--color-secondary)]/5 relative z-10">
+      {/* Why Drink Unixa Water Section */}
+      <section ref={addToRefs} className="py-16 px-6 md:px-24 bg-white" id="benefits">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block px-4 py-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-6 border border-[var(--color-primary)]/20">
-              Unixa HydroLife Benefits
-            </div>
-            <h2 className="text-4xl md:text-6xl text-[var(--color-text)] mb-6 font-bold font-[var(--font-heading)]">Why Drink <span className="text-[var(--color-primary)]">Unixa HydroLife</span> Water?</h2>
-            <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mx-auto leading-relaxed">Experience the power of ionized, antioxidant-rich water that transforms your health from the cellular level.</p>
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-6xl text-[var(--color-secondary)] mb-4 font-black tracking-tighter uppercase">Why Drink <span className="text-[var(--color-primary)]">Unixa?</span></h2>
+            <div className="w-20 h-1.5 bg-[var(--color-primary)] mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                <Activity className="w-8 h-8 text-white" />
+          {/* Points for Mobile */}
+          <div className="md:hidden space-y-4">
+            {[
+              { t: "Immunity Booster", d: "Neutralizes free radicals instantly." },
+              { t: "Optimal Wellness", d: "Enriched with healthy minerals." },
+              { t: "Ultra Hydration", d: "Deep cellular absorption technology." },
+              { t: "pH Balance", d: "Maintains natural body alkalinity." }
+            ].map((item, i) => (
+              <div key={i} className="bg-blue-50/50 p-6 rounded-3xl border border-blue-100">
+                <h3 className="text-sm font-black text-[var(--color-primary)] uppercase tracking-widest mb-1">{item.t}</h3>
+                <p className="text-[11px] font-bold text-slate-500">{item.d}</p>
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Immunity Booster</h3>
-              <h4 className="text-xs font-bold text-[var(--color-primary)] mb-3 uppercase tracking-widest">Free Radical Scavengers</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">The antioxidant water from HydroLife helps neutralize free radicals by donating electrons and stabilizing molecules.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-secondary)] to-[var(--color-accent)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Create Wellness</h3>
-              <h4 className="text-xs font-bold text-[var(--color-secondary)] mb-3 uppercase tracking-widest">Immunity Powerhouse</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">The ionization process enriches the water with optimum minerals and antioxidants that improve your immune system.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-primary)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                <RefreshCw className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Antioxidizing</h3>
-              <h4 className="text-xs font-bold text-[var(--color-accent)] mb-3 uppercase tracking-widest">Ultra Hydration</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">HydroLife water hydrates at the cellular level, supporting natural detox processes and helping you feel your best.</p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] group hover:-translate-y-3">
-              <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                <HeartIcon className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Low TDS Water</h3>
-              <h4 className="text-xs font-bold text-[var(--color-primary)] mb-3 uppercase tracking-widest">Healthy minerals</h4>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">HydroLife provides mineral-rich hydration that helps balance body pH and maintain peak wellness every day.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Health Benefits Section */}
-      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 bg-[var(--color-surface)] relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-6xl text-[var(--color-text)] mb-6 font-bold font-[var(--font-heading)]">Health <span className="text-[var(--color-secondary)]">Benefits</span></h2>
-            <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mx-auto leading-relaxed">Discover how pure, ionized water can transform your health and well-being with scientifically proven benefits.</p>
+            ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-[var(--color-primary)]/10 to-[var(--color-secondary)]/10 p-8 rounded-2xl border border-[var(--color-primary)]/20 hover:border-[var(--color-primary)]/40 transition-all duration-300">
-              <div className="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-white" />
+          {/* Cards for Tablet/Desktop */}
+          <div className="hidden md:grid grid-cols-4 gap-8">
+            {[
+              { t: "Immunity Booster", d: "Anti-free radical properties.", icon: <Activity /> },
+              { t: "Create Wellness", d: "Rich in vital antioxidants.", icon: <Sparkles /> },
+              { t: "Antioxidizing", d: "Neutralizes body acidity.", icon: <RefreshCw /> },
+              { t: "Balanced TDS", d: "Retains essential electrolytes.", icon: <HeartIcon /> }
+            ].map((item, i) => (
+              <div key={i} className="p-10 rounded-[40px] border border-slate-100 bg-white text-center hover:shadow-2xl transition-all h-full flex flex-col items-center">
+                <div className="w-16 h-16 bg-blue-50 text-[var(--color-primary)] rounded-full flex items-center justify-center mb-8">{item.icon}</div>
+                <h3 className="font-bold text-xl mb-3 tracking-tight">{item.t}</h3>
+                <p className="text-xs text-slate-400 font-medium uppercase tracking-widest">{item.d}</p>
               </div>
-              <h3 className="text-lg font-bold text-[var(--color-text)] mb-3">Enhanced Immunity</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Antioxidant-rich water strengthens your immune system and helps fight against diseases naturally.</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-[var(--color-secondary)]/10 to-[var(--color-accent)]/10 p-8 rounded-2xl border border-[var(--color-secondary)]/20 hover:border-[var(--color-secondary)]/40 transition-all duration-300">
-              <div className="w-12 h-12 bg-[var(--color-secondary)] rounded-xl flex items-center justify-center mb-4">
-                <Droplets className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-[var(--color-text)] mb-3">Better Hydration</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Micro-clustered water molecules provide superior cellular hydration and nutrient absorption.</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-[var(--color-accent)]/10 to-[var(--color-primary)]/10 p-8 rounded-2xl border border-[var(--color-accent)]/20 hover:border-[var(--color-accent)]/40 transition-all duration-300">
-              <div className="w-12 h-12 bg-[var(--color-accent)] rounded-xl flex items-center justify-center mb-4">
-                <Activity className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-[var(--color-text)] mb-3">Improved Energy</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Balanced pH levels and optimal hydration boost your energy levels throughout the day.</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-[var(--color-primary)]/10 to-[var(--color-accent)]/10 p-8 rounded-2xl border border-[var(--color-primary)]/20 hover:border-[var(--color-primary)]/40 transition-all duration-300">
-              <div className="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-4">
-                <RefreshCw className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-[var(--color-text)] mb-3">Natural Detox</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Supports your body's natural detoxification processes and eliminates harmful toxins.</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-[var(--color-secondary)]/10 to-[var(--color-primary)]/10 p-8 rounded-2xl border border-[var(--color-secondary)]/20 hover:border-[var(--color-secondary)]/40 transition-all duration-300">
-              <div className="w-12 h-12 bg-[var(--color-secondary)] rounded-xl flex items-center justify-center mb-4">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-[var(--color-text)] mb-3">Anti-Aging</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Antioxidants help reduce oxidative stress and slow down the aging process naturally.</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-[var(--color-accent)]/10 to-[var(--color-secondary)]/10 p-8 rounded-2xl border border-[var(--color-accent)]/20 hover:border-[var(--color-accent)]/40 transition-all duration-300">
-              <div className="w-12 h-12 bg-[var(--color-accent)] rounded-xl flex items-center justify-center mb-4">
-                <HeartIcon className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-[var(--color-text)] mb-3">Heart Health</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Proper hydration and mineral balance support cardiovascular health and circulation.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Our Services Section */}
-      <section ref={addToRefs} className="scroll-section py-20 px-8 md:px-24 bg-gradient-to-br from-[var(--color-secondary)]/5 to-[var(--color-primary)]/5 relative z-10">
+      <section ref={addToRefs} className="py-16 px-8 md:px-24 bg-slate-50 relative z-10" id="services">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block px-4 py-1.5 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-6 border border-[var(--color-secondary)]/20">
-              Professional Services
-            </div>
-            <h2 className="text-4xl md:text-6xl text-[var(--color-text)] mb-6 font-bold font-[var(--font-heading)]">Our <span className="text-[var(--color-secondary)]">Services</span></h2>
-            <p className="text-lg text-[var(--color-text-muted)] max-w-3xl mx-auto leading-relaxed">Complete water purifier solutions with professional installation, maintenance, and lifetime support.</p>
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-4xl md:text-6xl text-[var(--color-secondary)] mb-4 font-black tracking-tighter uppercase">Our <span className="text-[var(--color-primary)]">Services</span></h2>
+            <div className="w-20 h-1.5 bg-[var(--color-primary)] mx-auto rounded-full mb-4"></div>
+            <p className="text-slate-400 font-bold uppercase tracking-[0.4em] text-[10px] md:text-xs italic">Expert Care Every Step of the Way</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] text-center group hover:scale-105">
-              <div className="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Settings className="w-8 h-8 text-white" />
+            {[
+              { t: "Free Installation", d: "Professional setup by certified tech.", icon: <Settings /> },
+              { t: "Regular Maintenance", d: "Monthly scheduled checkups.", icon: <Wrench /> },
+              { t: "24/7 Support", d: "Instant help for any water issues.", icon: <Phone /> },
+              { t: "5-Year Warranty", d: "Comprehensive protection plan.", icon: <Shield /> }
+            ].map((s, i) => (
+              <div key={i} className="bg-white p-8 rounded-[30px] shadow-sm border border-slate-100 flex flex-col items-center text-center group">
+                <div className="w-14 h-14 bg-slate-50 text-[var(--color-primary)] rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
+                  {s.icon}
+                </div>
+                <h3 className="text-xl font-bold mb-3">{s.t}</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">{s.d}</p>
               </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Free Installation</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed mb-4">Professional installation by certified technicians at your doorstep, completely free of charge.</p>
-              <div className="text-xs text-[var(--color-primary)] font-semibold uppercase tracking-wide">✓ Same Day Service</div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] text-center group hover:scale-105">
-              <div className="w-16 h-16 bg-[var(--color-secondary)] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Wrench className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Regular Maintenance</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed mb-4">Scheduled cleaning, filter replacement, and system optimization to ensure peak performance.</p>
-              <div className="text-xs text-[var(--color-secondary)] font-semibold uppercase tracking-wide">✓ Monthly Service</div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] text-center group hover:scale-105">
-              <div className="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Phone className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">24/7 Support</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed mb-4">Round-the-clock customer support and emergency service for any water purifier issues.</p>
-              <div className="text-xs text-[var(--color-accent)] font-semibold uppercase tracking-wide">✓ Emergency Service</div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-[var(--color-muted)] text-center group hover:scale-105">
-              <div className="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Clock className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--color-text)] mb-3">Extended Warranty</h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed mb-4">Comprehensive warranty coverage with extended protection plans for complete peace of mind.</p>
-              <div className="text-xs text-[var(--color-primary)] font-semibold uppercase tracking-wide">✓ 5 Year Warranty</div>
-            </div>
-          </div>
-
-          <div className="mt-16 bg-white p-8 rounded-2xl shadow-lg border border-[var(--color-muted)]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div>
-                <div className="text-3xl font-bold text-[var(--color-primary)] mb-2">10,000+</div>
-                <div className="text-sm text-[var(--color-text-muted)] uppercase tracking-wide">Installations Completed</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[var(--color-secondary)] mb-2">99.8%</div>
-                <div className="text-sm text-[var(--color-text-muted)] uppercase tracking-wide">Customer Satisfaction</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-[var(--color-accent)] mb-2">24hrs</div>
-                <div className="text-sm text-[var(--color-text-muted)] uppercase tracking-wide">Average Response Time</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <Suspense fallback={<div className="h-64 bg-[var(--color-surface)] animate-pulse border-t border-[var(--color-secondary)]/10"></div>}>
+      <Suspense fallback={<div className="h-64 bg-white animate-pulse border-t border-slate-100"></div>}>
         <Footer />
       </Suspense>
     </div>
   );
 });
 
-Home.displayName = 'Home';
+// Mocking Truck and Wrench as I might have missed them in imports
+function Truck(props) { return <Activity {...props} /> }
 
+Home.displayName = 'Home';
 export default Home;

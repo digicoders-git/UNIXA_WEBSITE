@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ShoppingCart, ArrowLeft, Star, Package, Truck, Shield } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Star, Package, Truck, ShieldCheck, Droplets, Zap, Activity, Info } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
-
-import { getProductApi } from '../../api/product';
-import { addToCartApi } from '../../api/cart';
 import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
-
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -17,32 +13,88 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                const data = await getProductApi(id);
-                // Map API response to component structure
-                const p = data.product;
-                setProduct({
-                    id: p._id,
-                    name: p.name,
-                    img: p.mainImage?.url,
-                    price: p.price,
-                    finalPrice: p.finalPrice,
-                    discountPercent: p.discountPercent,
-                    priceStr: `₹${p.finalPrice} / kg`,
-                    description: p.description,
-                    category: p.category?.name || 'Special',
-                    ingredients: p.about?.ingredients || 'N/A',
-                    shelfLife: p.about?.shelfLife || 'N/A',
-                    netWeight: p.about?.netWeight || '1kg'
-                });
-                setLoading(false);
-            } catch (err) {
-                console.error("Failed to fetch product:", err);
-                setError(true);
-                setLoading(false);
+    // Static Data for Products (Japanese Hybrid Technology Models)
+    const staticProducts = [
+        {
+            _id: '1',
+            name: 'HydroLife Alkaline Pro',
+            img: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop',
+            price: 45000,
+            finalPrice: 39999,
+            discountPercent: 11,
+            description: 'The HydroLife Alkaline Pro is our flagship model, featuring advanced 11-stage ionization with Platinum plates. It goes beyond simple purification to deliver mineral-rich alkaline water that helps balance your bodys pH and provides powerful antioxidants.',
+            category: 'Premium',
+            techSpecs: {
+                filtration: "11-Stage RO + UV + UF + Ionization",
+                storage: "10 Liters",
+                power: "75 Watts",
+                warranty: "1 Year Comprehensive"
             }
+        },
+        {
+            _id: '2',
+            name: 'NanoPure Smart',
+            img: 'https://images.unsplash.com/photo-1544006659-f0b21884cb1d?q=80&w=2070&auto=format&fit=crop',
+            price: 25000,
+            finalPrice: 19999,
+            discountPercent: 20,
+            description: 'Perfect for modern kitchens with limited space, the NanoPure Smart offers a compact under-sink design without compromising on power. It features advanced RO and UV technology to ensure your water is always pure and safe.',
+            category: 'Smart',
+            techSpecs: {
+                filtration: "RO + UV + MTDS Control",
+                storage: "8 Liters",
+                power: "45 Watts",
+                warranty: "1 Year Comprehensive"
+            }
+        },
+        {
+            _id: '3',
+            name: 'SilverStream RO+',
+            img: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?q=80&w=2070&auto=format&fit=crop',
+            price: 15000,
+            finalPrice: 12999,
+            discountPercent: 13,
+            description: 'The SilverStream RO+ is designed for high TDS water sources, providing superior RO purification with an added mineral boost. It ensures that while impurities are removed, the essential minerals your body needs are retained.',
+            category: 'Standard',
+            techSpecs: {
+                filtration: "RO + Copper + Mineralizer",
+                storage: "12 Liters",
+                power: "60 Watts",
+                warranty: "1 Year Comprehensive"
+            }
+        },
+        {
+            _id: '4',
+            name: 'AquaZen Elite',
+            img: 'https://images.unsplash.com/photo-1517646288020-0be1574cc9e5?q=80&w=2070&auto=format&fit=crop',
+            price: 55000,
+            finalPrice: 49999,
+            discountPercent: 9,
+            description: 'Experience the ultimate in luxury and technology with the AquaZen Elite. Featuring our most advanced ionization tech and a sleek touchscreen interface, it allows you to precisely control the pH level of your water for various uses.',
+            category: 'Luxury',
+            techSpecs: {
+                filtration: "13-Stage Hybrid Purification",
+                storage: "15 Liters",
+                power: "100 Watts",
+                warranty: "2 Years Premium"
+            }
+        }
+    ];
+
+    useEffect(() => {
+        const fetchProduct = () => {
+            setLoading(true);
+            const foundProduct = staticProducts.find(p => p._id === id);
+            if (foundProduct) {
+                setProduct({
+                    ...foundProduct,
+                    id: foundProduct._id
+                });
+                setError(false);
+            } else {
+                setError(true);
+            }
+            setLoading(false);
         };
 
         if (id) {
@@ -52,19 +104,19 @@ const ProductDetail = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: `var(--color-surface)` }}>
-                <Loader text="Loading delicious details..." />
+            <div className="min-h-screen flex items-center justify-center bg-white">
+                <Loader text="Initializing product details..." />
             </div>
         );
     }
 
     if (error || !product) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: `var(--color-surface)` }}>
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold mb-4" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>Product Not Found</h2>
-                    <Link to="/laddus" className="transition-colors" style={{ color: `var(--color-text-muted)` }} onMouseEnter={(e) => e.target.style.color = 'var(--color-primary)'} onMouseLeave={(e) => e.target.style.color = 'var(--color-text-muted)'}>
-                        ← Back to Products
+            <div className="min-h-screen flex items-center justify-center bg-white">
+                <div className="text-center space-y-4">
+                    <h2 className="text-3xl font-black text-slate-800">Product Not Found</h2>
+                    <Link to="/purifiers" className="inline-block text-[var(--color-primary)] font-bold hover:underline">
+                        ← Back to Purifiers
                     </Link>
                 </div>
             </div>
@@ -72,211 +124,129 @@ const ProductDetail = () => {
     }
 
     const checkAuth = async () => {
-        const token = localStorage.getItem('userToken');
-        if (!token) {
-            const result = await Swal.fire({
-                title: 'Ready for a Treat?',
-                text: 'Please login to proceed with your purchase.',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#F2B705',
-                cancelButtonColor: '#2E2E2E',
-                confirmButtonText: 'Login Now',
-                cancelButtonText: 'Maybe Later',
-                background: '#FFFFFF',
-                color: '#2E2E2E',
-                iconColor: '#F2B705'
-            });
-
-            if (result.isConfirmed) {
-                navigate('/login');
-            }
-            return false;
-        }
-        return true;
+        return true; // Skipping auth check for static version
     };
 
     const handleAddToCart = async () => {
-        const isAuth = await checkAuth();
-        if (!isAuth) return;
-
-        try {
-            await addToCartApi({ productId: product.id, quantity: 1 });
-            window.dispatchEvent(new Event('cart-updated')); // Notify Navbar
-            toast.success(`${product.name} added to cart!`, { position: "top-right" });
-        } catch (error) {
-            console.error("Failed to add to cart:", error);
-        }
+        toast.success(`${product.name} added to cart!`, {
+            position: "bottom-center",
+            style: { borderRadius: '1rem', fontWeight: 'bold' }
+        });
+        window.dispatchEvent(new Event('cart-updated'));
     };
 
     return (
-        <div style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-text)`, fontFamily: `var(--font-body)` }} className="min-h-screen -mt-12">
-            <div className="pb-8 pt-16 px-6 md:px-24 relative overflow-hidden">
-                {/* Background Decorative Elements */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-                    <div className="detail-bubble detail-bubble-1"></div>
-                    <div className="detail-bubble detail-bubble-2"></div>
-                </div>
+        <div className="min-h-screen bg-white font-[var(--font-body)] pt-24">
+            <div className="pb-12 px-6 md:px-12 max-w-7xl mx-auto">
 
-                <style dangerouslySetInnerHTML={{
-                    __html: `
-                    .detail-bubble {
-                        position: absolute;
-                        background: var(--color-primary);
-                        border-radius: 50%;
-                        opacity: 0.05;
-                        animation: float-detail 20s infinite ease-in-out;
-                    }
-                    .detail-bubble-1 { width: 200px; height: 200px; left: -50px; top: 10%; }
-                    .detail-bubble-2 { width: 300px; height: 300px; right: -80px; bottom: 10%; animation-delay: 4s; }
-                    @keyframes float-detail {
-                        0%, 100% { transform: translate(0, 0) scale(1); }
-                        50% { transform: translate(30px, -40px) scale(1.05); }
-                    }
-                `
-                }} />
-
-                {/* Back Button */}
+                {/* Back Link */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 mb-8 font-semibold transition-colors relative z-10"
-                    style={{ color: `var(--color-primary)` }}
-                    onMouseEnter={(e) => e.target.style.color = 'var(--color-secondary)'}
-                    onMouseLeave={(e) => e.target.style.color = 'var(--color-primary)'}
+                    className="flex items-center gap-2 mb-8 font-bold text-slate-400 hover:text-[var(--color-secondary)] transition-colors"
                 >
-                    <ArrowLeft size={20} />
-                    Back
+                    <ArrowLeft size={18} />
+                    Back to Catalog
                 </button>
 
-                <div className="max-w-6xl mx-auto rounded-[40px] shadow-2xl overflow-hidden relative z-10" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                        {/* Product Image */}
-                        <div className="p-8 md:p-16 flex items-center justify-center relative overflow-hidden" style={{ background: `linear-gradient(135deg, var(--color-primary)/5, var(--color-secondary)/5)` }}>
-                            <div className="absolute inset-0 opacity-10" style={{ backgroundSize: 'cover', filter: 'blur(20px)' }}></div>
-                            <div className="absolute inset-0" style={{ background: `radial-gradient(circle at center, rgba(10, 40, 106, 0.1) 0%, transparent 70%)` }}></div>
-                            <img
-                                src={product.img}
-                                alt={product.name}
-                                className="w-full max-w-sm rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] transform hover:scale-105 transition-transform duration-500 relative z-10"
-                                style={{ border: `1px solid var(--color-border)` }}
-                            />
-                        </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
 
-                        {/* Product Details */}
-                        <div className="p-8 md:p-12 flex flex-col justify-center">
-                            {/* <div className="inline-block px-4 py-1 rounded-full text-sm font-bold mb-4 w-fit" style={{ backgroundColor: `var(--color-secondary)`, color: `var(--color-surface)` }}>
+                    {/* Image Section */}
+                    <div className="relative group rounded-[4rem] bg-gradient-to-br from-slate-50 to-blue-50/30 p-12 lg:p-24 flex items-center justify-center overflow-hidden border border-blue-100/50 shadow-2xl shadow-blue-500/5">
+                        <img
+                            src={product.img}
+                            alt={product.name}
+                            className="w-full max-w-md h-auto object-contain relative z-10 transition-transform duration-1000 group-hover:scale-110"
+                        />
+                        {/* Decorative Background */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-primary)]/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-400/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2" />
+
+                        <div className="absolute bottom-12 right-12 z-20 hidden md:flex items-center gap-3 bg-white/40 backdrop-blur-2xl border border-white/50 px-6 py-3 rounded-2xl shadow-xl text-xs font-black text-[var(--color-secondary)] uppercase tracking-widest">
+                            <ShieldCheck size={18} className="text-[var(--color-primary)]" />
+                            Certified Authentic
+                        </div>
+                    </div>
+
+                    {/* Details Section */}
+                    <div className="flex flex-col h-full pt-4">
+                        <div className="mb-2">
+                            <span className="bg-[var(--color-primary)]/10 text-[var(--color-secondary)] text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full inline-block mb-4">
                                 {product.category}
-                            </div> */}
+                            </span>
+                        </div>
 
-                            <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: `var(--color-text)`, fontFamily: `var(--font-heading)` }}>
-                                {product.name}
-                            </h1>
+                        <h1 className="text-4xl md:text-5xl font-black text-[var(--color-secondary)] leading-[1.1] mb-6">
+                            {product.name}
+                        </h1>
 
-                            <div className="flex items-center gap-2 mb-6">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="flex text-yellow-400">
                                 {[...Array(5)].map((_, i) => (
-                                    <Star key={i} size={20} className="fill-current" style={{ color: `var(--color-secondary)` }} />
+                                    <Star key={i} size={18} fill="currentColor" />
                                 ))}
-                                <span className="text-sm ml-2" style={{ color: `var(--color-text-muted)` }}>(4.9/5 from 120 reviews)</span>
                             </div>
+                            <span className="text-sm font-bold text-slate-400">(4.9/5 Excellent)</span>
+                        </div>
 
-                            <p className="text-lg leading-relaxed mb-6" style={{ color: `var(--color-text)`, opacity: 0.8 }}>
-                                {product.description}
-                            </p>
+                        <div className="flex items-baseline gap-4 mb-8 border-b border-slate-100 pb-8">
+                            <span className="text-4xl font-black text-[var(--color-primary)]">
+                                ₹{product.finalPrice?.toLocaleString()}
+                            </span>
+                            {product.discountPercent > 0 && (
+                                <>
+                                    <span className="text-lg text-slate-400 line-through font-bold">
+                                        ₹{product.price?.toLocaleString()}
+                                    </span>
+                                    <span className="text-xs font-black text-red-500 bg-red-50 px-2 py-1 rounded-full uppercase tracking-wider">
+                                        Save {product.discountPercent}%
+                                    </span>
+                                </>
+                            )}
+                        </div>
 
-                            <div className="rounded-2xl p-6 mb-6" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                                <h3 className="font-bold mb-3 flex items-center gap-2" style={{ color: `var(--color-primary)` }}>
-                                    <Package size={20} />
-                                    Product Details
-                                </h3>
-                                <div className="space-y-2 text-sm" style={{ color: `var(--color-text-muted)` }}>
-                                    <p><span className="font-semibold" style={{ color: `var(--color-text)` }}>Ingredients:</span> {product.ingredients}</p>
-                                    <p><span className="font-semibold" style={{ color: `var(--color-text)` }}>Shelf Life:</span> {product.shelfLife}</p>
-                                    <p><span className="font-semibold" style={{ color: `var(--color-text)` }}>Net Weight:</span> {product.netWeight}</p>
+                        <p className="text-slate-500 leading-relaxed mb-8 text-lg font-medium">
+                            {product.description}
+                        </p>
+
+                        {/* Tech Specs Grid */}
+                        <div className="grid grid-cols-2 gap-4 mb-10">
+                            {Object.entries(product.techSpecs).map(([key, value]) => (
+                                <div key={key} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{key}</p>
+                                    <p className="font-bold text-[var(--color-secondary)]">{value}</p>
                                 </div>
+                            ))}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-4 mt-auto">
+                            <button
+                                onClick={handleAddToCart}
+                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 bg-[var(--color-secondary)] text-white hover:bg-[var(--color-primary)] transition-all shadow-[0_10px_30px_rgba(15,23,42,0.15)] active:scale-95"
+                            >
+                                <ShoppingCart size={18} />
+                                Add to Cart
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleAddToCart();
+                                    navigate('/shop');
+                                }}
+                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] hover:bg-[var(--color-secondary)] hover:text-white transition-all active:scale-95"
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <div className="mt-8 flex items-center justify-center gap-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            <div className="flex items-center gap-2">
+                                <Truck size={14} className="text-[var(--color-primary)]" /> Free Shipping
                             </div>
-
-                            <div className="flex items-center justify-between mb-8">
-                                <div>
-                                    <p className="text-sm mb-1" style={{ color: `var(--color-text-muted)` }}>Price per kg</p>
-                                    <div className="flex items-center gap-3">
-                                        <p className="text-4xl font-bold" style={{ color: `var(--color-secondary)` }}>₹{product.finalPrice}</p>
-                                        {product.discountPercent > 0 && (
-                                            <>
-                                                <p className="text-xl line-through" style={{ color: `var(--color-text-muted)` }}>₹{product.price}</p>
-                                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                                                    {product.discountPercent}% OFF
-                                                </span>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-4 mb-8">
-                                <button
-                                    onClick={handleAddToCart}
-                                    className="flex-1 py-2 md:py-4 rounded-xl font-bold text-sm md:text-lg transition-all flex items-center justify-center gap-2"
-                                    style={{
-                                        backgroundColor: `var(--color-secondary)`,
-                                        color: `var(--color-surface)`,
-                                        boxShadow: `0 4px 15px rgba(6, 182, 212, 0.3)`
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = '#0891b2';
-                                        e.target.style.boxShadow = '0 6px 20px rgba(6, 182, 212, 0.4)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = 'var(--color-secondary)';
-                                        e.target.style.boxShadow = '0 4px 15px rgba(6, 182, 212, 0.3)';
-                                    }}
-                                >
-                                    <ShoppingCart size={18} className="md:w-[22px] md:h-[22px]" />
-                                    <span className="text-xs md:text-base">Add to Cart</span>
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        const isAuth = await checkAuth();
-                                        if (!isAuth) return;
-
-                                        try {
-                                            await addToCartApi({ productId: product.id, quantity: 1 });
-                                            window.dispatchEvent(new Event('cart-updated'));
-                                            navigate('/shop');
-                                        } catch (error) {
-                                            console.error("Buy now failed:", error);
-                                        }
-                                    }}
-                                    className="px-4 md:px-8 py-2 md:py-4 border-2 rounded-xl font-bold transition-all flex items-center justify-center no-underline text-xs md:text-base cursor-pointer"
-                                    style={{
-                                        borderColor: `var(--color-secondary)`,
-                                        color: `var(--color-secondary)`,
-                                        backgroundColor: 'transparent'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = 'var(--color-secondary)';
-                                        e.target.style.color = 'var(--color-surface)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = 'transparent';
-                                        e.target.style.color = 'var(--color-secondary)';
-                                    }}
-                                >
-                                    Buy Now
-                                </button>
-                            </div>
-
-                            {/* Features */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="flex items-center gap-3 text-sm">
-                                    <Truck size={20} style={{ color: `var(--color-secondary)` }} />
-                                    <span style={{ color: `var(--color-text-muted)` }}>Fast Delivery</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm">
-                                    <Shield size={20} style={{ color: `var(--color-secondary)` }} />
-                                    <span style={{ color: `var(--color-text-muted)` }}>100% Authentic</span>
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <ShieldCheck size={14} className="text-[var(--color-primary)]" /> 1 Year Warranty
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
