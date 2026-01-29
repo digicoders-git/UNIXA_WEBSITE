@@ -97,11 +97,10 @@ const Navbar = () => {
                 {/* Hamburger Button */}
                 <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="lg:hidden flex flex-col justify-center focus:outline-none z-[1001] p-1 rounded-md transition-all duration-200 hover:scale-105 active:scale-95"
-                    style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-primary)`, border: `1px solid var(--color-border)` }}
+                    className="lg:hidden flex flex-col justify-center focus:outline-none z-[1001] transition-all duration-200 hover:scale-105 active:scale-95 text-[var(--color-surface)]"
                     aria-label="Toggle Menu"
                 >
-                    {isMenuOpen ? <X size={14} /> : <Menu size={14} />}
+                    {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
             </div>
 
@@ -111,7 +110,7 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
             ></div>
 
-            <div className={`lg:hidden fixed top-16 right-4 h-[80vh] w-[80%] max-w-[300px] z-[1000] shadow-2xl transition-all duration-500 ease-in-out rounded-2xl overflow-hidden ${isMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`} style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
+            <div className={`lg:hidden fixed top-16 right-4 h-[80vh] w-[80%] max-w-[300px] z-[1000] shadow-2xl transition-all duration-500 ease-in-out rounded-2xl overflow-hidden ${isMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`} style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }} onClick={(e) => e.stopPropagation()}>
                 <div className="flex flex-col h-full p-6 py-8 gap-2">
                     <p className="text-xs uppercase tracking-wider font-semibold mb-4 px-2" style={{ color: `var(--color-text-muted)` }}>Navigation Menu</p>
                     {navLinks.map((link, idx) => (
@@ -132,7 +131,7 @@ const Navbar = () => {
 
                     <div className="mt-auto pt-4 flex items-center justify-between" style={{ borderTop: `1px solid var(--color-border)` }}>
                         <div
-                            onClick={() => navigate('/profile')}
+                            onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}
                             className="flex items-center gap-3 font-semibold cursor-pointer p-2 rounded-lg transition-all duration-300 hover:opacity-80"
                             style={{ color: `var(--color-text)` }}
                         >
