@@ -35,7 +35,7 @@ const About = () => {
     <div style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-text)`, fontFamily: `var(--font-body)` }} className="min-h-screen -mt-12">
 
       {/* Hero Section */}
-      <section className="relative py-12 px-6 text-center overflow-hidden rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
+      <section className="relative py-8 md:py-12 px-6 text-center overflow-hidden rounded-b-[40px] md:rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
         {/* Animated Bubbles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="bubble bubble-1"></div>
@@ -115,30 +115,30 @@ const About = () => {
         }} />
 
         <div className="relative z-10 max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Droplets className="w-8 h-8" style={{ color: `var(--color-surface)` }} />
-            <span className="font-semibold text-sm uppercase tracking-wider" style={{ color: `var(--color-surface)` }}>
+          <div className="flex items-center justify-center gap-2 mb-4 md:mb-6">
+            <Droplets className="w-6 h-6 md:w-8 md:h-8" style={{ color: `var(--color-surface)` }} />
+            <span className="font-semibold text-xs md:text-sm uppercase tracking-wider" style={{ color: `var(--color-surface)` }}>
               Pure Water Solutions
             </span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-black mb-6" style={{ color: `var(--color-accent)`, fontFamily: `var(--font-heading)` }}>
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6" style={{ color: `var(--color-accent)`, fontFamily: `var(--font-heading)` }}>
             About UNIXA
           </h1>
           
-          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
+          <p className="text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
             Leading the revolution in water purification technology with innovative solutions for healthier living
           </p>
           
           {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-8 mt-12">
-            <div className="flex items-center gap-2 backdrop-blur-sm px-6 py-3 rounded-full" style={{ backgroundColor: `var(--color-surface)15`, border: `1px solid var(--color-surface)30` }}>
-              <Shield className="w-5 h-5" style={{ color: `var(--color-muted)` }} />
-              <span className="font-bold" style={{ color: `var(--color-muted)` }}>ISO Certified</span>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-8 mt-8 md:mt-12">
+            <div className="flex items-center gap-2 backdrop-blur-sm px-4 md:px-6 py-2 md:py-3 rounded-full" style={{ backgroundColor: `var(--color-surface)15`, border: `1px solid var(--color-surface)30` }}>
+              <Shield className="w-4 h-4 md:w-5 md:h-5" style={{ color: `var(--color-muted)` }} />
+              <span className="font-bold text-sm md:text-base" style={{ color: `var(--color-muted)` }}>ISO Certified</span>
             </div>
-            <div className="flex items-center gap-2 backdrop-blur-sm px-6 py-3 rounded-full" style={{ backgroundColor: `var(--color-surface)15`, border: `1px solid var(--color-surface)30` }}>
-              <Award className="w-5 h-5" style={{ color: `var(--color-muted)` }} />
-              <span className="font-bold" style={{ color: `var(--color-muted)` }}>Industry Leader</span>
+            <div className="flex items-center gap-2 backdrop-blur-sm px-4 md:px-6 py-2 md:py-3 rounded-full" style={{ backgroundColor: `var(--color-surface)15`, border: `1px solid var(--color-surface)30` }}>
+              <Award className="w-4 h-4 md:w-5 md:h-5" style={{ color: `var(--color-muted)` }} />
+              <span className="font-bold text-sm md:text-base" style={{ color: `var(--color-muted)` }}>Industry Leader</span>
             </div>
           </div>
         </div>

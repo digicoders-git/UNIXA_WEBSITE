@@ -34,7 +34,7 @@ const Compare = () => {
     <div style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-text)`, fontFamily: `var(--font-body)` }} className="min-h-screen -mt-12">
 
       {/* Hero Section */}
-      <section className="relative py-12 px-6 text-center overflow-hidden rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
+      <section className="relative py-8 md:py-12 px-6 text-center overflow-hidden rounded-b-[40px] md:rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
         {/* Animated Bubbles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="bubble bubble-1"></div>
@@ -96,18 +96,18 @@ const Compare = () => {
         }} />
 
         <div className="relative z-10 max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Droplets className="w-8 h-8" style={{ color: `var(--color-surface)` }} />
-            <span className="font-semibold text-sm uppercase tracking-wider" style={{ color: `var(--color-surface)` }}>
+          <div className="flex items-center justify-center gap-2 mb-4 md:mb-6">
+            <Droplets className="w-6 h-6 md:w-8 md:h-8" style={{ color: `var(--color-surface)` }} />
+            <span className="font-semibold text-xs md:text-sm uppercase tracking-wider" style={{ color: `var(--color-surface)` }}>
               Water Comparison
             </span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-black mb-6" style={{ color: `var(--color-surface)`, fontFamily: `var(--font-heading)` }}>
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6" style={{ color: `var(--color-surface)`, fontFamily: `var(--font-heading)` }}>
             UNIXA vs Regular Water
           </h1>
           
-          <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
+          <p className="text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
             Discover the difference between regular tap water and UNIXA's advanced purification technology
           </p>
         </div>

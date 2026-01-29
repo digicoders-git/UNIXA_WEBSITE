@@ -122,17 +122,12 @@ const Shop = () => {
             text: "Are you sure you want to remove this item from your cart?",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6b7280',
+            confirmButtonColor: 'var(--color-secondary)',
+            cancelButtonColor: 'var(--color-text-muted)',
             confirmButtonText: 'Yes, remove it!',
             cancelButtonText: 'Cancel',
-            background: '#1f2937',
-            color: '#ffffff',
-            customClass: {
-                popup: 'swal-dark-popup',
-                title: 'swal-dark-title',
-                content: 'swal-dark-content'
-            }
+            background: 'var(--color-surface)',
+            color: 'var(--color-text)'
         });
 
         if (!result.isConfirmed) return;
@@ -154,17 +149,12 @@ const Shop = () => {
             text: "Are you sure you want to remove all items from your tray?",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6b7280',
+            confirmButtonColor: 'var(--color-secondary)',
+            cancelButtonColor: 'var(--color-text-muted)',
             confirmButtonText: 'Yes, clear it!',
             cancelButtonText: 'Cancel',
-            background: '#1f2937',
-            color: '#ffffff',
-            customClass: {
-                popup: 'swal-dark-popup',
-                title: 'swal-dark-title',
-                content: 'swal-dark-content'
-            }
+            background: 'var(--color-surface)',
+            color: 'var(--color-text)'
         });
 
         if (!result.isConfirmed) return;
@@ -341,10 +331,10 @@ const Shop = () => {
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: 'var(--color-secondary)',
-            cancelButtonColor: '#3085d6',
+            cancelButtonColor: 'var(--color-text-muted)',
             confirmButtonText: 'Yes, place it!',
-            background: '#1f2937',
-            color: '#fff'
+            background: 'var(--color-surface)',
+            color: 'var(--color-text)'
         });
 
         if (!result.isConfirmed) return;

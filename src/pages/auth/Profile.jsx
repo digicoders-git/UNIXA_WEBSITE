@@ -132,10 +132,10 @@ const Profile = () => {
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: 'var(--color-secondary)',
-            cancelButtonColor: '#d33',
+            cancelButtonColor: 'var(--color-text-muted)',
             confirmButtonText: 'Yes, Logout',
-            background: '#1f2937',
-            color: '#fff'
+            background: 'var(--color-surface)',
+            color: 'var(--color-text)'
         });
 
         if (result.isConfirmed) {
@@ -147,14 +147,14 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen -mt-12" style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-text)`, fontFamily: `var(--font-body)` }}>
-            <div className="py-12 px-4 md:px-8 max-w-6xl mx-auto">
+            <div className="py-8 md:py-12 px-4 md:px-8 max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>My Profile</h1>
-                    <p style={{ color: `var(--color-text-muted)` }}>Manage your account information</p>
+                <div className="text-center mb-6 md:mb-8">
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>My Profile</h1>
+                    <p className="text-sm md:text-base" style={{ color: `var(--color-text-muted)` }}>Manage your account information</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                     {/* Profile Info Section */}
                     <div className="lg:col-span-2 rounded-2xl p-6 md:p-8" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
                         <div className="flex justify-between items-center mb-6">
@@ -196,8 +196,8 @@ const Profile = () => {
                             )}
                         </div>
 
-                        <div className="space-y-10">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-6 md:space-y-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                                 <div>
                                     <label className="block text-base font-bold mb-3" style={{ color: `var(--color-text)` }}>First Name</label>
                                     <div className="relative">
@@ -231,7 +231,7 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                                 <div>
                                     <label className="block text-base font-bold mb-3" style={{ color: `var(--color-text)` }}>Email</label>
                                     <div className="relative">

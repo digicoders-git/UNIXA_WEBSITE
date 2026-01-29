@@ -25,17 +25,17 @@ const LadduCard = memo(({ product }) => {
         const token = localStorage.getItem('userToken');
         if (!token) {
             const result = await Swal.fire({
-                title: 'Authentic Taste Awaits!',
-                text: 'Please login to add these delicious laddus to your cart.',
+                title: 'Pure Water Awaits!',
+                text: 'Please login to add these water purifiers to your cart.',
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonColor: '#F2B705',
-                cancelButtonColor: '#2E2E2E',
+                confirmButtonColor: 'var(--color-secondary)',
+                cancelButtonColor: 'var(--color-text-muted)',
                 confirmButtonText: 'Login Now',
                 cancelButtonText: 'Later',
-                background: '#FFFFFF',
-                color: '#2E2E2E',
-                iconColor: '#F2B705'
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                iconColor: 'var(--color-secondary)'
             });
 
             if (result.isConfirmed) {

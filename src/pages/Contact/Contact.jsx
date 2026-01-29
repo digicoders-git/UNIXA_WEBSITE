@@ -121,7 +121,7 @@ const Contact = () => {
     return (
         <div style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-text)`, fontFamily: `var(--font-body)` }} className="min-h-screen -mt-12">
             {/* Contact Hero with Bubbles */}
-            <section className="relative py-20 px-8 md:px-24 text-center overflow-hidden rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
+            <section className="relative py-8 md:py-12 px-4 md:px-8 lg:px-24 text-center overflow-hidden rounded-b-[40px] md:rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
                 {/* Animated Background Bubbles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="contact-bubble contact-bubble-1"></div>
@@ -180,18 +180,18 @@ const Contact = () => {
                 }} />
 
                 <div className="relative z-10 max-w-4xl mx-auto">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6" style={{ color: `var(--color-surface)`, fontFamily: `var(--font-heading)` }}>Get In Touch</h1>
-                    <p className="text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-4" style={{ color: `var(--color-surface)`, fontFamily: `var(--font-heading)` }}>Get In Touch</h1>
+                    <p className="text-base md:text-xl lg:text-2xl max-w-2xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
                         Have questions about UNIXA water purifiers? We're here to help!
                     </p>
                 </div>
             </section>
 
-            <section className="py-24 px-8 md:px-24 -mt-16 z-20 relative">
-                <div className="flex flex-col md:flex-row gap-12 max-w-6xl mx-auto">
+            <section className="py-12 md:py-20 px-4 md:px-8 lg:px-24 -mt-6 md:-mt-12 z-20 relative">
+                <div className="flex flex-col lg:flex-row gap-8 md:gap-12 max-w-6xl mx-auto">
                     {/* Contact Info */}
                     <div ref={addToRefs} className="scroll-section flex-1 p-6 md:p-12 rounded-[40px] shadow-2xl" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                        <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-10" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>Contact Information</h2>
+                        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 lg:mb-10" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>Contact Information</h2>
 
                         <div className="space-y-6 md:space-y-8">
                             <div className="flex items-start gap-3 md:gap-6">
@@ -246,9 +246,9 @@ const Contact = () => {
 
                     {/* Contact Form */}
                     <div ref={addToRefs} className="scroll-section flex-[1.5] p-6 md:p-12 rounded-[40px] shadow-2xl" style={{ backgroundColor: `var(--color-surface)`, border: `1px solid var(--color-border)` }}>
-                        <h2 className="text-3xl font-bold mb-10" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>Send a Message</h2>
-                        <form className="space-y-6" onSubmit={handleSubmit}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6 md:mb-10" style={{ color: `var(--color-primary)`, fontFamily: `var(--font-heading)` }}>Send a Message</h2>
+                        <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold uppercase tracking-wider" style={{ color: `var(--color-text-muted)` }}>Full Name *</label>
                                     <input
@@ -290,7 +290,7 @@ const Contact = () => {
                                     {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold uppercase tracking-wider" style={{ color: `var(--color-text-muted)` }}>Phone Number *</label>
                                     <input

@@ -101,7 +101,7 @@ const Navbar = () => {
                     style={{ backgroundColor: `var(--color-surface)`, color: `var(--color-primary)`, border: `1px solid var(--color-border)` }}
                     aria-label="Toggle Menu"
                 >
-                    {isMenuOpen ? <X size={14} /> : <Menu size={12} />}
+                    {isMenuOpen ? <X size={14} /> : <Menu size={14} />}
                 </button>
             </div>
 

@@ -37,7 +37,7 @@ const Laddus = () => {
         <div className="bg-[var(--color-surface)] min-h-screen -mt-12">
             
             {/* Hero Header Section */}
-            <section className="relative py-12 px-6 text-center overflow-hidden rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
+            <section className="relative py-8 md:py-12 px-6 text-center overflow-hidden rounded-b-[40px] md:rounded-b-[100px]" style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)` }}>
                 {/* Animated Bubbles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="bubble bubble-1"></div>
@@ -99,17 +99,17 @@ const Laddus = () => {
                 }} />
                 
                 <div className="relative z-10 max-w-4xl mx-auto">
-                    <div className="flex items-center justify-center gap-2 mb-6">
-                        <span className="font-semibold text-sm uppercase tracking-wider" style={{ color: `var(--color-surface)` }}>
+                    <div className="flex items-center justify-center gap-2 mb-4 md:mb-6">
+                        <span className="font-semibold text-xs md:text-sm uppercase tracking-wider" style={{ color: `var(--color-surface)` }}>
                             Premium Collection
                         </span>
                     </div>
                     
-                    <h1 className="text-5xl md:text-7xl font-black mb-6" style={{ color: `var(--color-surface)`, fontFamily: `var(--font-heading)` }}>
+                    <h1 className="text-3xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6" style={{ color: `var(--color-surface)`, fontFamily: `var(--font-heading)` }}>
                         Our Products
                     </h1>
                     
-                    <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
+                    <p className="text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed font-medium" style={{ color: `var(--color-surface)` }}>
                         Handcrafted with love, made with the finest ingredients for an authentic taste experience
                     </p>
                 </div>

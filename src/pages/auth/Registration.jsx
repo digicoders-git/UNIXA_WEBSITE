@@ -156,14 +156,14 @@ const Registration = () => {
                     `
                 }} />
 
-                <div className="max-w-2xl w-full rounded-3xl shadow-2xl p-8 relative z-10 backdrop-blur-sm" style={{ backgroundColor: `rgba(248, 250, 252, 0.95)`, border: `1px solid rgba(6, 182, 212, 0.2)`, boxShadow: '0 25px 50px -12px rgba(6, 182, 212, 0.25)' }}>
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold mb-2" style={{ color: `var(--color-primary)` }}>Create Account</h2>
-                        <p style={{ color: `var(--color-text-muted)` }}>Join UNIXA for pure water solutions</p>
+                <div className="max-w-2xl w-full rounded-3xl shadow-2xl p-6 md:p-8 relative z-10 backdrop-blur-sm" style={{ backgroundColor: `rgba(248, 250, 252, 0.95)`, border: `1px solid rgba(6, 182, 212, 0.2)`, boxShadow: '0 25px 50px -12px rgba(6, 182, 212, 0.25)' }}>
+                    <div className="text-center mb-6 md:mb-8">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: `var(--color-primary)` }}>Create Account</h2>
+                        <p className="text-sm md:text-base" style={{ color: `var(--color-text-muted)` }}>Join UNIXA for pure water solutions</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                                 <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>First Name</label>
                                 <div className="relative">
@@ -207,7 +207,7 @@ const Registration = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                                 <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Password</label>
                                 <div className="relative">
@@ -271,7 +271,7 @@ const Registration = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                                 <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Phone Number</label>
                                 <div className="relative">

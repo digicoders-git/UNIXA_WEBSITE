@@ -52,7 +52,7 @@ const Login = () => {
     return (
         <div>
             <Navbar />
-            <div className="min-h-screen flex items-center justify-center px-4 -mb-20 relative overflow-hidden" style={{ backgroundColor: `var(--color-surface)` }}>
+            <div className="min-h-screen flex items-center justify-center px-4 py-8 -mb-20 relative overflow-hidden" style={{ backgroundColor: `var(--color-surface)` }}>
                 {/* Animated Background Bubbles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="auth-bubble auth-bubble-1"></div>
@@ -87,13 +87,13 @@ const Login = () => {
                     `
                 }} />
 
-                <div className="max-w-md w-full rounded-3xl shadow-2xl p-8 relative z-10 backdrop-blur-sm" style={{ backgroundColor: `rgba(248, 250, 252, 0.95)`, border: `1px solid rgba(6, 182, 212, 0.2)`, boxShadow: '0 25px 50px -12px rgba(6, 182, 212, 0.25)' }}>
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold mb-2" style={{ color: `var(--color-primary)` }}>Welcome Back</h2>
-                        <p style={{ color: `var(--color-text-muted)` }}>Sign in to your UNIXA account</p>
+                <div className="max-w-md w-full rounded-3xl shadow-2xl p-6 md:p-8 relative z-10 backdrop-blur-sm" style={{ backgroundColor: `rgba(248, 250, 252, 0.95)`, border: `1px solid rgba(6, 182, 212, 0.2)`, boxShadow: '0 25px 50px -12px rgba(6, 182, 212, 0.25)' }}>
+                    <div className="text-center mb-6 md:mb-8">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: `var(--color-primary)` }}>Welcome Back</h2>
+                        <p className="text-sm md:text-base" style={{ color: `var(--color-text-muted)` }}>Sign in to your UNIXA account</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                         <div>
                             <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Email Address</label>
                             <div className="relative">
