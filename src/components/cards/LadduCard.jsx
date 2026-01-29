@@ -5,7 +5,7 @@ import { ShoppingCart, CheckCircle, Heart } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 
-const LadduCard = memo(({ product }) => {
+const ProductCard = memo(({ product }) => {
     const navigate = useNavigate();
     const [added, setAdded] = useState(false);
 
@@ -163,7 +163,7 @@ const LadduCard = memo(({ product }) => {
                             console.error("Buy now failed:", error);
                         }
                     }}
-                    className="laddu-btn flex-1 py-2 md:py-2.5 bg-[var(--color-secondary)] text-[var(--color-primary)] rounded-xl font-bold hover:opacity-90 hover:shadow-xl transition-all active:scale-95 text-[10px] md:text-xs shadow-[0_8px_20px_rgba(242,183,5,0.25)]"
+                    className="flex-1 py-2 md:py-2.5 bg-[var(--color-secondary)] text-white rounded-xl font-bold hover:opacity-90 hover:shadow-xl transition-all active:scale-95 text-[10px] md:text-xs shadow-[0_8px_20px_rgba(3,105,161,0.25)]"
                 >
                     Buy Now
                 </button>
@@ -172,7 +172,7 @@ const LadduCard = memo(({ product }) => {
     );
 });
 
-LadduCard.displayName = 'LadduCard';
+ProductCard.displayName = 'ProductCard';
 
-export default LadduCard;
+export default ProductCard;
 

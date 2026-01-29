@@ -233,36 +233,36 @@ const Home = memo(() => {
       </section>
 
       {/* Trust Indicators Section */}
-      <section ref={addToRefs} className="scroll-section py-16 px-8 md:px-24 bg-[var(--color-surface)] relative z-10">
+      <section ref={addToRefs} className="scroll-section py-16 px-8 md:px-24 bg-[var(--color-muted)]/20 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mb-4">
-                <Users className="w-8 h-8 text-white" />
+            <div className="flex flex-col items-center group">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-primary)]/20 group-hover:scale-110 transition-transform">
+                <Users className="w-10 h-10 text-[var(--color-primary)]" />
               </div>
-              <h3 className="text-2xl font-bold text-[var(--color-secondary)] mb-1">50,000+</h3>
-              <p className="text-sm text-[var(--color-text-muted)]">Happy Families</p>
+              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">50,000+</h3>
+              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Happy Families</p>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mb-4">
-                <Award className="w-8 h-8 text-white" />
+            <div className="flex flex-col items-center group">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-secondary)]/20 group-hover:scale-110 transition-transform">
+                <Award className="w-10 h-10 text-[var(--color-secondary)]" />
               </div>
-              <h3 className="text-2xl font-bold text-[var(--color-secondary)] mb-1">ISI</h3>
-              <p className="text-sm text-[var(--color-text-muted)]">Certified Quality</p>
+              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">BIS</h3>
+              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Certified Quality</p>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[var(--color-secondary)] rounded-full flex items-center justify-center mb-4">
-                <Star className="w-8 h-8 text-white" />
+            <div className="flex flex-col items-center group">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-accent)]/20 group-hover:scale-110 transition-transform">
+                <Star className="w-10 h-10 text-[var(--color-accent)]" />
               </div>
-              <h3 className="text-2xl font-bold text-[var(--color-secondary)] mb-1">4.8/5</h3>
-              <p className="text-sm text-[var(--color-text-muted)]">Customer Rating</p>
+              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">4.9/5</h3>
+              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Customer Rating</p>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mb-4">
-                <Zap className="w-8 h-8 text-white" />
+            <div className="flex flex-col items-center group">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-[var(--color-primary)]/20 group-hover:scale-110 transition-transform">
+                <Zap className="w-10 h-10 text-[var(--color-primary)]" />
               </div>
-              <h3 className="text-2xl font-bold text-[var(--color-secondary)] mb-1">24/7</h3>
-              <p className="text-sm text-[var(--color-text-muted)]">Service Support</p>
+              <h3 className="text-3xl font-bold text-[var(--color-secondary)] mb-1">24/7</h3>
+              <p className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Expert Support</p>
             </div>
           </div>
         </div>
@@ -274,12 +274,12 @@ const Home = memo(() => {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-24 space-y-6">
             <div className="flex items-center justify-center gap-4 opacity-50">
-              <div className="h-[1px] w-12 bg-[var(--color-secondary)]"></div>
-              <h4 className="text-[var(--color-secondary)] font-bold uppercase tracking-[0.6em] text-xs lg:text-sm">Advanced Technology</h4>
-              <div className="h-[1px] w-12 bg-[var(--color-secondary)]"></div>
+              <div className="h-[1px] w-12 bg-[var(--color-primary)]"></div>
+              <h4 className="text-[var(--color-primary)] font-bold uppercase tracking-[0.6em] text-xs lg:text-sm">Advanced Technology</h4>
+              <div className="h-[1px] w-12 bg-[var(--color-primary)]"></div>
             </div>
             <h2 className="text-5xl md:text-9xl font-black text-[var(--color-text)] font-[var(--font-heading)] leading-none tracking-tighter">
-              Pure Water <span className="text-[var(--color-primary)] drop-shadow-[0_4px_10px_rgba(5,150,105,0.2)]">Technology</span>
+              Alkaline <span className="text-[var(--color-primary)] drop-shadow-[0_4px_10px_rgba(14,165,233,0.3)]">Technology</span>
             </h2>
           </div>
 
@@ -374,37 +374,82 @@ const Home = memo(() => {
       </section>
 
 
-      {/* Why Choose Our Water Purifiers Section */}
-      <section ref={addToRefs} className="scroll-section py-10 px-8 md:px-24 bg-[var(--color-surface)] relative z-10 shadow-sm mb-2" id="priorities">
-        <h2 className="text-4xl text-[var(--color-secondary)] mb-16 font-bold text-center">Why Choose Our Water Purifiers</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          <div className="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-[var(--color-muted)]">
-            <div className="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-[var(--color-primary)] mb-2">Advanced Filtration</h3>
-            <p className="text-sm text-[var(--color-text)]">Multi-stage RO+UV+UF technology removes 99.9% of contaminants, bacteria, and viruses for pure water.</p>
+      {/* Why Choose Unixa HydroLife Section */}
+      <section ref={addToRefs} className="scroll-section py-24 px-8 md:px-24 bg-[var(--color-surface)] relative z-10 overflow-hidden" id="priorities">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl text-[var(--color-secondary)] mb-6 font-bold">Why Choose Unixa HydroLife?</h2>
+            <p className="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto">The best alkaline water machine in India, combining research expertise and technology innovation.</p>
           </div>
-          <div className="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-[var(--color-muted)]">
-            <div className="w-16 h-16 bg-[var(--color-secondary)] rounded-full flex items-center justify-center mx-auto mb-4">
-              <Droplets className="w-8 h-8 text-white" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Point 1: Made in India */}
+            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
+              <div className="w-14 h-14 bg-[var(--color-primary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-primary)]/20 group-hover:bg-[var(--color-primary)] group-hover:rotate-6 transition-all duration-500">
+                < Award className="w-7 h-7 text-[var(--color-primary)] group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Made in India</h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Engineered specifically for Indian water conditions and power stability.</p>
             </div>
-            <h3 className="text-lg font-bold text-[var(--color-secondary)] mb-2">Pure & Safe</h3>
-            <p className="text-sm text-[var(--color-text)]">Crystal clear water that retains essential minerals while eliminating harmful chemicals and impurities.</p>
-          </div>
-          <div className="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-[var(--color-muted)]">
-            <div className="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto mb-4">
-              <Leaf className="w-8 h-8 text-white" />
+
+            {/* Point 2: Ionizer Plates */}
+            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
+              <div className="w-14 h-14 bg-[var(--color-secondary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-secondary)]/20 group-hover:bg-[var(--color-secondary)] group-hover:rotate-6 transition-all duration-500">
+                <Zap className="w-7 h-7 text-[var(--color-secondary)] group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Platinum Plates</h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">High-quality platinum-coated titanium plates for superior ionization efficiency.</p>
             </div>
-            <h3 className="text-lg font-bold text-[var(--color-accent)] mb-2">Eco-Friendly</h3>
-            <p className="text-sm text-[var(--color-text)]">Energy-efficient design with minimal water wastage and long-lasting filters for sustainable living.</p>
-          </div>
-          <div className="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-[var(--color-muted)]">
-            <div className="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-4">
-              <HeartIcon className="w-8 h-8 text-white" />
+
+            {/* Point 3: 5 Types of Water */}
+            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
+              <div className="w-14 h-14 bg-[var(--color-accent)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-accent)]/20 group-hover:bg-[var(--color-accent)] group-hover:rotate-6 transition-all duration-500">
+                <Droplets className="w-7 h-7 text-[var(--color-accent)] group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">5+ Water Types</h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Craft your water with adjustable pH levels from 3.5 to 10.5 for all your needs.</p>
             </div>
-            <h3 className="text-lg font-bold text-[var(--color-primary)] mb-2">Family Care</h3>
-            <p className="text-sm text-[var(--color-text-muted)]">Trusted by thousands of families for providing healthy, great-tasting water for all ages.</p>
+
+            {/* Point 4: Purification Options */}
+            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
+              <div className="w-14 h-14 bg-[var(--color-primary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-primary)]/20 group-hover:bg-[var(--color-primary)] group-hover:rotate-6 transition-all duration-500">
+                <Shield className="w-7 h-7 text-[var(--color-primary)] group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Pure+ Technology</h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Multi-stage purification including UV and ultra-filtration for maximum safety.</p>
+            </div>
+
+            {/* Point 5: Product Design */}
+            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
+              <div className="w-14 h-14 bg-[var(--color-secondary)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-secondary)]/20 group-hover:bg-[var(--color-secondary)] group-hover:rotate-6 transition-all duration-500">
+                <Settings className="w-7 h-7 text-[var(--color-secondary)] group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Elegant Design</h3>
+              <h4 className="text-[10px] font-bold text-[var(--color-secondary)] mb-2 uppercase tracking-widest">Premium Aesthetic</h4>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Sleek, modern design that complements your premium kitchen decor.</p>
+            </div>
+
+            {/* Point 6: Doorstep Delivery */}
+            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30">
+              <div className="w-14 h-14 bg-[var(--color-accent)]/10 rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-accent)]/20 group-hover:bg-[var(--color-accent)] group-hover:rotate-6 transition-all duration-500">
+                < Droplets className="w-7 h-7 text-[var(--color-accent)] group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Free Delivery</h3>
+              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">Hassle-free doorbell delivery across all major cities in India.</p>
+            </div>
+
+            {/* Point 7: Trusted Care */}
+            <div className="group p-8 bg-white rounded-[32px] shadow-sm hover:shadow-2xl transition-all duration-500 border border-[var(--color-muted)] hover:border-[var(--color-primary)]/30 lg:col-span-2">
+              <div className="flex flex-col md:flex-row gap-8 items-center h-full">
+                <div className="w-20 h-20 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center border-4 border-[var(--color-primary)]/20 group-hover:scale-110 transition-transform">
+                  <HeartIcon className="w-10 h-10 text-[var(--color-primary)]" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Trusted Care Solutions</h3>
+                  <p className="text-[var(--color-text-muted)] leading-relaxed">Expert service network with 24/7 support and annual maintenance guarantee for absolute peace of mind.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
