@@ -13,6 +13,8 @@ const ProductDetail = lazy(() => import('../pages/ProductDetail/ProductDetail'))
 const Shop = lazy(() => import('../pages/Shop/Shop'));
 const Profile = lazy(() => import('../pages/auth/Profile'));
 const Orders = lazy(() => import('../pages/Orders/Orders'));
+const AmcRenewals = lazy(() => import('../pages/AmcRenewals/AmcRenewals'));
+const TransactionHistory = lazy(() => import('../pages/Transactions/TransactionHistory'));
 const Login = lazy(() => import('../pages/auth/Login'));
 const Registration = lazy(() => import('../pages/auth/Registration'));
 const ReturnPolicy = lazy(() => import('../pages/Policies/ReturnPolicy'));
@@ -39,6 +41,8 @@ function App() {
                         <Route path="shop" element={<Shop />} />
                         <Route path="profile" element={<Profile />} />
                         <Route path="orders" element={<Orders />} />
+                        <Route path="amc-renewals" element={<AmcRenewals />} />
+                        <Route path="transactions" element={<TransactionHistory />} />
                         <Route path="login" element={<Login />} />
                         <Route path="register" element={<Registration />} />
                         <Route path="return-policy" element={<ReturnPolicy />} />

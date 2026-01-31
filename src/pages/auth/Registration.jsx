@@ -107,7 +107,7 @@ const Registration = () => {
     return (
         <div>
             <Navbar />
-            <div className="min-h-screen flex items-center justify-center py-12 px-4 mt-20 relative overflow-hidden" style={{ backgroundColor: `var(--color-surface)` }}>
+            <div className="min-h-[calc(100vh-80px)] flex items-center justify-center py-16 px-4 mt-20 relative overflow-hidden" style={{ backgroundColor: `var(--color-surface)` }}>
                 {/* Animated Background Bubbles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="auth-bubble auth-bubble-1"></div>

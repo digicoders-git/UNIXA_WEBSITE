@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, PhoneCall } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, PhoneCall, ShieldCheck } from 'lucide-react';
 import UnixaBrand from '../common/UnixaBrand';
 
 const Navbar = () => {
@@ -66,6 +66,14 @@ const Navbar = () => {
                                 {cartCount}
                             </span>
                         )}
+                    </div>
+
+                    <div
+                        onClick={() => navigate('/amc-renewals')}
+                        className="hidden sm:flex cursor-pointer p-2 rounded-full hover:bg-blue-50 text-[var(--color-primary)] transition-all group items-center gap-1"
+                        title="AMC Protection"
+                    >
+                        <ShieldCheck size={20} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
                     </div>
 
                     <div

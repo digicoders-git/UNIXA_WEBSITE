@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingBag, Trash2, MapPin, CreditCard, CheckCircle2, Plus, Minus, Banknote, Smartphone, X, Home, Briefcase, User, Pencil, Tag, ChevronRight, Check } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -7,7 +7,6 @@ import Footer from '../../components/layout/Footer';
 
 const Shop = () => {
     const navigate = useNavigate();
-    const sectionRefs = useRef([]);
     const [paymentMethod, setPaymentMethod] = useState('cod');
 
     // Cart Data State (Static)
@@ -24,11 +23,14 @@ const Shop = () => {
             filtration: '11-Stage RO+UV',
             warranty: '1 Year',
             quantity: 1,
+            stock: 12,
             description: 'Advanced 11-stage ionization with Platinum plates.'
         }
     ]);
-    const [cartTotal, setCartTotal] = useState(39999);
-    const [loadingCart, setLoadingCart] = useState(false);
+
+    const cartTotal = useMemo(() => {
+        return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }, [cartItems]);
 
     // Address Management State (Static)
     const [savedAddresses, setSavedAddresses] = useState([
@@ -47,7 +49,7 @@ const Shop = () => {
     ]);
     const [selectedAddressId, setSelectedAddressId] = useState('addr1');
     const [showAddressForm, setShowAddressForm] = useState(false);
-    const [loadingAddresses, setLoadingAddresses] = useState(false);
+
     const [editingAddressId, setEditingAddressId] = useState(null);
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
     const [isAddressSaving, setIsAddressSaving] = useState(false);
@@ -64,15 +66,22 @@ const Shop = () => {
         addressType: 'home'
     });
 
-    useEffect(() => {
-        const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        setCartTotal(total);
-    }, [cartItems]);
-
     const handleQuantityChange = (itemId, change) => {
         setCartItems(prev => prev.map(item => {
             if (item.cartItemId === itemId) {
-                const newQty = Math.max(1, item.quantity + change);
+                const newQty = item.quantity + change;
+                
+                // Stock Validation
+                if (newQty > item.stock) {
+                    toast.warning(`Only ${item.stock} units available in stock!`, {
+                        position: "top-center",
+                        autoClose: 2000
+                    });
+                    return item;
+                }
+                
+                if (newQty < 1) return item;
+                
                 return { ...item, quantity: newQty };
             }
             return item;
@@ -85,6 +94,10 @@ const Shop = () => {
     };
 
     const handleSaveAddress = () => {
+        if (!addressForm.name || !addressForm.phone || !addressForm.pincode) {
+            toast.error("Please fill required fields!");
+            return;
+        }
         setIsAddressSaving(true);
         setTimeout(() => {
             if (editingAddressId) {
@@ -131,6 +144,16 @@ const Shop = () => {
             toast.error("Your cart is empty!");
             return;
         }
+
+        // Final Stock Validation before placing order
+        const outOfStockItems = cartItems.filter(item => item.quantity > item.stock);
+        if (outOfStockItems.length > 0) {
+            toast.error(`Some items in your cart exceed available stock. Please adjust quantities.`, {
+                position: "top-center"
+            });
+            return;
+        }
+
         setIsPlacingOrder(true);
         setTimeout(() => {
             setIsPlacingOrder(false);
@@ -145,9 +168,7 @@ const Shop = () => {
         }, 1500);
     };
 
-    const handleItemClick = (productId) => {
-        navigate(`/product/${productId}`);
-    };
+
 
     return (
         <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text)] font-[var(--font-body)] overflow-x-hidden">
@@ -161,12 +182,12 @@ const Shop = () => {
                             key={i}
                             className="absolute rounded-full bg-blue-300/40 border border-white/40 blur-[0.5px] animate-float-bubble"
                             style={{
-                                width: `${Math.random() * 30 + 10}px`,
-                                height: `${Math.random() * 30 + 10}px`,
-                                left: `${Math.random() * 100}%`,
-                                bottom: `-${Math.random() * 20 + 10}%`,
-                                animationDuration: `${Math.random() * 4 + 4}s`,
-                                animationDelay: `${Math.random() * 3}s`
+                                width: `${(i * 7) % 30 + 10}px`,
+                                height: `${(i * 7) % 30 + 10}px`,
+                                left: `${(i * 13) % 100}%`,
+                                bottom: `-${(i * 5) % 20 + 10}%`,
+                                animationDuration: `${(i * 2) % 4 + 4}s`,
+                                animationDelay: `${(i * i) % 3}s`
                             }}
                         />
                     ))}
@@ -321,52 +342,66 @@ const Shop = () => {
                     </div>
                 </div>
             </div>
-            {/* Address Modal - Compact & Refined */}
-            {showAddressForm && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white w-full max-w-lg rounded-[32px] p-6 md:p-8 shadow-2xl relative overflow-hidden">
-                        <button onClick={() => setShowAddressForm(false)} className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-900 transition-colors"><X size={20} /></button>
+            {/* Address Modal - Premium & Refined (Decreased Size) */}
+            <div className={`fixed inset-0 z-[1100] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-md transition-opacity duration-300 ${showAddressForm ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+                <div 
+                    className={`bg-white w-full max-w-md rounded-[32px] p-6 md:p-8 shadow-2xl relative transition-all duration-500 ease-out ${showAddressForm ? 'translate-y-0 scale-100' : 'translate-y-12 scale-95'}`}
+                >
+                    <button 
+                        onClick={() => setShowAddressForm(false)} 
+                        className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-900 transition-colors bg-slate-50 rounded-full hover:bg-slate-100"
+                    >
+                        <X size={18} />
+                    </button>
 
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-black text-slate-900">{editingAddressId ? 'Edit' : 'Add'} <span className="text-[var(--color-primary)]">Address</span></h2>
-                            <p className="text-slate-400 font-medium text-xs mt-1">Provide delivery details for your order.</p>
+                    <div className="mb-6">
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
+                                <MapPin size={18} className="text-[var(--color-primary)]" />
+                            </div>
+                            <h2 className="text-xl font-black text-slate-900">Add <span className="text-[var(--color-primary)]">Address</span></h2>
                         </div>
+                        <p className="text-slate-400 font-medium text-[10px] ml-12">Delivery details for your units.</p>
+                    </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1 col-span-2">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
-                                <input value={addressForm.name} onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] transition-all" placeholder="Enter name" />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
-                                <input value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] transition-all" placeholder="Mobile no." />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Pincode</label>
-                                <input value={addressForm.pincode} onChange={(e) => setAddressForm({ ...addressForm, pincode: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] transition-all" placeholder="6-digits" />
-                            </div>
-                            <div className="space-y-1 col-span-2">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Address Detail</label>
-                                <input value={addressForm.addressLine1} onChange={(e) => setAddressForm({ ...addressForm, addressLine1: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] transition-all" placeholder="House/Flat No, Street" />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">City</label>
-                                <input value={addressForm.city} onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] transition-all" placeholder="City" />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">State</label>
-                                <input value={addressForm.state} onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] transition-all" placeholder="State" />
-                            </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                            <input value={addressForm.name} onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })} className="w-full p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all shadow-inner" placeholder="E.g. Ricky Singh" />
                         </div>
-
-                        <div className="flex gap-4 mt-6">
-                            <button onClick={handleSaveAddress} disabled={isAddressSaving} className="flex-1 py-3.5 bg-[var(--color-primary)] text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50">
-                                {isAddressSaving ? 'Saving...' : 'Save & Continue'}
-                            </button>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
+                            <input value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} className="w-full p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all shadow-inner" placeholder="Mobile no." />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Pincode</label>
+                            <input value={addressForm.pincode} onChange={(e) => setAddressForm({ ...addressForm, pincode: e.target.value })} className="w-full p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all shadow-inner" placeholder="6-digits" />
+                        </div>
+                        <div className="space-y-1.5 col-span-2">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Address Detail</label>
+                            <input value={addressForm.addressLine1} onChange={(e) => setAddressForm({ ...addressForm, addressLine1: e.target.value })} className="w-full p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all shadow-inner" placeholder="House/Flat No, Apartment, Street" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">City</label>
+                            <input value={addressForm.city} onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} className="w-full p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all shadow-inner" placeholder="City" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">State</label>
+                            <input value={addressForm.state} onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} className="w-full p-3.5 bg-slate-50/50 border border-slate-100 rounded-xl font-bold text-sm outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all shadow-inner" placeholder="State" />
                         </div>
                     </div>
+
+                    <div className="mt-8">
+                        <button 
+                            onClick={handleSaveAddress} 
+                            disabled={isAddressSaving} 
+                            className="w-full py-4 bg-[var(--color-primary)] text-white rounded-[18px] font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            {isAddressSaving ? 'Saving...' : <><Check size={16} strokeWidth={3} /> Save Address</>}
+                        </button>
+                    </div>
                 </div>
-            )}
+            </div>
 
             <Footer />
         </div>

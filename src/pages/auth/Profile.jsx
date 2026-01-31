@@ -1,9 +1,170 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, X, ChevronRight } from 'lucide-react';
+import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, X, ChevronRight, Package, Download, Calendar, ShoppingBag, ShieldCheck, Zap, RefreshCw, Clock, Info, CreditCard } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Footer from '../../components/layout/Footer';
 import Swal from 'sweetalert2';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
+const InvoiceModal = ({ order, isOpen, onClose }) => {
+    const [show, setShow] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => setShow(true), 10);
+        } else {
+            setShow(false);
+        }
+    }, [isOpen]);
+
+    if (!isOpen || !order) return null;
+
+    const handleDownloadPdf = async () => {
+        const element = document.getElementById('printable-invoice');
+        if (!element) {
+            toast.error("Invoice element not found!");
+            return;
+        }
+        setIsGenerating(true);
+        try {
+            const canvas = await html2canvas(element, { 
+                scale: 2, 
+                useCORS: true, 
+                logging: false,
+                backgroundColor: '#ffffff',
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight,
+                onclone: (clonedDoc) => {
+                    const invoice = clonedDoc.getElementById('printable-invoice');
+                    if (invoice) {
+                        invoice.style.fontFamily = "Arial, sans-serif";
+                    }
+                }
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Invoice_${order._id.slice(-6).toUpperCase()}.pdf`);
+            toast.success("Invoice downloaded successfully!");
+        } catch (error) {
+            console.error("PDF Generation Error:", error);
+            toast.error("Failed to download PDF. Try using a different browser.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    return (
+        <div 
+            className={`fixed inset-0 z-[11000] flex items-center justify-center px-4 bg-black/60 backdrop-blur-md transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}
+            onClick={onClose}
+        >
+            <div 
+                className={`bg-[#ffffff] w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] relative border border-white/20 transition-all duration-500 ease-out ${show ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}`}
+                onClick={e => e.stopPropagation()}
+            >
+                <div id="printable-invoice" className="flex flex-col flex-1 overflow-y-auto bg-white p-8 md:p-12" style={{ color: '#1e293b' }}>
+                    <div className="flex justify-between items-start mb-10">
+                        <div className="flex flex-col gap-1">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-2xl mb-2" style={{ backgroundColor: '#eff6ff' }}>
+                                <img src="/sks-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                            </div>
+                            <h2 className="text-xl font-black tracking-tighter" style={{ color: '#0f172a' }}>UNIXA <span style={{ color: '#0ea5e9' }}>PURE</span></h2>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Tax Invoice</p>
+                            <p className="text-sm font-bold" style={{ color: '#0f172a' }}>#INV-{order._id.slice(-6).toUpperCase()}</p>
+                            <p className="text-xs font-medium mt-1" style={{ color: '#64748b' }}>{today}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-8 mb-10">
+                        <div>
+                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>From</p>
+                            <p className="font-bold" style={{ color: '#0f172a' }}>UNIXA PURE WATER</p>
+                            <p className="text-xs leading-relaxed mt-1" style={{ color: '#64748b' }}>Ahirawan, Sandila,<br />Hardoi, Uttar Pradesh</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>Bill To</p>
+                            <p className="font-bold" style={{ color: '#0f172a' }}>{order.shippingAddress?.name}</p>
+                            <p className="text-xs leading-relaxed mt-1" style={{ color: '#64748b' }}>
+                                {order.shippingAddress?.addressLine1}<br />
+                                {order.shippingAddress?.city}, {order.shippingAddress?.pincode}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mb-10">
+                        <div className="grid grid-cols-12 border-b pb-3 mb-3 text-[10px] font-black uppercase tracking-widest" style={{ color: '#94a3b8', borderColor: '#f1f5f9' }}>
+                            <div className="col-span-8">Product Details</div>
+                            <div className="col-span-1 text-center">Qty</div>
+                            <div className="col-span-3 text-right">Price</div>
+                        </div>
+                        {order.items.map((item, idx) => (
+                            <div key={idx} className="grid grid-cols-12 py-3 items-center border-b last:border-0" style={{ borderColor: '#f8fafc' }}>
+                                <div className="col-span-8">
+                                    <p className="text-sm font-bold" style={{ color: '#0f172a' }}>{item.productName}</p>
+                                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#94a3b8' }}>Standard Warranty Included</p>
+                                </div>
+                                <div className="col-span-1 text-center text-sm font-bold" style={{ color: '#475569' }}>{item.quantity}</div>
+                                <div className="col-span-3 text-right text-sm font-bold" style={{ color: '#0f172a' }}>₹{item.productPrice.toLocaleString()}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-auto border-t pt-8" style={{ borderColor: '#f1f5f9' }}>
+                        <div className="flex flex-col items-end gap-3 text-sm">
+                            <div className="flex justify-between w-48 font-medium" style={{ color: '#64748b' }}>
+                                <span>Subtotal</span>
+                                <span className="font-bold" style={{ color: '#0f172a' }}>₹{order.subtotal.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between w-48 font-medium" style={{ color: '#64748b' }}>
+                                <span>Shipping Fees</span>
+                                <span className="font-bold uppercase text-[10px] tracking-widest" style={{ color: '#16a34a' }}>Free</span>
+                            </div>
+                            <div className="flex justify-between w-48 items-center mt-2 pt-4 border-t" style={{ borderColor: '#f1f5f9' }}>
+                                <span className="text-xs font-black uppercase tracking-widest" style={{ color: '#0f172a' }}>Total Amount</span>
+                                <span className="text-2xl font-black" style={{ color: '#0ea5e9' }}>₹{order.total.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="mt-12 text-center border-2 border-dashed rounded-2xl p-4" style={{ borderColor: '#f1f5f9' }}>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: '#94a3b8' }}>Thank you for choosing Unixa</p>
+                    </div>
+                </div>
+
+                <div className="p-6 bg-[#f8fafc] flex items-center justify-between border-t" style={{ borderColor: '#f1f5f9' }}>
+                    <button onClick={onClose} className="px-6 py-3 text-xs font-black uppercase tracking-widest text-[#94a3b8] hover:text-[#475569] transition-colors">
+                        Close
+                    </button>
+                    <button 
+                        onClick={handleDownloadPdf} 
+                        disabled={isGenerating} 
+                        className="bg-[#0f172a] hover:bg-[#0ea5e9] text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 shadow-xl shadow-blue-500/10 disabled:opacity-50"
+                    >
+                        {isGenerating ? (
+                            <span className="flex items-center gap-2">
+                                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Processing...
+                            </span>
+                        ) : (
+                            <><Download size={14} strokeWidth={3} /> Download Invoice</>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -25,6 +186,47 @@ const Profile = () => {
         newPassword: '',
         confirmPassword: ''
     });
+
+    const [orders, setOrders] = useState([
+        {
+            _id: 'ord_hyp_001',
+            createdAt: new Date().toISOString(),
+            status: 'Confirmed',
+            total: 39999,
+            subtotal: 39999,
+            items: [
+                {
+                    productName: 'HydroLife Alkaline Pro',
+                    productPrice: 39999,
+                    quantity: 1,
+                    product: { mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' } }
+                }
+            ],
+            shippingAddress: {
+                name: 'Ricky Singh',
+                addressLine1: '123, Purity Lane',
+                city: 'New Delhi',
+                phone: '9876543210',
+                pincode: '110001'
+            },
+            paymentMethod: 'COD'
+        }
+    ]);
+    const [invoiceOrder, setInvoiceOrder] = useState(null);
+    const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+    };
+
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'confirmed': return 'text-green-600 bg-green-50 border-green-100';
+            case 'processing': return 'text-blue-600 bg-blue-50 border-blue-100';
+            case 'delivered': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+            default: return 'text-gray-600 bg-gray-50 border-gray-100';
+        }
+    };
 
     const handleProfileChange = (e) => {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
@@ -88,12 +290,12 @@ const Profile = () => {
                             key={i}
                             className="absolute rounded-full bg-blue-300/40 border border-white/40 blur-[0.5px] animate-float-bubble"
                             style={{
-                                width: `${Math.random() * 30 + 10}px`,
-                                height: `${Math.random() * 30 + 10}px`,
-                                left: `${Math.random() * 100}%`,
-                                bottom: `-${Math.random() * 20 + 10}%`,
-                                animationDuration: `${Math.random() * 4 + 5}s`,
-                                animationDelay: `${Math.random() * 5}s`
+                                width: `${(i * 11) % 30 + 10}px`,
+                                height: `${(i * 11) % 30 + 10}px`,
+                                left: `${(i * 17) % 100}%`,
+                                bottom: `-${(i * 4) % 20 + 10}%`,
+                                animationDuration: `${(i * 3) % 4 + 5}s`,
+                                animationDelay: `${(i * 2) % 5}s`
                             }}
                         />
                     ))}
@@ -228,6 +430,61 @@ const Profile = () => {
                             </button>
                         </div>
                     </div>
+
+                    {/* My Orders Section - Proper Integration */}
+                    <div className="mt-12">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                                <Package className="text-[var(--color-primary)]" size={28} /> My Recent <span className="text-[var(--color-primary)]">Orders</span>
+                            </h2>
+                            <div className="flex items-center gap-6">
+                                <button onClick={() => navigate('/transactions')} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                                    <CreditCard size={14} /> Payment History
+                                </button>
+                                <button onClick={() => navigate('/orders')} className="text-[10px] font-black uppercase tracking-widest text-blue-500 hover:underline flex items-center gap-1">
+                                    View All Orders <ChevronRight size={14} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6">
+                            {orders.length > 0 ? (
+                                orders.map(order => (
+                                    <div key={order._id} className="bg-white p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-8 transition-all hover:border-blue-100 group">
+                                        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center relative group-hover:bg-blue-50 transition-colors">
+                                            <Package className="text-[var(--color-primary)]" size={28} />
+                                            <div className="absolute -top-2 -right-2 bg-[var(--color-secondary)] text-white text-[10px] font-black px-2 py-1 rounded-full">{order.items.length}</div>
+                                        </div>
+                                        <div className="flex-1 text-center md:text-left">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">ID: #{order._id.slice(-6).toUpperCase()}</p>
+                                            <h3 className="text-lg font-bold mb-3 text-slate-900">{order.items[0].productName} {order.items.length > 1 && `+ ${order.items.length - 1} more`}</h3>
+                                            <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                                                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${getStatusColor(order.status)}`}>{order.status}</span>
+                                                <span className="text-slate-400 text-xs font-bold flex items-center gap-1"><Calendar size={12} /> {formatDate(order.createdAt)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-center md:text-right border-t md:border-t-0 md:border-l border-slate-50 pt-4 md:pt-0 md:pl-8">
+                                            <p className="text-2xl font-black text-[var(--color-secondary)] mb-3">₹{order.total.toLocaleString()}</p>
+                                            <button onClick={() => { setInvoiceOrder(order); setIsInvoiceModalOpen(true); }} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--color-primary)] hover:text-[var(--color-secondary)] transition-colors mx-auto md:ml-auto">
+                                                <Download size={14} /> Download Invoice
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-12 bg-slate-50 rounded-[32px] border-2 border-dashed border-slate-200">
+                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                        <ShoppingBag size={24} className="text-slate-300" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900">No orders yet</h3>
+                                    <p className="text-slate-400 text-sm font-medium mt-1">Your hydration journey starts here.</p>
+                                    <button onClick={() => navigate('/shop')} className="mt-6 px-8 py-3 bg-[var(--color-primary)] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Start Shopping</button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <InvoiceModal order={invoiceOrder} isOpen={isInvoiceModalOpen} onClose={() => setIsInvoiceModalOpen(false)} />
                 </div>
             </div>
             <Footer />

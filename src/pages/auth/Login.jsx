@@ -53,7 +53,7 @@ const Login = () => {
     return (
         <div>
             <Navbar />
-            <div className="min-h-screen flex items-center justify-center px-4 py-8 -mb-20 relative overflow-hidden" style={{ backgroundColor: `var(--color-surface)` }}>
+            <div className="min-h-[calc(100vh-80px)] mt-20 flex items-center justify-center px-4 py-12 relative overflow-hidden" style={{ backgroundColor: `var(--color-surface)` }}>
                 {/* Animated Background Bubbles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="auth-bubble auth-bubble-1"></div>
