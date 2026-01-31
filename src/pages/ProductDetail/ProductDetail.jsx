@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
 import UnixaBrand from '../../components/common/UnixaBrand';
+import ReviewSection from '../../components/product/ReviewSection';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -180,14 +181,17 @@ const ProductDetail = () => {
                             {product.name}
                         </h1>
 
-                        <div className="flex items-center gap-4 mb-8">
+                        <button 
+                            onClick={() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="flex items-center gap-4 mb-8 hover:opacity-80 transition-opacity cursor-pointer"
+                        >
                             <div className="flex text-yellow-400">
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} size={18} fill="currentColor" />
                                 ))}
                             </div>
                             <span className="text-sm font-bold text-slate-400">(4.9/5 Excellent)</span>
-                        </div>
+                        </button>
 
                         <div className="flex items-baseline gap-4 mb-8 border-b border-slate-100 pb-8">
                             <span className="text-4xl font-black text-[var(--color-primary)]">
@@ -250,6 +254,10 @@ const ProductDetail = () => {
 
                     </div>
                 </div>
+
+                {/* Review Section */}
+                <ReviewSection productId={product.id} />
+                
             </div>
             <Footer />
         </div>
