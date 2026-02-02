@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronDown } from 'lucide-react';
 // import { createUserApi } from '../../api/user';
@@ -86,16 +87,23 @@ const Registration = () => {
         if (Object.keys(newErrors).length === 0) {
             setIsLoading(true);
             try {
-                // Simulated Local Registration
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                const mockToken = "static-token-12345";
-                saveToken(mockToken);
-                toast.success('Registration successful (Static Mode)!');
-                navigate('/');
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                const submissionData = {
+                    ...formData,
+                    gender: formData.gender.toLowerCase()
+                };
+                const { data } = await axios.post(`${apiUrl}/users/register`, submissionData);
+                
+                if (data.token) {
+                    saveToken(data.token);
+                    localStorage.setItem('userId', data.user.id);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
+                    toast.success('Registration successful!');
+                    navigate('/');
+                }
             } catch (error) {
                 console.error('Registration failed:', error);
-                toast.error('Registration failed. Please try again.');
+                toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
             } finally {
                 setIsLoading(false);
             }

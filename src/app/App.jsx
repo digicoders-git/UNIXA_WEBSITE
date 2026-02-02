@@ -12,6 +12,8 @@ const Contact = lazy(() => import('../pages/Contact/Contact'));
 const ProductDetail = lazy(() => import('../pages/ProductDetail/ProductDetail'));
 const Shop = lazy(() => import('../pages/Shop/Shop'));
 const Profile = lazy(() => import('../pages/auth/Profile'));
+
+
 const Orders = lazy(() => import('../pages/Orders/Orders'));
 const AmcRenewals = lazy(() => import('../pages/AmcRenewals/AmcRenewals'));
 const TransactionHistory = lazy(() => import('../pages/Transactions/TransactionHistory'));
@@ -39,6 +41,8 @@ function App() {
                         <Route path="contact" element={<Contact />} />
                         <Route path="product/:id" element={<ProductDetail />} />
                         <Route path="shop" element={<Shop />} />
+
+
                         <Route path="profile" element={<Profile />} />
                         <Route path="orders" element={<Orders />} />
                         <Route path="amc-renewals" element={<AmcRenewals />} />

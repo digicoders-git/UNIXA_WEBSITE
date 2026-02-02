@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { isTokenValid, getToken } from '../../utils/auth';
+import { useCart } from '../../context/CartContext';
 import { 
     XCircle, Package, Calendar, MapPin, CreditCard, ShoppingBag, CheckCircle2, 
-    Eye, X, Clock, Info, Printer, Download, Search, Filter, 
+    Eye, Clock, Info, Printer, Download, Search, Filter, 
     ArrowRight, ChevronRight, Truck, ShieldCheck, Star, 
     RefreshCcw, Layers, Zap, Heart
 } from 'lucide-react';
@@ -21,7 +24,8 @@ const OrderLifecycle = ({ status }) => {
         { label: 'Delivered', icon: <ShieldCheck size={14} />, color: 'green' }
     ];
 
-    const currentStep = steps.findIndex(s => s.label.toLowerCase() === status.toLowerCase());
+    const isCancelled = status.toLowerCase() === 'cancelled';
+    const currentStep = isCancelled ? -1 : steps.findIndex(s => s.label.toLowerCase() === status.toLowerCase());
 
     return (
         <div className="relative pt-10 pb-4 px-2">
@@ -33,13 +37,18 @@ const OrderLifecycle = ({ status }) => {
             <div className="relative flex justify-between">
                 {steps.map((step, idx) => (
                     <div key={idx} className="flex flex-col items-center gap-3 relative z-10">
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${idx <= currentStep ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 scale-110' : 'bg-white border border-slate-100 text-slate-300'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${isCancelled ? 'bg-slate-50 border border-slate-100 text-slate-200' : (idx <= currentStep ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 scale-110' : 'bg-white border border-slate-100 text-slate-300')}`}>
                             {step.icon}
                         </div>
                         <span className={`text-[9px] font-black uppercase tracking-wider ${idx <= currentStep ? 'text-slate-900' : 'text-slate-300'}`}>{step.label}</span>
                     </div>
                 ))}
             </div>
+            {isCancelled && (
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                    <span className="bg-red-50 text-red-500 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] border border-red-100 shadow-xl shadow-red-500/10 rotate-[-5deg]">Order Terminated</span>
+                </div>
+            )}
         </div>
     );
 };
@@ -165,51 +174,240 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
     );
 };
 
-// Mock data moved outside to avoid impurity during render
-const INITIAL_ORDERS = [
-    {
-        _id: 'ord_ux_001',
-        createdAt: new Date().toISOString(),
-        status: 'Delivered',
-        total: 39999,
-        subtotal: 39999,
-        items: [
-            {
-                productName: 'HydroLife Alkaline Pro',
-                productPrice: 39999,
-                quantity: 1,
-                product: { mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' } }
-            }
-        ],
-        shippingAddress: { name: 'Ricky Singh', addressLine1: '123, Purity Lane', city: 'New Delhi', phone: '9876543210', pincode: '110001' },
-        paymentMethod: 'Prepaid'
-    },
-    {
-        _id: 'ord_ux_002',
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        status: 'Shipped',
-        total: 12499,
-        subtotal: 12499,
-        items: [
-            {
-                productName: 'NexGen Carbon Block',
-                productPrice: 12499,
-                quantity: 1,
-                product: { mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' } }
-            }
-        ],
-        shippingAddress: { name: 'Ricky Singh', addressLine1: '123, Purity Lane', city: 'New Delhi', phone: '9876543210', pincode: '110001' },
-        paymentMethod: 'COD'
-    }
-];
+const RefundRequestModal = ({ order, type, isOpen, onClose, onSubmit }) => {
+    const [reason, setReason] = useState('');
+    const [bankDetails, setBankDetails] = useState({
+        accountHolderName: '',
+        bankName: '',
+        accountNumber: '',
+        ifscCode: '',
+        upiId: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
+    if (!isOpen || !order) return null;
+
+    const needsBankDetails = order.paymentMethod !== 'COD';
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!reason.trim()) {
+            toast.error("Please provide a reason");
+            return;
+        }
+        if (needsBankDetails && !bankDetails.upiId && !bankDetails.accountNumber) {
+            toast.error("Please provide Bank Details or UPI ID for refund");
+            return;
+        }
+        setIsSubmitting(true);
+        await onSubmit(order, type, reason, needsBankDetails ? bankDetails : null);
+        setIsSubmitting(false);
+        setReason('');
+        setBankDetails({ accountHolderName: '', bankName: '', accountNumber: '', ifscCode: '', upiId: '' });
+        onClose();
+    };
+
+    return (
+        <div className="fixed inset-0 z-[11000] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-md transition-opacity duration-300 overflow-y-auto pt-20 pb-10" onClick={onClose}>
+            <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 my-auto" onClick={e => e.stopPropagation()}>
+                <div className="space-y-2">
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{type} Request</h3>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Order #UX-{order._id.slice(-6).toUpperCase()} • {needsBankDetails ? 'Refund Required' : 'No Refund Action'}</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Reason for {type.toLowerCase()}</label>
+                        <textarea 
+                            value={reason}
+                            required
+                            onChange={(e) => setReason(e.target.value)}
+                            className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[24px] text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-100 min-h-[100px]"
+                            placeholder={`Tell us why you want to ${type.toLowerCase()} this order...`}
+                        />
+                    </div>
+
+                    {needsBankDetails && (
+                        <div className="space-y-4 bg-blue-50/50 p-6 rounded-[30px] border border-blue-100">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-2">Refund Destination Ledger</p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <input 
+                                    type="text" 
+                                    placeholder="Account Holder"
+                                    value={bankDetails.accountHolderName}
+                                    onChange={(e) => setBankDetails({...bankDetails, accountHolderName: e.target.value})}
+                                    className="col-span-2 p-4 bg-white border border-blue-100 rounded-2xl text-[10px] font-black uppercase"
+                                />
+                                <input 
+                                    type="text" 
+                                    placeholder="Bank Name"
+                                    value={bankDetails.bankName}
+                                    onChange={(e) => setBankDetails({...bankDetails, bankName: e.target.value})}
+                                    className="p-4 bg-white border border-blue-100 rounded-2xl text-[10px] font-black uppercase"
+                                />
+                                <input 
+                                    type="text" 
+                                    placeholder="IFSC Code"
+                                    value={bankDetails.ifscCode}
+                                    onChange={(e) => setBankDetails({...bankDetails, ifscCode: e.target.value})}
+                                    className="p-4 bg-white border border-blue-100 rounded-2xl text-[10px] font-black uppercase"
+                                />
+                                <input 
+                                    type="text" 
+                                    placeholder="Account Number"
+                                    value={bankDetails.accountNumber}
+                                    onChange={(e) => setBankDetails({...bankDetails, accountNumber: e.target.value})}
+                                    className="col-span-2 p-4 bg-white border border-blue-100 rounded-2xl text-[10px] font-black uppercase"
+                                />
+                                <div className="col-span-2 flex items-center gap-4">
+                                    <div className="h-px bg-blue-100 flex-1" />
+                                    <span className="text-[9px] font-black text-blue-300 uppercase">OR</span>
+                                    <div className="h-px bg-blue-100 flex-1" />
+                                </div>
+                                <input 
+                                    type="text" 
+                                    placeholder="UPI ID (VPA)"
+                                    value={bankDetails.upiId}
+                                    onChange={(e) => setBankDetails({...bankDetails, upiId: e.target.value})}
+                                    className="col-span-2 p-4 bg-white border border-blue-100 rounded-2xl text-[10px] font-black uppercase"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-4 pt-4">
+                        <button type="button" onClick={onClose} className="flex-1 py-4 bg-slate-100 text-slate-400 rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:text-slate-900 transition-all">Abort</button>
+                        <button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className="flex-[2] py-4 bg-slate-900 text-white rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-600 transition-all disabled:opacity-50"
+                        >
+                            {isSubmitting ? 'Transmitting...' : `Execute ${type}`}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 const Orders = () => {
+
     const navigate = useNavigate();
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [orders] = useState(INITIAL_ORDERS);
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+    const [refundType, setRefundType] = useState('');
+    const { addToCart } = useCart();
+
+    useEffect(() => {
+        if (!isTokenValid()) {
+            navigate('/login');
+            return;
+        }
+
+        const fetchOrders = async () => {
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                const userId = localStorage.getItem('userId');
+                
+                if (!userId) {
+                    toast.error("User identification failure. Re-authenticating...");
+                    navigate('/login');
+                    return;
+                }
+
+                const { data } = await axios.get(`${apiUrl}/orders/user/${userId}`, {
+                    headers: { Authorization: `Bearer ${getToken()}` }
+                });
+                
+                if (data && data.orders) {
+                    setOrders(data.orders);
+                }
+            } catch (err) {
+                console.error("Fetch orders error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, [navigate]);
+
+    const handleRefundSubmit = async (order, type, reason, bankDetails) => {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const userId = localStorage.getItem('userId');
+            
+            const payload = {
+                orderId: order._id,
+                userId: userId,
+                type: type, 
+                reason: reason,
+                amount: order.total,
+                bankDetails: bankDetails
+            };
+
+            await axios.post(`${apiUrl}/refunds`, payload, {
+                headers: { Authorization: `Bearer ${getToken()}` }
+            });
+
+            Swal.fire({
+                title: 'Request Received',
+                text: `Your ${type.toLowerCase()} request has been logged and is under review.`,
+                icon: 'success',
+                confirmButtonColor: '#3b82f6',
+                borderRadius: '30px'
+            });
+
+            // Update local state if needed
+        } catch (error) {
+            console.error(`${type} error:`, error);
+            toast.error(error.response?.data?.message || `Failed to submit ${type.toLowerCase()} request`);
+        }
+    };
+    const handleRepeatOrder = (order) => {
+        try {
+            order.items.forEach(item => {
+                addToCart({
+                    _id: item.product?._id || item.product,
+                    id: item.product?._id || item.product,
+                    name: item.productName,
+                    price: item.productPrice,
+                    img: item.product?.mainImage?.url || item.product?.img,
+                    quantity: item.quantity
+                });
+            });
+            
+            Swal.fire({
+                title: 'Cart Restored',
+                text: 'Order items have been added to your cart.',
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonText: 'View Cart',
+                cancelButtonText: 'Continue Shopping',
+                confirmButtonColor: '#3b82f6',
+                borderRadius: '30px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate('/shop');
+                }
+            });
+        } catch (error) {
+            console.error("Repeat order error:", error);
+            toast.error("Failed to restore order items");
+        }
+    };
+
+    const handleSupport = (order) => {
+        const orderId = order._id.slice(-6).toUpperCase();
+        const message = `Hello Unixa Support, I need assistance with my Order #UX-${orderId}. Date: ${new Date(order.createdAt).toLocaleDateString()}.`;
+        const supportNumber = '919554746401'; 
+        window.open(`https://wa.me/${supportNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    };
 
     const stats = useMemo(() => {
         return {
@@ -219,6 +417,7 @@ const Orders = () => {
             savedCarbon: (orders.length * 24.5).toFixed(1)
         };
     }, [orders]);
+
 
     const filteredOrders = orders.filter(o => {
         const matchesFilter = filter === 'All' || o.status === filter;
@@ -310,7 +509,7 @@ const Orders = () => {
 
                 {/* Filter Tabs */}
                 <div className="flex gap-4 mb-10 p-2 bg-slate-100 w-fit rounded-[32px] animate-in fade-in zoom-in duration-700 delay-300">
-                    {['All', 'Shipped', 'Delivered', 'Cancelled'].map(t => (
+                    {['All', 'Shipped', 'Delivered', 'Cancelled', 'Returned'].map(t => (
                         <button 
                             key={t}
                             onClick={() => setFilter(t)}
@@ -323,14 +522,25 @@ const Orders = () => {
 
                 {/* Orders List */}
                 <div className="space-y-10">
-                    {filteredOrders.length > 0 ? (
+                    {loading ? (
+                        <div className="py-40 text-center animate-pulse">
+                            <div className="w-20 h-20 bg-slate-100 rounded-[30px] flex items-center justify-center mx-auto mb-6">
+                                <Clock size={40} className="text-blue-500 animate-spin" />
+                            </div>
+                            <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Accessing Archives...</h2>
+                        </div>
+                    ) : filteredOrders.length > 0 ? (
                         filteredOrders.map((order, idx) => (
                             <div key={order._id} className="bg-white border border-slate-100 rounded-[50px] shadow-sm hover:shadow-2xl transition-all duration-700 overflow-hidden group animate-in fade-in slide-in-from-bottom-20 duration-1000" style={{ animationDelay: `${idx * 150}ms` }}>
                                 <div className="p-8 md:p-14 flex flex-col xl:flex-row gap-12 items-start xl:items-center">
                                     {/* Asset Identity */}
                                     <div className="relative shrink-0">
                                         <div className="w-48 h-48 bg-slate-50 rounded-[50px] overflow-hidden border border-slate-100 group-hover:rotate-3 transition-transform duration-700">
-                                            <img src={order.items[0].product.mainImage.url} alt="asset" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                            <img 
+                                                src={order.items[0]?.product?.mainImage?.url || order.items[0]?.product?.img || "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop"} 
+                                                alt="asset" 
+                                                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
+                                            />
                                             {order.items.length > 1 && (
                                                 <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center text-white font-black text-xl shadow-2xl">
                                                     +{order.items.length - 1}
@@ -339,12 +549,17 @@ const Orders = () => {
                                         </div>
                                     </div>
 
+
                                     {/* Asset Info */}
                                     <div className="flex-1 space-y-8 w-full">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                             <div className="space-y-3">
                                                 <div className="flex items-center gap-3">
-                                                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
+                                                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                                        order.status === 'Delivered' ? 'bg-green-50 text-green-600' : 
+                                                        order.status === 'cancelled' ? 'bg-red-50 text-red-600' :
+                                                        'bg-blue-50 text-blue-600'
+                                                    }`}>
                                                         {order.status}
                                                     </span>
                                                     <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">ID: {order._id.toUpperCase()}</span>
@@ -377,14 +592,36 @@ const Orders = () => {
                                         >
                                             <Download size={16} /> Secure Invoice
                                         </button>
-                                        <button className="w-full py-4 bg-white border border-slate-100 text-slate-600 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-slate-50 transition-all active:scale-95">
+                                        <button 
+                                            onClick={() => handleRepeatOrder(order)}
+                                            className="w-full py-4 bg-white border border-slate-100 text-slate-600 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-slate-50 transition-all active:scale-95"
+                                        >
                                             <RefreshCcw size={16} /> Repeat Order
                                         </button>
                                         <div className="flex gap-3">
-                                            <button className="flex-1 py-4 bg-white border border-slate-100 text-slate-400 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center hover:text-blue-500 hover:bg-blue-50/30 transition-all">
-                                                Track
-                                            </button>
-                                            <button className="flex-1 py-4 bg-white border border-slate-100 text-slate-400 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center hover:text-red-500 hover:bg-red-50/30 transition-all">
+                                            { (order.status.toLowerCase() === 'pending' || order.status.toLowerCase() === 'confirmed') ? (
+                                                <button 
+                                                    onClick={() => { setSelectedOrder(order); setRefundType('Cancellation'); setIsRefundModalOpen(true); }}
+                                                    className="flex-1 py-4 bg-white border border-red-50 text-red-400 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center hover:text-red-600 hover:bg-red-50/50 transition-all"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            ) : order.status.toLowerCase() === 'delivered' ? (
+                                                <button 
+                                                    onClick={() => { setSelectedOrder(order); setRefundType('Return'); setIsRefundModalOpen(true); }}
+                                                    className="flex-1 py-4 bg-white border border-blue-50 text-blue-400 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center hover:text-blue-600 hover:bg-blue-50/50 transition-all"
+                                                >
+                                                    Return
+                                                </button>
+                                            ) : (
+                                                <button disabled className="flex-1 py-4 bg-slate-50 border border-slate-100 text-slate-300 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center">
+                                                    Track
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => handleSupport(order)}
+                                                className="flex-1 py-4 bg-white border border-slate-100 text-slate-400 rounded-[24px] text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center hover:text-red-500 hover:bg-red-50/30 transition-all"
+                                            >
                                                 Support
                                             </button>
                                         </div>
@@ -422,6 +659,13 @@ const Orders = () => {
             </div>
 
             <InvoiceModal order={selectedOrder} isOpen={isInvoiceModalOpen} onClose={() => setIsInvoiceModalOpen(false)} />
+            <RefundRequestModal 
+                order={selectedOrder} 
+                type={refundType} 
+                isOpen={isRefundModalOpen} 
+                onClose={() => setIsRefundModalOpen(false)} 
+                onSubmit={handleRefundSubmit}
+            />
             <Footer />
         </div>
     );

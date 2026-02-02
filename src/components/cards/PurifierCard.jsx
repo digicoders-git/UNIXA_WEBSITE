@@ -1,11 +1,15 @@
 import React, { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+
 import { ShoppingCart, CheckCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const ProductCard = memo(({ product }) => {
     const navigate = useNavigate();
+    const { addToCart } = useCart();
     const [added, setAdded] = useState(false);
+
 
     const name = product?.name;
     const img = product?.mainImage?.url || product?.img;
@@ -24,6 +28,15 @@ const ProductCard = memo(({ product }) => {
         e.stopPropagation();
         if (isOutOfStock) return;
         
+        addToCart({
+            _id: id,
+            id,
+            name,
+            price: displayPrice,
+            img,
+            quantity: 1
+        });
+
         setAdded(true);
         toast.success(`${name} added!`, {
             position: "bottom-center",
@@ -37,6 +50,7 @@ const ProductCard = memo(({ product }) => {
         });
         setTimeout(() => setAdded(false), 2000);
     };
+
 
     const handleViewDetails = () => navigate(`/product/${id}`);
 
@@ -128,8 +142,23 @@ const ProductCard = memo(({ product }) => {
                     )}
                 </button>
                 <button
-                    onClick={() => !isOutOfStock && navigate('/shop')}
+                    onClick={() => {
+                        if (!isOutOfStock) {
+                            addToCart({
+                                _id: id,
+                                id,
+                                name,
+                                price: displayPrice,
+                                img,
+                                quantity: 1
+                            });
+                            // Navigating to /shop after "Buy Now" as per current flow,
+                            // instead of a direct checkout page.
+                            navigate('/shop'); 
+                        }
+                    }}
                     disabled={isOutOfStock}
+
                     className={`flex-[1.5] py-2 md:py-3 rounded-xl font-black text-[8px] md:text-[9px] uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center justify-center gap-1 ${isOutOfStock 
                         ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
                         : 'bg-[var(--color-secondary)] text-white hover:bg-[var(--color-primary)]'}`}

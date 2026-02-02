@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, X, ChevronRight, Package, Download, Calendar, ShoppingBag, ShieldCheck, Zap, RefreshCw, Clock, Info, CreditCard } from 'lucide-react';
+import axios from 'axios';
+import { getToken, removeToken, isTokenValid } from '../../utils/auth';
+import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, ChevronRight, Package, Download, Calendar, ShoppingBag, ShieldCheck, Zap, RefreshCw, Clock, Info, CreditCard } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Footer from '../../components/layout/Footer';
 import Swal from 'sweetalert2';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+
+import { createPortal } from 'react-dom';
 
 const InvoiceModal = ({ order, isOpen, onClose }) => {
     const [show, setShow] = useState(false);
@@ -62,7 +66,7 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
 
     const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
 
-    return (
+    return createPortal(
         <div 
             className={`fixed inset-0 z-[11000] flex items-center justify-center px-4 bg-black/60 backdrop-blur-md transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}
             onClick={onClose}
@@ -71,7 +75,7 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
                 className={`bg-[#ffffff] w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] relative border border-white/20 transition-all duration-500 ease-out ${show ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}`}
                 onClick={e => e.stopPropagation()}
             >
-                <div id="printable-invoice" className="flex flex-col flex-1 overflow-y-auto bg-white p-8 md:p-12" style={{ color: '#1e293b' }}>
+                <div id="printable-invoice" className="flex flex-col flex-1 overflow-y-auto" style={{ backgroundColor: '#ffffff', color: '#1e293b', padding: '3rem' }}>
                     <div className="flex justify-between items-start mb-10">
                         <div className="flex flex-col gap-1">
                             <div className="w-12 h-12 flex items-center justify-center rounded-2xl mb-2" style={{ backgroundColor: '#eff6ff' }}>
@@ -109,13 +113,35 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
                             <div className="col-span-3 text-right">Price</div>
                         </div>
                         {order.items.map((item, idx) => (
-                            <div key={idx} className="grid grid-cols-12 py-3 items-center border-b last:border-0" style={{ borderColor: '#f8fafc' }}>
-                                <div className="col-span-8">
-                                    <p className="text-sm font-bold" style={{ color: '#0f172a' }}>{item.productName}</p>
-                                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#94a3b8' }}>Standard Warranty Included</p>
+                            <div key={idx} className="grid grid-cols-12 py-4 items-start border-b last:border-0" style={{ borderColor: '#f8fafc' }}>
+                                <div className="col-span-8 pr-4">
+                                    <p className="text-sm font-black" style={{ color: '#0f172a' }}>{item.productName}</p>
+                                    
+                                    <div className="flex flex-col gap-1 mt-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748b' }}>
+                                                Warranty ID: <span style={{ color: '#0f172a' }}>{item.warrantyId || `WAR-${order._id.slice(-6)}-${idx}`}</span>
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748b' }}>
+                                                AMC Plan: <span style={{ color: '#0f172a' }}>{item.amcPlan || 'Standard Protection'}</span>
+                                            </span>
+                                        </div>
+                                        {item.amcId && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#6366f1' }}></div>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748b' }}>
+                                                    AMC Ref: <span style={{ color: '#0f172a' }}>{item.amcId}</span>
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="col-span-1 text-center text-sm font-bold" style={{ color: '#475569' }}>{item.quantity}</div>
-                                <div className="col-span-3 text-right text-sm font-bold" style={{ color: '#0f172a' }}>₹{item.productPrice.toLocaleString()}</div>
+                                <div className="col-span-1 text-center text-sm font-bold pt-1" style={{ color: '#475569' }}>{item.quantity}</div>
+                                <div className="col-span-3 text-right text-sm font-black pt-1" style={{ color: '#0f172a' }}>₹{item.productPrice.toLocaleString()}</div>
                             </div>
                         ))}
                     </div>
@@ -162,7 +188,8 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -174,11 +201,11 @@ const Profile = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [profileData, setProfileData] = useState({
-        firstName: 'Ricky',
-        lastName: 'Singh',
-        email: 'ricky@example.com',
-        phone: '9876543210',
-        gender: 'male'
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        gender: ''
     });
 
     const [passwordData, setPasswordData] = useState({
@@ -187,33 +214,54 @@ const Profile = () => {
         confirmPassword: ''
     });
 
-    const [orders, setOrders] = useState([
-        {
-            _id: 'ord_hyp_001',
-            createdAt: new Date().toISOString(),
-            status: 'Confirmed',
-            total: 39999,
-            subtotal: 39999,
-            items: [
-                {
-                    productName: 'HydroLife Alkaline Pro',
-                    productPrice: 39999,
-                    quantity: 1,
-                    product: { mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' } }
-                }
-            ],
-            shippingAddress: {
-                name: 'Ricky Singh',
-                addressLine1: '123, Purity Lane',
-                city: 'New Delhi',
-                phone: '9876543210',
-                pincode: '110001'
-            },
-            paymentMethod: 'COD'
-        }
-    ]);
+    const [orders, setOrders] = useState([]);
     const [invoiceOrder, setInvoiceOrder] = useState(null);
     const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+    const fetchProfileAndOrders = async () => {
+        if (!isTokenValid()) {
+            navigate('/login');
+            return;
+        }
+
+        setIsInitialLoading(true);
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const headers = { Authorization: `Bearer ${getToken()}` };
+            
+            // Fetch Profile
+            const profileRes = await axios.get(`${apiUrl}/users/profile`, { headers });
+            if (profileRes.data.user) {
+                setProfileData({
+                    firstName: profileRes.data.user.firstName || '',
+                    lastName: profileRes.data.user.lastName || '',
+                    email: profileRes.data.user.email || '',
+                    phone: profileRes.data.user.phone || '',
+                    gender: profileRes.data.user.gender || ''
+                });
+                localStorage.setItem('userData', JSON.stringify(profileRes.data.user));
+            }
+
+            // Fetch Orders
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                const ordersRes = await axios.get(`${apiUrl}/orders/user/${userId}`, { headers });
+                setOrders(ordersRes.data.orders || []);
+            }
+        } catch (error) {
+            console.error("Fetch profile/orders error:", error);
+            if (error.response?.status === 401) {
+                handleLogout(true);
+            }
+        } finally {
+            setIsInitialLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfileAndOrders();
+    }, []);
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -236,7 +284,7 @@ const Profile = () => {
         setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
     };
 
-    const handleUpdatePassword = () => {
+    const handleUpdatePassword = async () => {
         if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
             toast.error('Please fill all password fields');
             return;
@@ -245,24 +293,56 @@ const Profile = () => {
             toast.error('New passwords do not match');
             return;
         }
+
         setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            await axios.put(`${apiUrl}/users/change-password`, {
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            }, {
+                headers: { Authorization: `Bearer ${getToken()}` }
+            });
+
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
             toast.success('Password updated successfully!');
-        }, 1000);
-    };
-
-    const handleSaveProfile = () => {
-        setIsLoading(true);
-        setTimeout(() => {
+            setShowCurrentPassword(false);
+            setShowNewPassword(false);
+        } catch (error) {
+            console.error("Update password error:", error);
+            toast.error(error.response?.data?.message || "Failed to update password");
+        } finally {
             setIsLoading(false);
-            setIsEditing(false);
-            toast.success('Profile updated successfully (Static)!');
-        }, 1000);
+        }
     };
 
-    const handleLogout = async () => {
+    const handleSaveProfile = async () => {
+        setIsLoading(true);
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const { data } = await axios.put(`${apiUrl}/users/profile`, profileData, {
+                headers: { Authorization: `Bearer ${getToken()}` }
+            });
+            setProfileData(data.user);
+            setIsEditing(false);
+            toast.success('Profile updated successfully!');
+        } catch (error) {
+            console.error("Update profile error:", error);
+            toast.error(error.response?.data?.message || "Failed to update profile");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleLogout = async (silent = false) => {
+        if (silent) {
+            removeToken();
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userData');
+            navigate('/login');
+            return;
+        }
+
         const result = await Swal.fire({
             title: 'Logout Confirmation',
             text: 'Are you sure you want to logout?',
@@ -273,6 +353,9 @@ const Profile = () => {
         });
 
         if (result.isConfirmed) {
+            removeToken();
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userData');
             toast.success('Logged out successfully!');
             navigate('/login');
         }
@@ -449,11 +532,11 @@ const Profile = () => {
 
                         <div className="grid grid-cols-1 gap-6">
                             {orders.length > 0 ? (
-                                orders.map(order => (
+                                orders.slice(0, 3).map(order => (
                                     <div key={order._id} className="bg-white p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-8 transition-all hover:border-blue-100 group">
                                         <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center relative group-hover:bg-blue-50 transition-colors">
                                             <Package className="text-[var(--color-primary)]" size={28} />
-                                            <div className="absolute -top-2 -right-2 bg-[var(--color-secondary)] text-white text-[10px] font-black px-2 py-1 rounded-full">{order.items.length}</div>
+                                            <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded-full">{order.items.length}</div>
                                         </div>
                                         <div className="flex-1 text-center md:text-left">
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">ID: #{order._id.slice(-6).toUpperCase()}</p>

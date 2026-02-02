@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { Mail, Phone, MapPin, Loader2, Droplets, ArrowRight } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 // Removed API import for local system
@@ -102,8 +103,8 @@ const Contact = () => {
 
         setLoading(true);
         try {
-            // Simulated local delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            await axios.post(`${apiUrl}/enquiry`, formData);
 
             toast.success("Thank you! Your message has been sent.");
             setFormData({
@@ -116,7 +117,8 @@ const Contact = () => {
             setErrors({});
         } catch (error) {
             console.error("Enquiry submission failed:", error);
-            toast.error("Something went wrong. Please try again.");
+            const errorMsg = error.response?.data?.message || "Something went wrong. Please try again.";
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }

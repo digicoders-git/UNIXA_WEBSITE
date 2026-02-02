@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, PhoneCall, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, PhoneCall, ShieldCheck, LogOut } from 'lucide-react';
 import UnixaBrand from '../common/UnixaBrand';
+import { useCart } from '../../context/CartContext';
+import { isTokenValid, removeToken } from '../../utils/auth';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [cartCount, setCartCount] = useState(0);
+    const { cart } = useCart();
+    const [isLoggedIn, setIsLoggedIn] = useState(isTokenValid());
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
         setIsMenuOpen(false);
-        setCartCount(0); // Static version
+        setIsLoggedIn(isTokenValid());
     }, [location.pathname]);
 
     const activeLink = `text-[var(--color-primary)] font-bold text-sm uppercase tracking-wider transition-all border-b-2 border-[var(--color-primary)] pb-1`;
@@ -61,9 +64,9 @@ const Navbar = () => {
                         className="relative cursor-pointer p-2 rounded-full hover:bg-slate-50 text-[var(--color-secondary)] transition-all group"
                     >
                         <ShoppingCart size={20} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-                        {cartCount > 0 && (
-                            <span className="absolute top-0 right-0 bg-[var(--color-primary)] text-white text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">
-                                {cartCount}
+                        {cart.length > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow-lg border-2 border-white">
+                                {cart.length}
                             </span>
                         )}
                     </div>
@@ -77,10 +80,11 @@ const Navbar = () => {
                     </div>
 
                     <div
-                        onClick={() => navigate('/profile')}
-                        className="hidden sm:block cursor-pointer p-2 rounded-full hover:bg-slate-50 text-[var(--color-secondary)] transition-all group"
+                        onClick={() => navigate(isLoggedIn ? '/profile' : '/login')}
+                        className="hidden sm:block cursor-pointer p-2 rounded-xl hover:bg-slate-50 text-[var(--color-secondary)] transition-all group"
+                        title={isLoggedIn ? "My Profile" : "Sign In"}
                     >
-                        <User size={20} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                        <User size={20} strokeWidth={2.5} className={isLoggedIn ? "text-(--color-primary)" : ""} />
                     </div>
 
                     <button

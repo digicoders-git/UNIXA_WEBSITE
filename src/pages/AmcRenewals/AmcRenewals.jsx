@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ShieldCheck, Zap, RefreshCw, Clock, Calendar, Info, ChevronRight, ArrowRight, X, Check, Star, Shield, Smartphone, Activity, Wrench, History, FileText, Droplets, Target, Cpu, HardDrive } from 'lucide-react';
+import axios from 'axios';
+import { getToken } from '../../utils/auth';
+import { ShieldCheck, Zap, RefreshCw, Clock, Calendar, Info, ChevronRight, ArrowRight, X, Check, Star, Shield, Smartphone, Activity, Wrench, History, FileText, Droplets, Target, Cpu, HardDrive, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Footer from '../../components/layout/Footer';
 import Swal from 'sweetalert2';
+import { createPortal } from 'react-dom';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
 
 // Advanced Components
 const DeviceHealthWidget = ({ health, onScan, isScanning }) => (
@@ -150,12 +156,204 @@ const ServiceRequestModal = ({ isOpen, onClose, onSubmit }) => {
     );
 };
 
+const ReceiptModal = ({ amc, isOpen, onClose }) => {
+    const [show, setShow] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [userData, setUserData] = useState(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => setShow(true), 10);
+            // Try to get user data from localStorage
+            try {
+                const storedUser = localStorage.getItem('userData');
+                if (storedUser) setUserData(JSON.parse(storedUser));
+            } catch (e) {
+                console.error("Error parsing user data", e);
+            }
+        } else {
+            setShow(false);
+        }
+    }, [isOpen]);
+
+    if (!isOpen || !amc) return null;
+
+    const handleDownloadPdf = async () => {
+        const element = document.getElementById('printable-receipt');
+        if (!element) {
+            toast.error("Receipt element not found!");
+            return;
+        }
+        setIsGenerating(true);
+        try {
+            const canvas = await html2canvas(element, { 
+                scale: 2, 
+                useCORS: true, 
+                logging: false,
+                backgroundColor: '#ffffff',
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight,
+                onclone: (clonedDoc) => {
+                    const el = clonedDoc.getElementById('printable-receipt');
+                    if (el) el.style.fontFamily = "Arial, sans-serif";
+                }
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Receipt_AMC_${amc._id.slice(-6).toUpperCase()}.pdf`);
+            toast.success("Receipt downloaded successfully!");
+        } catch (error) {
+            console.error("PDF Generation Error:", error);
+            toast.error("Failed to download PDF.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const formatDate = (date) => new Date(date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+    const receiptDate = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    return createPortal(
+        <div 
+            className={`fixed inset-0 z-[11000] flex items-center justify-center px-4 bg-black/60 backdrop-blur-md transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}
+            onClick={onClose}
+        >
+            <div 
+                className={`bg-[#ffffff] w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] relative border border-white/20 transition-all duration-500 ease-out ${show ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}`}
+                onClick={e => e.stopPropagation()}
+            >
+                <div id="printable-receipt" className="flex flex-col flex-1 overflow-y-auto bg-white p-8 md:p-12" style={{ color: '#1e293b' }}>
+                    
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-10">
+                        <div className="flex flex-col gap-1">
+                            <div className="w-12 h-12 flex items-center justify-center rounded-2xl mb-2" style={{ backgroundColor: '#eff6ff' }}>
+                                <img src="/sks-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                            </div>
+                            <h2 className="text-xl font-black tracking-tighter" style={{ color: '#0f172a' }}>UNIXA <span style={{ color: '#0ea5e9' }}>PURE</span></h2>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>AMC Receipt</p>
+                            <p className="text-sm font-bold" style={{ color: '#0f172a' }}>#AMC-{amc._id.slice(-6).toUpperCase()}</p>
+                            <p className="text-xs font-medium mt-1" style={{ color: '#64748b' }}>{receiptDate}</p>
+                        </div>
+                    </div>
+
+                    {/* Parties */}
+                    <div className="grid grid-cols-2 gap-8 mb-10">
+                        <div>
+                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>From</p>
+                            <p className="font-bold" style={{ color: '#0f172a' }}>UNIXA PURE WATER</p>
+                            <p className="text-xs leading-relaxed mt-1" style={{ color: '#64748b' }}>Ahirawan, Sandila,<br />Hardoi, Uttar Pradesh</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>Bill To</p>
+                            <p className="font-bold" style={{ color: '#0f172a' }}>{userData?.firstName || 'Valued'} {userData?.lastName || 'Customer'}</p>
+                            <p className="text-xs leading-relaxed mt-1" style={{ color: '#64748b' }}>
+                                {userData?.phone || ''}<br />
+                                {userData?.email || ''}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Details */}
+                    <div className="mb-10">
+                        <div className="grid grid-cols-12 border-b pb-3 mb-3 text-[10px] font-black uppercase tracking-widest" style={{ color: '#94a3b8', borderColor: '#f1f5f9' }}>
+                            <div className="col-span-8">Description</div>
+                            <div className="col-span-4 text-right">Amount</div>
+                        </div>
+                        
+                        <div className="grid grid-cols-12 py-3 items-center border-b" style={{ borderColor: '#f8fafc' }}>
+                            <div className="col-span-8">
+                                <p className="text-sm font-bold" style={{ color: '#0f172a' }}>{amc.planName} Plan</p>
+                                <p className="text-[10px] mt-1 font-medium" style={{ color: '#64748b' }}>Product: {amc.productName}</p>
+                                <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#64748b' }}>
+                                    Validity: {formatDate(amc.startDate)} - {formatDate(amc.expiryDate)}
+                                </p>
+                            </div>
+                            <div className="col-span-4 text-right text-sm font-bold" style={{ color: '#0f172a' }}>₹{amc.price}</div>
+                        </div>
+                    </div>
+
+                    {/* Footer Totals */}
+                    <div className="mt-auto border-t pt-8" style={{ borderColor: '#f1f5f9' }}>
+                        <div className="flex flex-col items-end gap-3 text-sm">
+                            <div className="flex justify-between w-48 font-medium" style={{ color: '#64748b' }}>
+                                <span>Subtotal</span>
+                                <span className="font-bold" style={{ color: '#0f172a' }}>₹{amc.price}</span>
+                            </div>
+                            <div className="flex justify-between w-48 font-medium" style={{ color: '#64748b' }}>
+                                <span>Tax (18% GST)</span>
+                                <span className="font-bold text-[10px]" style={{ color: '#64748b' }}>Included</span>
+                            </div>
+                            <div className="flex justify-between w-48 items-center mt-2 pt-4 border-t" style={{ borderColor: '#f1f5f9' }}>
+                                <span className="text-xs font-black uppercase tracking-widest" style={{ color: '#0f172a' }}>Total Paid</span>
+                                <span className="text-2xl font-black" style={{ color: '#0ea5e9' }}>₹{amc.price}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="mt-12 text-center border-2 border-dashed rounded-2xl p-4 bg-slate-50/50" style={{ borderColor: '#f1f5f9' }}>
+                        <div className="flex justify-center mb-2">
+                             <ShieldCheck size={20} className="text-blue-500" />
+                        </div>
+                        <p className="text-[9px] font-medium uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+                            Official AMC Document • {amc._id}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="p-6 bg-[#f8fafc] flex items-center justify-between border-t" style={{ borderColor: '#f1f5f9' }}>
+                    <button onClick={onClose} className="px-6 py-3 text-xs font-black uppercase tracking-widest text-[#94a3b8] hover:text-[#475569] transition-colors">
+                        Close
+                    </button>
+                    <button 
+                        onClick={handleDownloadPdf} 
+                        disabled={isGenerating} 
+                        className="bg-[#0f172a] hover:bg-[#0ea5e9] text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 shadow-xl shadow-blue-500/10 disabled:opacity-50"
+                    >
+                        {isGenerating ? (
+                            <span className="flex items-center gap-2">
+                                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Processing...
+                            </span>
+                        ) : (
+                            <><Download size={14} strokeWidth={3} /> Download PDF</>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+// ... existing PlanSelectorModal, etc ...
 const PlanSelectorModal = ({ isOpen, onClose, onSelect }) => {
-    const plans = [
-        { id: 1, name: 'Basic Care', price: 1499, duration: '1 Year', features: ['Filter Replacement', 'Free Labor', '2 Semi-Annual Services'], color: 'slate' },
-        { id: 2, name: 'Premium Care', price: 2499, duration: '1 Year', features: ['All Filters + Membrane', 'Free Labor & Spares', '4 Quarterly Services', 'Water Quality Test'], color: 'blue', popular: true },
-        { id: 3, name: 'Ultimate Shield', price: 3999, duration: '1 Year', features: ['Unlimited Spares', 'Priority 12hr Service', 'Monthly Health Check', 'Free Pre-filter Housing'], color: 'indigo' }
-    ];
+    const [plans, setPlans] = useState([]);
+
+    useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                const { data } = await axios.get(`${url}/amc-plans?activeOnly=true`);
+                if (data.success) {
+                    setPlans(data.plans);
+                }
+            } catch (error) {
+                console.error("Failed to fetch AMC plans", error);
+                // Fallback or show error
+            }
+        };
+
+        if (isOpen) fetchPlans();
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -211,7 +409,7 @@ const PlanSelectorModal = ({ isOpen, onClose, onSelect }) => {
     );
 };
 
-const SuccessModal = ({ isOpen, onClose, plan }) => {
+const SuccessModal = ({ isOpen, onClose, plan, transactionId }) => {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
@@ -228,7 +426,7 @@ const SuccessModal = ({ isOpen, onClose, plan }) => {
                 <div className="bg-slate-50 rounded-3xl p-6 mb-10 border border-slate-100">
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-2">
                         <span className="text-slate-400">Transaction ID</span>
-                        <span className="text-slate-900">#UX_{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+                        <span className="text-slate-900">#{transactionId || 'UX_PENDING'}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                         <span className="text-slate-400">Total Paid</span>
@@ -249,34 +447,107 @@ const AmcRenewals = () => {
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
+    const [transactionId, setTransactionId] = useState(null);
     const [purifierHealth, setPurifierHealth] = useState(88);
     const [isScanning, setIsScanning] = useState(false);
 
-    const [amcData, setAmcData] = useState([
-        {
-            _id: 'amc_001',
-            serviceType: 'Annual Maintenance Contract',
-            productName: 'HydroLife Alkaline Pro',
-            planName: 'Premium Care Plan',
-            status: 'Active',
-            startDate: '2025-05-15',
-            expiryDate: '2026-05-14',
-            lastService: '2025-11-20',
-            price: 2499
-        }
+    const [amcData, setAmcData] = useState([]);
+    const [serviceLogs, setServiceLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    
+    // Receipt Modal State
+    const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+    const [selectedReceiptAmc, setSelectedReceiptAmc] = useState(null);
+
+    const [serviceSteps, setServiceSteps] = useState([
+        { title: 'Activation Check', desc: 'Device audit pending', completed: false },
+        { title: 'Bi-Annual Service', desc: 'Scheduled maintenance', completed: false },
+        { title: 'Deep Cleaning', desc: 'Performance optimization', completed: false },
+        { title: 'Renewal Audit', desc: 'Pre-renewal checkup', completed: false }
     ]);
 
-    const serviceSteps = [
-        { title: 'Activation Check', desc: 'Initial device audit and registration', completed: true, date: '15 May 2025' },
-        { title: 'Bi-Annual Service', desc: 'Primary filter replacement and sanitation', completed: true, date: '20 Nov 2025' },
-        { title: 'Deep Cleaning', desc: 'Internal tank and membrane flushing', current: true },
-        { title: 'Renewal Audit', desc: 'Pre-renewal performance checkup', completed: false }
-    ];
+    const fetchAmcData = async () => {
+        try {
+            setLoading(true);
+            const token = getToken(); 
+            
+            if (!token) {
+                 setLoading(false);
+                 return; // Or show empty state
+            }
 
-    const serviceLogs = [
-        { id: 1, type: 'Maintenance', date: '20 Nov 2025', engineer: 'Rajesh Kumar', note: 'All sediment filters replaced. Water TDS: 45ppm (Optimal)', icon: <RefreshCw size={14} /> },
-        { id: 2, type: 'Installation', date: '15 May 2025', engineer: 'Amit Singh', note: 'Initial setup and AMC activation successful.', icon: <Check size={14} /> }
-    ];
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const { data } = await axios.get(`${apiUrl}/amc-user/my-subscriptions`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (data.success) {
+                setAmcData(data.amc);
+                // Transform service history if available
+                if (data.serviceHistory) {
+                    const logs = data.serviceHistory.map((log, i) => ({
+                        id: i,
+                        type: log.type,
+                        date: new Date(log.date).toLocaleDateString(),
+                        engineer: log.technicianName || 'Pending',
+                        note: log.notes || log.description || 'Service record',
+                        icon: log.type === 'Installation' ? <Check size={14} /> : <RefreshCw size={14} />
+                    }));
+                    setServiceLogs(logs);
+                }
+
+                // Update Timeline based on first active AMC
+                if (data.amc && data.amc.length > 0) {
+                    const latest = data.amc[0];
+                    const start = new Date(latest.startDate);
+                    const end = new Date(latest.expiryDate);
+                    const now = new Date();
+                    const midYear = new Date(start);
+                    midYear.setMonth(midYear.getMonth() + 6);
+
+                    setServiceSteps([
+                        { 
+                            title: 'Activation Check', 
+                            desc: 'Initial device audit and registration', 
+                            completed: true, 
+                            date: new Date(latest.startDate).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})
+                        },
+                        { 
+                            title: 'Bi-Annual Service', 
+                            desc: 'Primary filter replacement', 
+                            completed: now > midYear, 
+                            current: now <= midYear && now > start,
+                            date: midYear.toLocaleDateString('en-IN', {day: 'numeric', month: 'short'}) 
+                        },
+                        { 
+                            title: 'Deep Cleaning', 
+                            desc: 'Internal tank and membrane flushing', 
+                            current: now > midYear && now < end 
+                        },
+                        { 
+                            title: 'Renewal Audit', 
+                            desc: 'Pre-renewal performance checkup', 
+                            completed: false,
+                            date: new Date(latest.expiryDate).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})
+                        }
+                    ]);
+                    
+                    // Update validity days in UI (Widget)
+                    // Note: Health widget is simulated, but we could update "Days Left" text if it was state.
+                    // The days widget is hardcoded in JSX "342 Days Left". 
+                    // I should check if I can make that dynamic too. 
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch AMC data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAmcData();
+    }, []);
 
     const particles = useMemo(() => [...Array(20)].map((_, i) => ({
         id: i,
@@ -288,15 +559,17 @@ const AmcRenewals = () => {
     })), []);
 
     const formatDate = (dateString) => {
+        if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
     const handleBuyNewPlan = () => setIsPlanModalOpen(true);
 
-    const handleSelectPlan = (plan) => {
+    const handleSelectPlan = async (plan) => {
         setIsPlanModalOpen(false);
         setSelectedPlan(plan);
         
+        // Authenticating simulation
         Swal.fire({
             title: 'Verifying Coverage...',
             html: '<div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authenticating Device Signature</div>',
@@ -305,21 +578,32 @@ const AmcRenewals = () => {
             timer: 2000,
             background: '#ffffff',
             customClass: { popup: 'rounded-[32px]' }
-        }).then(() => {
-            setIsSuccessModalOpen(true);
-            const newAmc = {
-                _id: `amc_ux_${Math.floor(Math.random() * 10000)}`,
-                serviceType: 'Annual Maintenance Contract',
-                productName: 'HydroLife Alkaline Pro',
-                planName: plan.name,
-                status: 'Active',
-                startDate: new Date().toISOString().split('T')[0],
-                expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-                lastService: 'Not yet serviced',
-                price: plan.price
-            };
-            setAmcData([newAmc, ...amcData]);
-            toast.success("Security contract established!");
+        }).then(async () => {
+             try {
+                const token = getToken();
+                if (!token) {
+                    toast.error("Please login to purchase a plan");
+                    navigate('/login');
+                    return;
+                }
+
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                await axios.post(`${apiUrl}/amc-user/subscribe`, {
+                    planName: plan.name,
+                    price: plan.price
+                }, {
+                     headers: { Authorization: `Bearer ${token}` }
+                });
+
+                const tid = `UX_${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
+                setTransactionId(tid);
+                setIsSuccessModalOpen(true);
+                toast.success("Security contract established!");
+                fetchAmcData(); // Refresh list
+             } catch (error) {
+                console.error("Purchase failed", error);
+                toast.error("Failed to purchase plan. Please try again.");
+             }
         });
     };
 
@@ -345,18 +629,23 @@ const AmcRenewals = () => {
                 title: 'Updating Protection...',
                 timer: 1500,
                 didOpen: () => Swal.showLoading()
-            }).then(() => {
-                const updatedAmc = amcData.map(item => {
-                    if (item._id === amc._id) {
-                        const currentExpirty = new Date(item.expiryDate);
-                        const newExpiry = new Date(currentExpirty.setFullYear(currentExpirty.getFullYear() + 1));
-                        return { ...item, expiryDate: newExpiry.toISOString().split('T')[0] };
-                    }
-                    return item;
-                });
-                setAmcData(updatedAmc);
-                setSelectedPlan({ name: amc.planName, price: amc.price });
-                setIsSuccessModalOpen(true);
+            }).then(async () => {
+                try {
+                    const token = getToken();
+                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                    await axios.post(`${apiUrl}/amc-user/renew`, {
+                        amcId: amc._id
+                    }, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    setSelectedPlan({ name: amc.planName, price: amc.price });
+                    setIsSuccessModalOpen(true);
+                    fetchAmcData(); // Refresh
+                } catch (error) {
+                    console.error("Renewal failed", error);
+                    toast.error("Failed to renew plan");
+                }
             });
         }
     };
@@ -370,15 +659,34 @@ const AmcRenewals = () => {
         }, 3000);
     };
 
-    const handleServiceSubmit = (data) => {
+    const handleServiceSubmit = async (data) => {
         setIsServiceModalOpen(false);
-        Swal.fire({
-            icon: 'success',
-            title: 'Request Dispatched',
-            text: `We've scheduled a ${data.type} request. Our engineer will contact you soon.`,
-            confirmButtonColor: '#1e293b',
-            customClass: { popup: 'rounded-[32px]' }
-        });
+        
+        try {
+            const token = getToken();
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            
+            if (!token) {
+                toast.error("Authentication failed. Please login again.");
+                navigate('/login');
+                return;
+            }
+
+            await axios.post(`${apiUrl}/amc-user/request-service`, data, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Request Dispatched',
+                text: `We've scheduled a ${data.type} request. Our engineer will contact you soon.`,
+                confirmButtonColor: '#1e293b',
+                customClass: { popup: 'rounded-[32px]' }
+            });
+        } catch (error) {
+            console.error("Service Request failed", error);
+            toast.error("Failed to submit service request");
+        }
     };
 
     const handleSupportChat = () => {
@@ -506,8 +814,11 @@ const AmcRenewals = () => {
                                                 >
                                                     Renew Plan
                                                 </button>
-                                                <button className="px-10 py-5 bg-slate-50 text-slate-600 border border-slate-100 rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-white transition-all text-center">
-                                                    Download Receipt
+                                                <button 
+                                                    onClick={() => { setSelectedReceiptAmc(amc); setIsReceiptModalOpen(true); }}
+                                                    className="px-10 py-5 bg-slate-50 text-slate-600 border border-slate-100 rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-white transition-all text-center flex items-center justify-center gap-2"
+                                                >
+                                                    <Download size={14} /> Download Receipt
                                                 </button>
                                             </div>
                                         </div>
@@ -598,11 +909,17 @@ const AmcRenewals = () => {
                 isOpen={isSuccessModalOpen} 
                 onClose={() => setIsSuccessModalOpen(false)} 
                 plan={selectedPlan}
+                transactionId={transactionId}
             />
             <ServiceRequestModal 
                 isOpen={isServiceModalOpen} 
                 onClose={() => setIsServiceModalOpen(false)} 
                 onSubmit={handleServiceSubmit}
+            />
+            <ReceiptModal 
+                isOpen={isReceiptModalOpen}
+                onClose={() => setIsReceiptModalOpen(false)}
+                amc={selectedReceiptAmc}
             />
 
             <style>{`

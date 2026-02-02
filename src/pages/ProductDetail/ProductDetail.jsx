@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+
+
 import { ShoppingCart, ArrowLeft, Star, Package, Truck, ShieldCheck, Droplets, Zap, Activity, Info } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
@@ -11,98 +15,42 @@ import ReviewSection from '../../components/product/ReviewSection';
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { addToCart } = useCart();
     const [product, setProduct] = useState(null);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    // Static Data for Products (Pure Hybrid Technology Models)
-    const staticProducts = [
-        {
-            _id: '1',
-            name: 'HydroLife Alkaline Pro',
-            img: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop',
-            price: 45000,
-            finalPrice: 39999,
-            discountPercent: 11,
-            description: 'The HydroLife Alkaline Pro is our flagship model, featuring advanced 11-stage ionization with Platinum plates. It goes beyond simple purification to deliver mineral-rich alkaline water that helps balance your bodys pH and provides powerful antioxidants.',
-            category: 'Premium',
-            techSpecs: {
-                filtration: "11-Stage RO + UV + UF + Ionization",
-                storage: "10 Liters",
-                power: "75 Watts",
-                warranty: "1 Year Comprehensive"
-            }
-        },
-        {
-            _id: '2',
-            name: 'NanoPure Smart',
-            img: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop',
-            price: 25000,
-            finalPrice: 19999,
-            discountPercent: 20,
-            description: 'Perfect for modern kitchens with limited space, the NanoPure Smart offers a compact under-sink design without compromising on power. It features advanced RO and UV technology to ensure your water is always pure and safe.',
-            category: 'Smart',
-            techSpecs: {
-                filtration: "RO + UV + MTDS Control",
-                storage: "8 Liters",
-                power: "45 Watts",
-                warranty: "1 Year Comprehensive"
-            }
-        },
-        {
-            _id: '3',
-            name: 'SilverStream RO+',
-            img: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?q=80&w=2070&auto=format&fit=crop',
-            price: 15000,
-            finalPrice: 12999,
-            discountPercent: 13,
-            description: 'The SilverStream RO+ is designed for high TDS water sources, providing superior RO purification with an added mineral boost. It ensures that while impurities are removed, the essential minerals your body needs are retained.',
-            category: 'Standard',
-            techSpecs: {
-                filtration: "RO + Copper + Mineralizer",
-                storage: "12 Liters",
-                power: "60 Watts",
-                warranty: "1 Year Comprehensive"
-            }
-        },
-        {
-            _id: '4',
-            name: 'AquaZen Elite',
-            img: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop',
-            price: 55000,
-            finalPrice: 49999,
-            discountPercent: 9,
-            description: 'Experience the ultimate in luxury and technology with the AquaZen Elite. Featuring our most advanced ionization tech and a sleek touchscreen interface, it allows you to precisely control the pH level of your water for various uses.',
-            category: 'Luxury',
-            techSpecs: {
-                filtration: "13-Stage Hybrid Purification",
-                storage: "15 Liters",
-                power: "100 Watts",
-                warranty: "2 Years Premium"
-            }
-        }
-    ];
-
     useEffect(() => {
-        const fetchProduct = () => {
+        const fetchProduct = async () => {
             setLoading(true);
-            const foundProduct = staticProducts.find(p => p._id === id);
-            if (foundProduct) {
-                setProduct({
-                    ...foundProduct,
-                    id: foundProduct._id
-                });
-                setError(false);
-            } else {
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                const { data } = await axios.get(`${apiUrl}/products/${id}`);
+                
+                if (data && data.product) {
+                    setProduct(data.product);
+                    setError(false);
+                } else if (data) {
+                    // In case the API returns the product directly
+                    setProduct(data);
+                    setError(false);
+                } else {
+                    setError(true);
+                }
+            } catch (err) {
+                console.error("Fetch product error:", err);
                 setError(true);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         if (id) {
             fetchProduct();
         }
     }, [id]);
+
 
     if (loading) {
         return (
@@ -117,7 +65,7 @@ const ProductDetail = () => {
             <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl font-black text-slate-800">Product Not Found</h2>
-                    <Link to="/purifiers" className="inline-block text-[var(--color-primary)] font-bold hover:underline">
+                    <Link to="/purifiers" className="inline-block text-(--color-primary) font-bold hover:underline">
                         ← Back to Purifiers
                     </Link>
                 </div>
@@ -130,21 +78,32 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = async () => {
+        if (!product) return;
+        
+        addToCart({
+            _id: product._id || product.id,
+            id: product._id || product.id,
+            name: product.name,
+            price: product.finalPrice || product.price,
+            img: product.mainImage?.url || product.img,
+            quantity: 1
+        });
+
         toast.success(`${product.name} added to cart!`, {
             position: "bottom-center",
             style: { borderRadius: '1rem', fontWeight: 'bold' }
         });
-        window.dispatchEvent(new Event('cart-updated'));
     };
 
+
     return (
-        <div className="min-h-screen bg-white font-[var(--font-body)] pt-24">
+        <div className="min-h-screen bg-white font-(--font-body) pt-24">
             <div className="pb-12 px-6 md:px-12 max-w-7xl mx-auto">
 
                 {/* Back Link */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 mb-8 font-bold text-slate-400 hover:text-[var(--color-secondary)] transition-colors"
+                    className="flex items-center gap-2 mb-8 font-bold text-slate-400 hover:text-(--color-secondary) transition-colors"
                 >
                     <ArrowLeft size={18} />
                     Back to Catalog
@@ -155,16 +114,17 @@ const ProductDetail = () => {
                     {/* Image Section */}
                     <div className="relative group rounded-[4rem] bg-gradient-to-br from-slate-50 to-blue-50/30 p-12 lg:p-24 flex items-center justify-center overflow-hidden border border-blue-100/50 shadow-2xl shadow-blue-500/5">
                         <img
-                            src={product.img || product.mainImage?.url}
-                            alt={product.name}
+                            src={product?.mainImage?.url || product?.img}
+                            alt={product?.name}
                             className="w-full max-w-md h-auto object-contain relative z-10 transition-transform duration-1000 group-hover:scale-110"
                         />
+
                         {/* Decorative Background */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-primary)]/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-(--color-primary)/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2" />
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-400/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2" />
 
-                        <div className="absolute bottom-12 right-12 z-20 hidden md:flex items-center gap-3 bg-white/40 backdrop-blur-2xl border border-white/50 px-6 py-3 rounded-2xl shadow-xl text-xs font-black text-[var(--color-secondary)] uppercase tracking-widest">
-                            <ShieldCheck size={18} className="text-[var(--color-primary)]" />
+                        <div className="absolute bottom-12 right-12 z-20 hidden md:flex items-center gap-3 bg-white/40 backdrop-blur-2xl border border-white/50 px-6 py-3 rounded-2xl shadow-xl text-xs font-black text-(--color-secondary) uppercase tracking-widest">
+                            <ShieldCheck size={18} className="text-(--color-primary)" />
                             Certified Authentic
                         </div>
                     </div>
@@ -172,14 +132,15 @@ const ProductDetail = () => {
                     {/* Details Section */}
                     <div className="flex flex-col h-full pt-4">
                         <div className="mb-2">
-                            <span className="bg-[var(--color-primary)]/10 text-[var(--color-secondary)] text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full inline-block mb-4">
-                                {product.category}
+                            <span className="bg-(--color-primary)/10 text-(--color-secondary) text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full inline-block mb-4">
+                                {product?.category?.name || product?.category || "Purifier"}
                             </span>
                         </div>
 
-                        <h1 className="text-4xl md:text-5xl font-black text-[var(--color-secondary)] leading-[1.1] mb-6">
-                            {product.name}
+                        <h1 className="text-4xl md:text-5xl font-black text-(--color-secondary) leading-[1.1] mb-6">
+                            {product?.name}
                         </h1>
+
 
                         <button 
                             onClick={() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' })}
@@ -194,7 +155,7 @@ const ProductDetail = () => {
                         </button>
 
                         <div className="flex items-baseline gap-4 mb-8 border-b border-slate-100 pb-8">
-                            <span className="text-4xl font-black text-[var(--color-primary)]">
+                            <span className="text-4xl font-black text-(--color-primary)">
                                 ₹{product.finalPrice?.toLocaleString()}
                             </span>
                             {product.discountPercent > 0 && (
@@ -209,19 +170,52 @@ const ProductDetail = () => {
                             )}
                         </div>
 
-                        <p className="text-slate-500 leading-relaxed mb-8 text-lg font-medium font-[var(--font-body)]">
+                        <p className="text-slate-500 leading-relaxed mb-8 text-lg font-medium">
                             {product.description}
                         </p>
 
                         {/* Tech Specs Grid */}
-                        <div className="grid grid-cols-2 gap-4 mb-10">
-                            {Object.entries(product.techSpecs).map(([key, value]) => (
-                                <div key={key} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{key}</p>
-                                    <p className="font-bold text-[var(--color-secondary)]">{value}</p>
-                                </div>
-                            ))}
-                        </div>
+                        {product?.specifications && (
+                            <div className="grid grid-cols-2 gap-4 mb-10">
+                                {Object.entries(product.specifications)
+                                    .filter(([, value]) => value && value !== "")
+                                    .map(([key, value]) => (
+
+                                    <div key={key} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{key}</p>
+                                        <p className="font-bold text-(--color-secondary)">{value}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+
+                        {/* Features */}
+                        {product?.features && product.features.length > 0 && (
+                            <div className="mb-10">
+                                <h3 className="text-xs font-black text-(--color-secondary) uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                    <Zap size={14} className="text-(--color-primary)" /> Key Features
+                                </h3>
+                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {product.features.map((feature, idx) => (
+                                        <li key={idx} className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                                            <Droplets size={12} className="text-(--color-primary)" /> {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* About / Long Description */}
+                        {product?.about && (
+                            <div className="mb-10 p-6 bg-slate-50 rounded-4xl border border-slate-100">
+                                <h3 className="text-xs font-black text-(--color-secondary) uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                                    <Info size={14} className="text-(--color-primary)" /> About this System
+                                </h3>
+                                <div className="text-sm text-slate-500 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: product.about }} />
+                            </div>
+                        )}
+
 
                         {/* Actions */}
                         <div className="flex gap-4 mt-auto">
@@ -237,18 +231,19 @@ const ProductDetail = () => {
                                     handleAddToCart();
                                     navigate('/shop');
                                 }}
-                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] hover:bg-[var(--color-secondary)] hover:text-white transition-all active:scale-95"
+                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 border-2 border-(--color-secondary) text-(--color-secondary) hover:bg-(--color-secondary) hover:text-white transition-all active:scale-95"
                             >
                                 Buy Now
                             </button>
+
                         </div>
 
                         <div className="mt-8 flex items-center justify-center gap-6 text-xs font-bold text-slate-400 uppercase tracking-wider">
                             <div className="flex items-center gap-2">
-                                <Truck size={14} className="text-[var(--color-primary)]" /> Free Shipping
+                                <Truck size={14} className="text-(--color-primary)" /> Free Shipping
                             </div>
                             <div className="flex items-center gap-2">
-                                <ShieldCheck size={14} className="text-[var(--color-primary)]" /> 1 Year Warranty
+                                <ShieldCheck size={14} className="text-(--color-primary)" /> 1 Year Warranty
                             </div>
                         </div>
 
@@ -256,7 +251,8 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Review Section */}
-                <ReviewSection productId={product.id} />
+                <ReviewSection productId={product?._id || product?.id} />
+
                 
             </div>
             <Footer />

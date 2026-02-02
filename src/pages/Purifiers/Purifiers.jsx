@@ -1,116 +1,84 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import { Sparkles, Star, Award, Search, X, Grid, Filter, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
 import ProductCard from '../../components/cards/PurifierCard';
 import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
 import UnixaBrand from '../../components/common/UnixaBrand';
 
+// Swiper imports
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+
+
 const Purifiers = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
     const [sortBy, setSortBy] = useState('Featured');
     const [isSortOpen, setIsSortOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [products, setProducts] = useState([]);
 
-    // Shared high-quality image for all products to ensure visibility
-    const sharedImg = "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop";
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                // Fetch products from API
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                const { data } = await axios.get(`${apiUrl}/products`);
+                if (data && data.products) {
+                    setProducts(data.products);
+                }
+            } catch (error) {
+                console.error("Failed to fetch products:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    // Static Data for Products (Pure Hybrid Technology Models)
-    const products = useMemo(() => [
-        {
-            _id: '1',
-            name: 'HydroLife Alkaline Pro',
-            mainImage: { url: sharedImg },
-            price: 45000,
-            finalPrice: 39999,
-            discountPercent: 11,
-            description: 'Advanced 11-stage ionization with Platinum plates. Delivers mineral-rich alkaline water.',
-            category: { name: 'Premium' },
-            stock: 12
-        },
-        {
-            _id: '2',
-            name: 'NanoPure Smart',
-            mainImage: { url: sharedImg },
-            price: 25000,
-            finalPrice: 19999,
-            discountPercent: 20,
-            description: 'Compact Under-sink design for modern kitchens. Space-saving yet powerful filtration.',
-            category: { name: 'Smart' },
-            stock: 5
-        },
-        {
-            _id: '3',
-            name: 'SilverStream RO+',
-            mainImage: { url: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?q=80&w=2070&auto=format&fit=crop" },
-            price: 15000,
-            finalPrice: 12999,
-            discountPercent: 13,
-            description: 'Superior RO purification with mineral boost. Ideal for high TDS water sources.',
-            category: { name: 'Standard' },
-            stock: 0
-        },
-        {
-            _id: '4',
-            name: 'AquaZen Elite',
-            mainImage: { url: sharedImg },
-            price: 55000,
-            finalPrice: 49999,
-            discountPercent: 9,
-            description: 'Supreme ionization technology with smart touchscreen controls. The future of hydration.',
-            category: { name: 'Luxury' },
-            stock: 8
-        },
-        {
-            _id: '5',
-            name: 'PureNexus AI',
-            mainImage: { url: sharedImg },
-            price: 65000,
-            finalPrice: 58999,
-            discountPercent: 9,
-            description: 'AI-monitored water health with automated filter flush system.',
-            category: { name: 'Luxury' },
-            stock: 15
-        },
-        {
-            _id: '6',
-            name: 'EcoPure Basic',
-            mainImage: { url: sharedImg },
-            price: 9999,
-            finalPrice: 8499,
-            discountPercent: 15,
-            description: 'Essential purification for pure family health.',
-            category: { name: 'Standard' },
-            stock: 3
-        }
-    ], []);
+        fetchProducts();
+    }, []);
+
+    // Derive dynamic categories from products
+    const categories = useMemo(() => {
+        const cats = new Set(products.map(p => p.category?.name).filter(Boolean));
+        return ['All', ...Array.from(cats)];
+    }, [products]);
 
     const filteredAndSortedProducts = useMemo(() => {
         let result = products.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                p.description.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesCategory = activeCategory === 'All' || p.category.name === activeCategory;
+            const query = searchQuery.toLowerCase().trim();
+            const matchesSearch = p.name.toLowerCase().includes(query) ||
+                                 (p.description && p.description.toLowerCase().includes(query)) ||
+                                 (p.category?.name && p.category.name.toLowerCase().includes(query));
+            const matchesCategory = activeCategory === 'All' || p.category?.name === activeCategory;
             return matchesSearch && matchesCategory;
         });
+
 
         if (sortBy === 'Price: Low to High') {
             result.sort((a, b) => a.finalPrice - b.finalPrice);
         } else if (sortBy === 'Price: High to Low') {
             result.sort((a, b) => b.finalPrice - a.finalPrice);
         } else if (sortBy === 'Newest') {
-            result.sort((a, b) => b._id.localeCompare(a._id));
+            result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         }
 
         return result;
     }, [searchQuery, activeCategory, sortBy, products]);
 
-    useEffect(() => {
-        setLoading(true);
-        const timer = setTimeout(() => setLoading(false), 800);
-        return () => clearTimeout(timer);
-    }, [activeCategory, sortBy]);
+    // Group products into pages of 8 for the slider
+    const paginatedProducts = useMemo(() => {
+        const pages = [];
+        for (let i = 0; i < filteredAndSortedProducts.length; i += 8) {
+            pages.push(filteredAndSortedProducts.slice(i, i + 8));
+        }
+        return pages;
+    }, [filteredAndSortedProducts]);
 
-    const categories = ['All', 'Premium', 'Luxury', 'Smart', 'Standard'];
+
     const sortOptions = ['Featured', 'Newest', 'Price: Low to High', 'Price: High to Low'];
 
     return (
@@ -248,25 +216,61 @@ const Purifiers = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-                                {filteredAndSortedProducts.map((product) => (
-                                    <ProductCard
-                                        key={product._id}
-                                        product={{
-                                            id: product._id,
-                                            name: product.name,
-                                            img: product.mainImage?.url,
-                                            price: product.price,
-                                            finalPrice: product.finalPrice,
-                                            discountPercent: product.discountPercent,
-                                            description: product.description,
-                                            category: product.category?.name
+                            {paginatedProducts.length > 0 ? (
+                                <div className="purifier-slider-container relative">
+                                    <Swiper
+                                        modules={[Navigation, Pagination, EffectFade]}
+                                        spaceBetween={0}
+                                        slidesPerView={1}
+                                        navigation={{
+                                            nextEl: '.swiper-button-next-custom',
+                                            prevEl: '.swiper-button-prev-custom',
                                         }}
-                                    />
-                                ))}
-                            </div>
+                                        pagination={{ 
+                                            clickable: true,
+                                            dynamicBullets: true,
+                                            renderBullet: (index, className) => {
+                                                return `<span class="${className} custom-bullet">${index + 1}</span>`;
+                                            }
+                                        }}
+                                        className="purifier-swiper pb-20"
+                                    >
+                                        {paginatedProducts.map((page, pageIdx) => (
+                                            <SwiperSlide key={pageIdx}>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                                    {page.map((product) => (
+                                                        <ProductCard
+                                                            key={product._id}
+                                                            product={{
+                                                                id: product._id,
+                                                                name: product.name,
+                                                                img: product.mainImage?.url,
+                                                                price: product.price,
+                                                                finalPrice: product.finalPrice,
+                                                                discountPercent: product.discountPercent,
+                                                                description: product.description,
+                                                                category: product.category?.name
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </SwiperSlide>
+                                        ))}
+                                    </Swiper>
 
-                            {filteredAndSortedProducts.length === 0 && (
+                                    {/* Custom Navigation Buttons */}
+                                    {paginatedProducts.length > 1 && (
+                                        <>
+                                            <button className="swiper-button-prev-custom absolute left-[-20px] md:left-[-50px] top-[40%] z-30 w-10 h-10 md:w-14 md:h-14 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all hover:bg-slate-900 hover:text-white group">
+                                                <ChevronDown size={24} className="rotate-90 group-hover:-translate-x-1 transition-transform" />
+                                            </button>
+                                            <button className="swiper-button-next-custom absolute right-[-20px] md:right-[-50px] top-[40%] z-30 w-10 h-10 md:w-14 md:h-14 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all hover:bg-slate-900 hover:text-white group">
+                                                <ChevronDown size={24} className="-rotate-90 group-hover:translate-x-1 transition-transform" />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            ) : (
                                 <div className="py-32 text-center space-y-6 animate-in fade-in slide-in-from-bottom-5">
                                     <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
                                         <Filter size={48} strokeWidth={1.5} />
@@ -307,7 +311,37 @@ const Purifiers = () => {
                     -ms-overflow-style: none;
                     scrollbar-width: none;
                 }
+                .custom-bullet {
+                    width: 35px !important;
+                    height: 35px !important;
+                    background: white !important;
+                    border: 1px solid #e2e8f0 !important;
+                    opacity: 1 !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    font-size: 12px !important;
+                    font-weight: 900 !important;
+                    color: #64748b !important;
+                    border-radius: 10px !important;
+                    margin: 0 5px !important;
+                    transition: all 0.3s ease !important;
+                }
+                .custom-bullet.swiper-pagination-bullet-active {
+                    background: var(--color-secondary) !important;
+                    color: white !important;
+                    border-color: var(--color-secondary) !important;
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                }
+                .swiper-pagination-lock {
+                    display: none !important;
+                }
+                .purifier-swiper {
+                    overflow: visible !important;
+                }
             `}</style>
+
         </div>
     );
 };

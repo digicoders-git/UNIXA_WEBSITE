@@ -15,16 +15,29 @@ export const CartProvider = ({ children }) => {
     }, [cart]);
 
     const addToCart = (product) => {
-        setCart(prev => [...prev, { ...product, uniqueId: Date.now() }]);
+        const productId = product._id || product.id;
+        setCart(prev => {
+            const existingIndex = prev.findIndex(item => (item._id || item.id) === productId);
+            if (existingIndex > -1) {
+                const newCart = [...prev];
+                newCart[existingIndex] = {
+                    ...newCart[existingIndex],
+                    quantity: (newCart[existingIndex].quantity || 0) + (product.quantity || 1)
+                };
+                return newCart;
+            }
+            return [...prev, { ...product, quantity: product.quantity || 1 }];
+        });
     };
 
-    const removeFromCart = (uniqueId) => {
-        setCart(prev => prev.filter(item => item.uniqueId !== uniqueId));
+    const removeFromCart = (productId) => {
+        setCart(prev => prev.filter(item => (item._id || item.id) !== productId));
     };
 
-    const updateQuantity = (uniqueId, quantity) => {
+    const updateQuantity = (productId, quantity) => {
+        if (quantity < 1) return removeFromCart(productId);
         setCart(prev => prev.map(item => 
-            item.uniqueId === uniqueId ? { ...item, quantity } : item
+            (item._id || item.id) === productId ? { ...item, quantity } : item
         ));
     };
 

@@ -1,10 +1,21 @@
-import React, { useEffect, useRef } from 'react';
-import { Droplets, X, Check, AlertTriangle, Shield, Heart, Zap, Filter, ArrowRight, Star } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
+import { Droplets, X, Check, AlertTriangle, Shield, Heart, Zap, Filter, ArrowRight, Star, Quote } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 import UnixaBrand from '../../components/common/UnixaBrand';
+import Loader from '../../components/common/Loader';
+
+// Swiper imports
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, EffectCoverflow } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-coverflow';
 
 const Testimonials = () => {
   const sectionRefs = useRef([]);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -25,16 +36,43 @@ const Testimonials = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const { data } = await axios.get(`${apiUrl}/reviews/all`);
+        if (data.success) {
+          setReviews(data.reviews);
+        }
+      } catch (error) {
+        console.error("Failed to fetch reviews:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
   const addToRefs = (el) => {
     if (el && !sectionRefs.current.includes(el)) {
       sectionRefs.current.push(el);
     }
   };
 
+  // Fallback reviews if database is empty
+  const fallbackReviews = [
+    { user: "Rahul Sharma", role: "Elite Member", comment: "The water quality from UNIXA is simply amazing. My family has noticed a huge difference in taste and health within just a month of use.", rating: 5 },
+    { user: "Mrs. Priya Gupta", role: "Certified Health Expert", comment: "As a professional, I've seen many purifiers, but UNIXA's multi-stage technology is truly in a league of its own. Purest water I've ever tested.", rating: 5 },
+    { user: "Sanjay Verma", role: "Home Automation Lead", comment: "Installation was seamless and the smart features are game changers. It's the only appliance in my home that I trust 100%.", rating: 5 }
+  ];
+
+  const displayReviews = reviews.length > 0 ? reviews : fallbackReviews;
+
   return (
     <div className="min-h-screen bg-[var(--color-surface)]" style={{ fontFamily: `var(--font-body)` }}>
 
-      {/* Hero Section - Matched to About/Purifiers Premium Feel */}
+      {/* Hero Section */}
       <section className="relative pt-20 pb-12 md:pt-24 md:pb-16 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]">
         {/* High Visibility Water Bubbles */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
@@ -70,16 +108,16 @@ const Testimonials = () => {
           <div className="inline-flex items-center gap-3 px-5 py-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 rounded-full mx-auto">
             <Droplets size={20} className="text-[var(--color-primary)]" />
             <span className="text-[12px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">
-              Comparison Benchmark
+              Real Stories. Real Purity.
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-8xl font-bold tracking-tighter leading-none">
-            Comparison <span className="text-[var(--color-primary)]">Matters</span>
+          <h1 className="text-4xl md:text-8xl font-black tracking-tighter leading-none">
+            Customer <span className="text-[var(--color-primary)]">Voices</span>
           </h1>
 
-          <p className="text-slate-600 text-sm md:text-xl max-w-2xl mx-auto leading-relaxed font-semibold">
-            Not all water is created equal. Discover the scientific difference between standard filtration and <UnixaBrand className="text-sm md:text-xl" /> HydroLife.
+          <p className="text-slate-600 text-sm md:text-xl max-w-2xl mx-auto leading-relaxed font-bold">
+            See why thousands of families trust <UnixaBrand className="text-sm md:text-xl" /> for their daily hydration.
           </p>
         </div>
 
@@ -87,8 +125,99 @@ const Testimonials = () => {
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[var(--color-primary)]/10 to-transparent pointer-events-none" />
       </section>
 
-      {/* Scientific Comparison Section */}
-      <section ref={addToRefs} className="py-20 px-6 md:px-12 bg-white relative">
+      {/* Customer Reviews - Dynamic Slider */}
+      <section ref={addToRefs} className="py-24 px-4 md:px-12 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-400/10 border border-yellow-400/20 rounded-full mx-auto">
+              <Star size={12} className="text-yellow-500 fill-yellow-500" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">Rated 4.9/5 by 2000+ Users</span>
+            </div>
+            <h2 className="text-3xl md:text-6xl font-black tracking-tighter uppercase text-[var(--color-secondary)] leading-none">
+              LOVED BY <span className="text-[var(--color-primary)] underline decoration-4 underline-offset-8">THOUSANDS</span>
+            </h2>
+          </div>
+
+          {loading ? (
+             <div className="min-h-[300px] flex items-center justify-center">
+                <Loader text="Loading Reviews..." />
+             </div>
+          ) : (
+            <div className="testimonials-slider relative px-0 md:px-8">
+              <Swiper
+                modules={[Autoplay, Pagination, EffectCoverflow]}
+                effect={'coverflow'}
+                grabCursor={true}
+                centeredSlides={true}
+                slidesPerView={'auto'}
+                coverflowEffect={{
+                  rotate: 0,
+                  stretch: 0,
+                  depth: 100,
+                  modifier: 2.5,
+                  slideShadows: false,
+                }}
+                autoplay={{
+                  delay: 3500,
+                  disableOnInteraction: false,
+                }}
+                pagination={{ clickable: true, dynamicBullets: true }}
+                loop={true}
+                breakpoints={{
+                  640: {
+                    slidesPerView: 1,
+                    spaceBetween: 20,
+                  },
+                  768: {
+                    slidesPerView: 2,
+                    spaceBetween: 40,
+                  },
+                  1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 50,
+                  },
+                }}
+                className="py-12"
+              >
+                {displayReviews.map((review, i) => (
+                  <SwiperSlide key={i} className="max-w-md w-full">
+                    <div className="bg-slate-50 p-8 md:p-10 rounded-[3rem] border border-slate-100 h-full flex flex-col justify-center relative shadow-lg hover:shadow-2xl hover:bg-white transition-all duration-500 group">
+                      <Quote className="absolute top-8 right-8 text-[var(--color-primary)]/10 rotate-180" size={64} />
+                      
+                      <div className="flex gap-1 mb-6">
+                        {[...Array(review.rating || 5)].map((_, idx) => (
+                          <Star key={idx} size={16} className="text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                      
+                      <p className="text-slate-600 font-medium italic mb-8 leading-relaxed text-base md:text-lg flex-grow">
+                        "{review.comment || review.text}"
+                      </p>
+                      
+                      <div className="flex items-center gap-4 mt-auto">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-cyan-400 flex items-center justify-center text-white font-bold text-xl shadow-lg uppercase">
+                          {(review.user || review.name || 'U')[0]}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-[var(--color-secondary)] tracking-tight text-base leading-none mb-1">
+                            {review.user || review.name}
+                          </h4>
+                          <p className="text-[10px] font-black text-[var(--color-primary)] uppercase tracking-widest">
+                            {review.role || "Verified Buyer"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+            </Swiper>
+            </div>
+          )}
+        </div>
+      </section>
+
+       {/* Scientific Comparison Section */}
+       <section ref={addToRefs} className="py-20 px-6 md:px-12 bg-white relative border-t border-slate-100">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
 
@@ -158,18 +287,12 @@ const Testimonials = () => {
                   </li>
                 ))}
               </ul>
-
-              {/* <div className="mt-12 group/btn">
-                <button className="w-full h-16 bg-[var(--color-secondary)] text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-[var(--color-primary)] transition-all duration-300 flex items-center justify-center gap-3">
-                  Examine Systems <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform" />
-                </button>
-              </div> */}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Advanced Benefits - Re-styled to match About/Home */}
+      {/* Advanced Benefits */}
       <section ref={addToRefs} className="py-24 px-8 md:px-24 bg-slate-50 border-t border-slate-100 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16 space-y-4">
@@ -194,47 +317,6 @@ const Testimonials = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-[var(--color-secondary)] uppercase tracking-tight">{b.title}</h3>
                 <p className="text-slate-500 font-medium leading-relaxed">{b.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Customer Reviews - New Section for Testimonials Feel */}
-      <section ref={addToRefs} className="py-24 px-8 md:px-24 bg-white border-t border-slate-100 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-400/10 border border-yellow-400/20 rounded-full mx-auto">
-              <Star size={12} className="text-yellow-500 fill-yellow-500" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">Rated 4.9/5 by 2000+ Users</span>
-            </div>
-            <h2 className="text-3xl md:text-6xl font-bold tracking-tighter uppercase text-[var(--color-secondary)] leading-none">
-              LOVED BY <span className="text-[var(--color-primary)] underline decoration-4 underline-offset-8">THOUSANDS</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { name: "Rahul Sharma", role: "Elite Member", text: "The water quality from UNIXA is simply amazing. My family has noticed a huge difference in taste and health within just a month of use.", stars: 5 },
-              { name: "Mrs. Priya Gupta", role: "Certified Health Expert", text: "As a professional, I've seen many purifiers, but UNIXA's multi-stage technology is truly in a league of its own. Purest water I've ever tested.", stars: 5 },
-              { name: "Sanjay Verma", role: "Home Automation Lead", text: "Installation was seamless and the smart features are game changers. It's the only appliance in my home that I trust 100%.", stars: 5 }
-            ].map((review, i) => (
-              <div key={i} className="bg-slate-50 p-10 rounded-[4rem] border border-slate-100 hover:bg-white hover:shadow-2xl transition-all duration-500 group">
-                <div className="flex gap-1 mb-6">
-                  {[...Array(review.stars)].map((_, idx) => (
-                    <Star key={idx} size={16} className="text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-slate-600 font-medium italic mb-10 leading-relaxed text-lg">"{review.text}"</p>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-blue-400 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                    {review.name[0]}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[var(--color-secondary)] tracking-tight text-base leading-none mb-1">{review.name}</h4>
-                    <p className="text-[10px] font-black text-[var(--color-primary)] uppercase tracking-widest">{review.role}</p>
-                  </div>
-                </div>
               </div>
             ))}
           </div>

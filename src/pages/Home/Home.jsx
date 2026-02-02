@@ -1,55 +1,48 @@
-import React, { useEffect, useRef, useState, memo, useCallback, lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
-import { Shield, Droplets, Leaf, Heart as HeartIcon, Star, Award, Users, Zap, Activity, Sparkles, RefreshCw, Settings, Phone, Wrench, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
-import { debounce, throttle } from '../../utils/performance';
+import React, { useEffect, useRef, useState, memo, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import axios from 'axios';
+import { Shield, Droplets, Heart as HeartIcon, Award, Zap, Activity, Settings, Phone, Wrench, CheckCircle2, ArrowRight } from 'lucide-react';
+
+import { throttle } from '../../utils/performance';
 // Lazy load all heavy components
 const Footer = lazy(() => import('../../components/layout/Footer'));
 const ProductCard = lazy(() => import('../../components/cards/PurifierCard'));
 const HeroSlider = lazy(() => import('../../components/Slider/HeroSlider'));
-import Loader from '../../components/common/Loader';
 import UnixaBrand from '../../components/common/UnixaBrand';
 
 // Import images directly
 import water2 from '../../assets/images/water2.webp';
 
-
-
 const Home = memo(() => {
+  const navigate = useNavigate();
   const sectionRefs = useRef([]);
 
-  // Static Data for Products (Restoring Original Content)
-  const products = [
-    {
-      _id: '1',
-      name: 'HydroLife Alkaline Pro',
-      mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' },
-      price: 45000,
-      finalPrice: 39999,
-      discountPercent: 11,
-      description: 'Advanced 11-stage ionization with Platinum plates. Delivers mineral-rich alkaline water.',
-      category: { name: 'Premium' }
-    },
-    {
-      _id: '2',
-      name: 'NanoPure Smart',
-      mainImage: { url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?q=80&w=2070&auto=format&fit=crop' },
-      price: 25000,
-      finalPrice: 19999,
-      discountPercent: 20,
-      description: 'Compact Under-sink design for modern kitchens. Space-saving yet powerful filtration.',
-      category: { name: 'Smart' }
-    },
-    {
-      _id: '3',
-      name: 'SilverStream RO+',
-      mainImage: { url: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?q=80&w=2070&auto=format&fit=crop' },
-      price: 15000,
-      finalPrice: 12999,
-      discountPercent: 13,
-      description: 'Superior RO purification with mineral boost. Ideal for high TDS water sources.',
-      category: { name: 'Standard' }
-    }
-  ];
+
+  // Dynamic Products State
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        // VITE_API_URL is expected to include /api, e.g., http://localhost:5000/api
+        const apiUrl = import.meta.env.VITE_API_URL; 
+        const { data } = await axios.get(`${apiUrl}/products`);
+        if (data && data.products) {
+          // Show top 3 products for the home page showcase as requested
+          setProducts(data.products.slice(0, 3));
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const observerRef = useRef(null);
 
@@ -110,8 +103,20 @@ const Home = memo(() => {
               </Suspense>
             ))}
           </div>
+
+          <div className="mt-16 text-center">
+            <button 
+              onClick={() => navigate('/purifiers')}
+              className="group relative px-10 py-4 bg-white border-2 border-[var(--color-secondary)] text-[var(--color-secondary)] font-black text-xs uppercase tracking-[0.3em] rounded-full overflow-hidden transition-all hover:text-white hover:bg-[var(--color-primary)] hover:border-[var(--color-primary)] active:scale-95 shadow-lg shadow-slate-100"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                View All Collection <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+          </div>
         </div>
       </section>
+
 
       <section className="py-12 px-8 md:px-24 bg-slate-50 border-y border-slate-100 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10">
@@ -260,3 +265,4 @@ const Home = memo(() => {
 
 Home.displayName = 'Home';
 export default Home;
+// Updated for dynamic catalog sync

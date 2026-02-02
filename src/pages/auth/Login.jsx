@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -34,17 +35,19 @@ const Login = () => {
 
         setIsLoading(true);
         try {
-            // Simulated local login delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Allow any login for static version
-            const mockToken = "static-token-12345";
-            saveToken(mockToken);
-            toast.success('Login successful (Static Mode)!');
-            navigate('/');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const { data } = await axios.post(`${apiUrl}/users/login`, formData);
+            
+            if (data.token) {
+                saveToken(data.token);
+                localStorage.setItem('userId', data.user.id);
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                toast.success('Login successful!');
+                navigate(-1 || '/'); // Go back or home
+            }
         } catch (error) {
             console.error("Login Error:", error);
-            toast.error('Something went wrong. Please try again.');
+            toast.error(error.response?.data?.message || 'Invalid credentials. Please try again.');
         } finally {
             setIsLoading(false);
         }
