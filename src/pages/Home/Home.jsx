@@ -87,7 +87,7 @@ const Home = memo(() => {
 
       {/* Products Section - International Catalog Look */}
       <section ref={addToRefs} className="scroll-section py-12 px-6 md:px-12 bg-white" id="products">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           <div className="text-center mb-8 md:mb-24">
             <h4 className="text-[var(--color-primary)] font-bold uppercase tracking-[0.4em] text-[10px] mb-4">The Purest Choice</h4>
             <h2 className="text-3xl md:text-6xl font-bold text-[var(--color-secondary)] tracking-tighter uppercase leading-none">
@@ -119,7 +119,7 @@ const Home = memo(() => {
 
 
       <section className="py-12 px-8 md:px-24 bg-slate-50 border-y border-slate-100 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-[1400px] mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-8 md:gap-16 items-center text-center md:text-left">
             <div className="relative order-2 lg:order-1 flex justify-center lg:justify-start">
               <div className="rounded-[30px] overflow-hidden shadow-xl border-4 border-white w-full max-w-[450px]">
@@ -161,7 +161,7 @@ const Home = memo(() => {
 
       {/* Technology Section - Industrial/Clean Look */}
       <section ref={addToRefs} className="scroll-section py-8 px-8 md:px-24 bg-white" id="technology">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           <div className="grid lg:grid-cols-2 gap-8 items-center text-center md:text-left">
             <div className="space-y-6">
               <div className="space-y-4">
@@ -197,7 +197,7 @@ const Home = memo(() => {
 
       {/* Why Choose Section - Row-wise on Mobile */}
       <section className="py-12 px-6 md:px-24 bg-[#F8FAFC] border-y border-slate-200" id="priorities">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1400px] mx-auto">
           <div className="text-center mb-10 space-y-3">
             <h2 className="text-2xl md:text-5xl font-bold tracking-tighter uppercase text-[var(--color-secondary)]">Why Choose <UnixaBrand /></h2>
             <div className="w-12 h-1 bg-[var(--color-primary)] mx-auto rounded-full"></div>

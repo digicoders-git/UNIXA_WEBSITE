@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Sparkles, Star, Award, Search, X, Grid, Filter, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
+import { Settings, Search, X, Filter, ArrowUpDown, ChevronDown, Check, Wrench, ShieldCheck, Truck } from 'lucide-react';
 import ProductCard from '../../components/cards/PurifierCard';
 import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
@@ -13,8 +13,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-
-const Purifiers = () => {
+const ROParts = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
     const [sortBy, setSortBy] = useState('Featured');
@@ -25,10 +24,13 @@ const Purifiers = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                // Fetch products from API
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
                 const { data } = await axios.get(`${apiUrl}/products`);
                 if (data && data.products) {
+                    // In a real scenario, we might filter by category 'Spares' or 'Parts' here
+                    // For now, we fetch all and let users filter, assuming the backend might mix them
+                    // or we check if there's a specific 'type' field. 
+                    // To make it distinct, let's assume we show all but style it for parts.
                     setProducts(data.products);
                 }
             } catch (error) {
@@ -41,7 +43,6 @@ const Purifiers = () => {
         fetchProducts();
     }, []);
 
-    // Derive dynamic categories from products
     const categories = useMemo(() => {
         const cats = new Set(products.map(p => p.category?.name).filter(Boolean));
         return ['All', ...Array.from(cats)];
@@ -57,7 +58,6 @@ const Purifiers = () => {
             return matchesSearch && matchesCategory;
         });
 
-
         if (sortBy === 'Price: Low to High') {
             result.sort((a, b) => a.finalPrice - b.finalPrice);
         } else if (sortBy === 'Price: High to Low') {
@@ -69,7 +69,7 @@ const Purifiers = () => {
         return result;
     }, [searchQuery, activeCategory, sortBy, products]);
 
-    // Group products into pages of 8 for the slider
+    // Pagination for Swiper
     const paginatedProducts = useMemo(() => {
         const pages = [];
         for (let i = 0; i < filteredAndSortedProducts.length; i += 8) {
@@ -78,107 +78,104 @@ const Purifiers = () => {
         return pages;
     }, [filteredAndSortedProducts]);
 
-
     const sortOptions = ['Featured', 'Newest', 'Price: Low to High', 'Price: High to Low'];
 
     return (
         <div className="bg-[var(--color-surface)] min-h-screen font-['Outfit',sans-serif]">
 
-            {/* Catalog Hero */}
-            <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/20 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]">
-                {/* Water Bubbles Effect */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
-                    {[...Array(15)].map((_, i) => (
+            {/* Hero Section */}
+            {/* Hero Section */}
+            {/* Hero Section */}
+            <section className="relative pt-20 pb-12 md:pt-28 md:pb-16 px-6 text-center bg-slate-50 border-b border-slate-200 rounded-b-[40px] md:rounded-b-[80px] overflow-hidden">
+                {/* High Visibility Water Bubbles */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
+                    {[...Array(10)].map((_, i) => (
                         <div
                             key={i}
-                            className="absolute rounded-full bg-blue-400/30 border border-white/40 blur-[0.5px] animate-float-bubble"
+                            className="absolute rounded-full bg-blue-300/40 border border-white/40 blur-[0.5px] animate-float-bubble"
                             style={{
-                                width: `${(i * 13) % 40 + 15}px`,
-                                height: `${(i * 13) % 40 + 15}px`,
-                                left: `${(i * 23) % 100}%`,
-                                bottom: `-${(i * 11) % 20 + 20}%`,
-                                animationDuration: `${(i * 2) % 4 + 5}s`,
-                                animationDelay: `${(i * 7) % 5}s`
+                                width: `${Math.random() * 40 + 10}px`,
+                                height: `${Math.random() * 40 + 10}px`,
+                                left: `${Math.random() * 100}%`,
+                                bottom: `-${Math.random() * 20 + 10}%`,
+                                animationDuration: `${Math.random() * 4 + 5}s`,
+                                animationDelay: `${Math.random() * 5}s`
                             }}
                         />
                     ))}
                 </div>
 
-                <div className="relative z-10 max-w-4xl mx-auto space-y-8 animate-fade-in px-4">
-                    <div className="space-y-4">
-                        <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white border border-slate-200 rounded-full mx-auto shadow-sm">
-                            <Sparkles size={14} className="text-blue-500" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
-                                Unixa Purifier Catalog 2026
-                            </span>
-                        </div>
-
-                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 leading-none">
-                            <UnixaBrand className="text-5xl md:text-8xl" /> <span className="bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">Series.</span>
-                        </h1>
-
-                        <p className="text-slate-500 text-sm md:text-lg max-w-xl mx-auto leading-relaxed font-bold uppercase tracking-wider opacity-60">
-                            Discover the next generation of smart hydration. Engineered for purity, designed for your lifestyle.
-                        </p>
+                <div className="relative z-10 max-w-4xl mx-auto space-y-4">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full mx-auto shadow-sm">
+                        <Settings size={16} className="text-[var(--color-primary)]" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Genuine Spares
+                        </span>
                     </div>
 
-                    {/* Integrated Search Bar */}
-                    <div className="max-w-xl mx-auto relative group">
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900">
+                        RO Parts <span className="text-[var(--color-primary)]">Store</span>
+                    </h1>
+
+                    <p className="text-slate-500 text-sm md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
+                        Keep your <UnixaBrand className="text-slate-900"/> running like new. 
+                        Authentic filters, membranes, and accessories delivered to your door.
+                    </p>
+
+                    {/* Search Bar - Integrated into Hero like Contact/Home style if needed, or kept simple */}
+                    <div className="max-w-xl mx-auto relative group mt-8">
                         <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-[32px] opacity-0 group-focus-within:opacity-10 blur-xl transition-all duration-500" />
-                        <div className="relative flex items-center bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[30px] p-2 shadow-2xl shadow-blue-500/5 hover:border-blue-200 transition-all duration-300">
-                            <div className="pl-6 text-slate-400">
-                                <Search size={22} strokeWidth={2.5} />
+                        <div className="relative flex items-center bg-white border border-slate-200 rounded-[30px] p-2 shadow-sm transition-all duration-300 focus-within:shadow-md focus-within:border-blue-300">
+                            <div className="pl-4 text-slate-400">
+                                <Search size={20} strokeWidth={2.5} />
                             </div>
                             <input 
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search by model or series..."
-                                className="flex-1 bg-transparent border-none focus:ring-0 outline-none text-slate-800 font-bold text-sm md:text-lg px-4 py-4 placeholder:text-slate-300 placeholder:font-black placeholder:uppercase placeholder:tracking-widest"
+                                placeholder="Find your part (e.g. 'Sediment Filter')"
+                                className="flex-1 bg-transparent border-none focus:ring-0 outline-none text-slate-800 font-bold text-sm px-4 py-3 placeholder:text-slate-400 placeholder:font-bold"
                             />
                             {searchQuery && (
                                 <button 
                                     onClick={() => setSearchQuery('')}
-                                    className="p-3 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl transition-all"
+                                    className="p-2 bg-slate-100 text-slate-500 hover:text-slate-900 rounded-full transition-all"
                                 >
-                                    <X size={18} strokeWidth={3} />
+                                    <X size={16} strokeWidth={3} />
                                 </button>
                             )}
                         </div>
                     </div>
                 </div>
-
-                <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-50/50 to-transparent pointer-events-none" />
             </section>
 
-            {/* Purity Control Dashboard (Filters & Sort) */}
-            <section className="sticky top-[70px] md:top-[74px] z-50 py-4 px-6 md:px-12 bg-white/70 backdrop-blur-xl border-b border-slate-100 shadow-sm">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-                    {/* Category Tabs */}
+            {/* Filters & Sorting */}
+            <section className="sticky top-[70px] md:top-[74px] z-50 py-4 px-6 md:px-12 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                    {/* Categories */}
                     <div className="flex items-center gap-1.5 p-1.5 bg-slate-50 border border-slate-100 rounded-2xl overflow-x-auto no-scrollbar w-full md:w-auto">
                         {categories.map(cat => (
                             <button 
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`whitespace-nowrap px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeCategory === cat ? 'bg-white text-blue-600 shadow-md border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`whitespace-nowrap px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeCategory === cat ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}
                             >
                                 {cat}
                             </button>
                         ))}
                     </div>
 
-                    {/* Quick Stats & Sort */}
+                    {/* Stats & Sort */}
                     <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
                         <div className="flex flex-col items-end">
-                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Catalog Sync</span>
-                            <span className="text-xs font-black text-slate-900 mt-1">{filteredAndSortedProducts.length} Systems Active</span>
+                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Inventory</span>
+                            <span className="text-xs font-black text-slate-900 mt-1">{filteredAndSortedProducts.length} Parts Found</span>
                         </div>
-                        <div className="w-px h-8 bg-slate-100 hidden md:block" />
                         
                         <div className="relative">
                             <button 
                                 onClick={() => setIsSortOpen(!isSortOpen)}
-                                className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:border-blue-200 transition-all shadow-sm"
+                                className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:border-slate-300 transition-all shadow-sm"
                             >
                                 <ArrowUpDown size={14} className="text-blue-500" />
                                 <span>{sortBy}</span>
@@ -207,12 +204,12 @@ const Purifiers = () => {
                 </div>
             </section>
 
-            {/* Catalog Grid */}
-            <section className="py-16 px-6 md:px-12 relative z-10 overflow-hidden">
-                <div className="max-w-[1400px] mx-auto">
+            {/* Product Grid */}
+            <section className="py-16 px-6 md:px-12 relative z-10 overflow-hidden bg-slate-50/50">
+                <div className="max-w-7xl mx-auto">
                     {loading ? (
                         <div className="py-32 flex flex-col items-center">
-                            <Loader text="Calibrating Purity Matrix..." />
+                            <Loader text="Searching Stock..." />
                         </div>
                     ) : (
                         <>
@@ -257,9 +254,9 @@ const Purifiers = () => {
                                             </SwiperSlide>
                                         ))}
                                     </Swiper>
-
-                                    {/* Custom Navigation Buttons */}
-                                    {paginatedProducts.length > 1 && (
+                                    
+                                     {/* Custom Navigation Buttons */}
+                                     {paginatedProducts.length > 1 && (
                                         <>
                                             <button className="swiper-button-prev-custom absolute left-[-20px] md:left-[-50px] top-[40%] z-30 w-10 h-10 md:w-14 md:h-14 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all hover:bg-slate-900 hover:text-white group">
                                                 <ChevronDown size={24} className="rotate-90 group-hover:-translate-x-1 transition-transform" />
@@ -272,18 +269,20 @@ const Purifiers = () => {
                                 </div>
                             ) : (
                                 <div className="py-32 text-center space-y-6 animate-in fade-in slide-in-from-bottom-5">
-                                    <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
-                                        <Filter size={48} strokeWidth={1.5} />
+                                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto text-slate-200 border border-slate-100">
+                                        <Search size={48} strokeWidth={1.5} />
                                     </div>
                                     <div className="space-y-2">
-                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Zero Purity Match</h3>
-                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest max-w-xs mx-auto opacity-60">We couldn't find any premium systems matching these specific calibration parameters.</p>
+                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">No Parts Found</h3>
+                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest max-w-xs mx-auto opacity-60">
+                                            We couldn't locate the part you're looking for.
+                                        </p>
                                     </div>
                                     <button 
-                                        onClick={() => { setSearchQuery(''); setActiveCategory('All'); setSortBy('Featured'); }}
-                                        className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-xl shadow-slate-200 hover:scale-105 active:scale-95 transition-all"
+                                        onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
+                                        className="px-8 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:scale-105 transition-all"
                                     >
-                                        Reset Matrix
+                                        Reset Filters
                                     </button>
                                 </div>
                             )}
@@ -292,18 +291,19 @@ const Purifiers = () => {
                 </div>
             </section>
 
-            <Footer />
+             {/* Help Section */}
+            <section className="py-16 bg-white border-t border-slate-100">
+                <div className="max-w-4xl mx-auto text-center space-y-6">
+                    <h2 className="text-3xl font-black text-slate-900">Cant find what you need?</h2>
+                    <p className="text-slate-500 font-medium">Our support team can help you identify the right part for your machine.</p>
+                    <button onClick={() => window.location.href='/contact'} className="px-8 py-4 bg-[var(--color-primary)] text-white rounded-full font-bold uppercase tracking-widest shadow-lg hover:shadow-xl hover:bg-blue-600 transition-all">
+                        Contact Support
+                    </button>
+                </div>
+            </section>
 
+            <Footer />
             <style>{`
-                @keyframes float-bubble {
-                    0% { transform: translateY(0) scale(1); opacity: 0; }
-                    20% { opacity: 0.4; }
-                    80% { opacity: 0.4; }
-                    100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
-                }
-                .animate-float-bubble {
-                    animation: float-bubble linear infinite;
-                }
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
                 }
@@ -340,10 +340,21 @@ const Purifiers = () => {
                 .purifier-swiper {
                     overflow: visible !important;
                 }
+                @keyframes blob {
+                    0% { transform: translate(0px, 0px) scale(1); }
+                    33% { transform: translate(30px, -50px) scale(1.1); }
+                    66% { transform: translate(-20px, 20px) scale(0.9); }
+                    100% { transform: translate(0px, 0px) scale(1); }
+                }
+                .animate-blob {
+                    animation: blob 7s infinite;
+                }
+                .animation-delay-2000 {
+                    animation-delay: 2s;
+                }
             `}</style>
-
         </div>
     );
 };
 
-export default Purifiers;
+export default ROParts;

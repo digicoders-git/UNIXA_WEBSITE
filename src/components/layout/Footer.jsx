@@ -49,11 +49,17 @@ const Footer = () => {
                 <span className="w-6 h-[2px] bg-[var(--color-primary)]"></span> Company
               </h4>
               <ul className="space-y-5">
-                {['Home', 'Purifiers', 'Technology', 'Reviews', 'Support'].map((link) => (
-                  <li key={link}>
-                    <Link to={link === 'Home' ? '/' : `/${link.toLowerCase()}`} className="text-base font-bold text-slate-200 hover:text-[var(--color-primary)] transition-all no-underline flex items-center gap-2 group">
+                {[
+                  { name: 'Home', link: '/' },
+                  { name: 'Purifiers', link: '/purifiers' },
+                  { name: 'Technology', link: '/#technology' },
+                  { name: 'Reviews', link: '/testimonials' },
+                  { name: 'Support', link: '/contact' }
+                ].map((item) => (
+                  <li key={item.name}>
+                    <Link to={item.link} className="text-base font-bold text-slate-200 hover:text-[var(--color-primary)] transition-all no-underline flex items-center gap-2 group">
                       <span className="w-0 h-0.5 bg-[var(--color-primary)] group-hover:w-3 transition-all"></span>
-                      {link}
+                      {item.name}
                     </Link>
                   </li>
                 ))}

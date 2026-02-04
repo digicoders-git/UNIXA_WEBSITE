@@ -11,6 +11,8 @@ const Testimonials = lazy(() => import('../pages/Testimonials/Testimonials'));
 const Contact = lazy(() => import('../pages/Contact/Contact'));
 const ProductDetail = lazy(() => import('../pages/ProductDetail/ProductDetail'));
 const Shop = lazy(() => import('../pages/Shop/Shop'));
+const RentOnRO = lazy(() => import('../pages/RentOnRO/RentOnRO'));
+const ROParts = lazy(() => import('../pages/ROParts/ROParts'));
 const Profile = lazy(() => import('../pages/auth/Profile'));
 
 
@@ -22,6 +24,7 @@ const Registration = lazy(() => import('../pages/auth/Registration'));
 const ReturnPolicy = lazy(() => import('../pages/Policies/ReturnPolicy'));
 const ShippingPolicy = lazy(() => import('../pages/Policies/ShippingPolicy'));
 const TermsOfService = lazy(() => import('../pages/Policies/TermsOfService'));
+const PrivacyPolicy = lazy(() => import('../pages/Policies/PrivacyPolicy'));
 const NotFound = lazy(() => import('../pages/NotFound/NotFound'));
 
 function App() {
@@ -41,6 +44,8 @@ function App() {
                         <Route path="contact" element={<Contact />} />
                         <Route path="product/:id" element={<ProductDetail />} />
                         <Route path="shop" element={<Shop />} />
+                        <Route path="rent-on-ro" element={<RentOnRO />} />
+                        <Route path="ro-parts" element={<ROParts />} />
 
 
                         <Route path="profile" element={<Profile />} />
@@ -52,6 +57,7 @@ function App() {
                         <Route path="return-policy" element={<ReturnPolicy />} />
                         <Route path="shipping-policy" element={<ShippingPolicy />} />
                         <Route path="terms-of-service" element={<TermsOfService />} />
+                        <Route path="privacy-policy" element={<PrivacyPolicy />} />
                         <Route path="*" element={<NotFound />} />
                     </Route>
                 </Routes>
