@@ -26,20 +26,31 @@ const ProductDetail = () => {
             setLoading(true);
             try {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const { data } = await axios.get(`${apiUrl}/products/${id}`);
                 
-                if (data && data.product) {
-                    setProduct(data.product);
-                    setError(false);
-                } else if (data) {
-                    // In case the API returns the product directly
-                    setProduct(data);
+                // First try standard products
+                try {
+                    const { data } = await axios.get(`${apiUrl}/products/${id}`);
+                    if (data && (data.product || data)) {
+                        setProduct(data.product || data);
+                        setError(false);
+                        setLoading(false);
+                        return;
+                    }
+                } catch (e) {
+                    console.log("Not a standard product, checking RO Parts...");
+                }
+
+                // If not found, check RO Parts
+                const { data: roData } = await axios.get(`${apiUrl}/ro-parts/${id}`);
+                if (roData && (roData.roPart || roData)) {
+                    const foundPart = roData.roPart || roData;
+                    setProduct(foundPart);
                     setError(false);
                 } else {
                     setError(true);
                 }
             } catch (err) {
-                console.error("Fetch product error:", err);
+                console.error("Fetch item error:", err);
                 setError(true);
             } finally {
                 setLoading(false);

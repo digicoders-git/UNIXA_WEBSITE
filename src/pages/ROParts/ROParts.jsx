@@ -25,13 +25,9 @@ const ROParts = () => {
         const fetchProducts = async () => {
             try {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const { data } = await axios.get(`${apiUrl}/products`);
-                if (data && data.products) {
-                    // In a real scenario, we might filter by category 'Spares' or 'Parts' here
-                    // For now, we fetch all and let users filter, assuming the backend might mix them
-                    // or we check if there's a specific 'type' field. 
-                    // To make it distinct, let's assume we show all but style it for parts.
-                    setProducts(data.products);
+                const { data } = await axios.get(`${apiUrl}/ro-parts`);
+                if (data && data.roParts) {
+                    setProducts(data.roParts);
                 }
             } catch (error) {
                 console.error("Failed to fetch products:", error);
