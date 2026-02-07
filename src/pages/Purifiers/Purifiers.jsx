@@ -243,6 +243,7 @@ const Purifiers = () => {
                                                             key={product._id}
                                                             product={{
                                                                 id: product._id,
+                                                                p_id: product.p_id,
                                                                 name: product.name,
                                                                 img: product.mainImage?.url,
                                                                 price: product.price,

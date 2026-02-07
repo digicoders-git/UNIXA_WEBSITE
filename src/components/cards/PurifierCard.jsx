@@ -14,7 +14,8 @@ const ProductCard = memo(({ product }) => {
     const name = product?.name;
     const img = product?.mainImage?.url || product?.img;
     const description = product?.description;
-    const id = product?.id || product?._id;
+    const id = product?.p_id || product?.slug || product?.id || product?._id;
+    const techId = product?._id || product?.id;
     const stock = product?.stock ?? 10; // Default to 10 if not provided
 
     const displayPrice = product?.finalPrice || product?.price;
@@ -29,8 +30,8 @@ const ProductCard = memo(({ product }) => {
         if (isOutOfStock) return;
         
         addToCart({
-            _id: id,
-            id,
+            _id: techId,
+            id: techId,
             name,
             price: displayPrice,
             img,
@@ -145,8 +146,8 @@ const ProductCard = memo(({ product }) => {
                     onClick={() => {
                         if (!isOutOfStock) {
                             addToCart({
-                                _id: id,
-                                id,
+                                _id: techId,
+                                id: techId,
                                 name,
                                 price: displayPrice,
                                 img,

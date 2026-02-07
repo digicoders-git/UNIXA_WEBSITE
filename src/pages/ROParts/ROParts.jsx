@@ -1,17 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Settings, Search, X, Filter, ArrowUpDown, ChevronDown, Check, Wrench, ShieldCheck, Truck } from 'lucide-react';
+import { Settings, Search, X, Filter, ArrowUpDown, ChevronDown, Check, Wrench, ShieldCheck, Truck, Plus } from 'lucide-react';
 import ProductCard from '../../components/cards/PurifierCard';
 import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
 import UnixaBrand from '../../components/common/UnixaBrand';
-
-// Swiper imports
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, EffectFade } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 
 const ROParts = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +13,10 @@ const ROParts = () => {
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [products, setProducts] = useState([]);
+    
+    // Pagination state
+    const [visibleCount, setVisibleCount] = useState(8);
+    const observerTarget = React.useRef(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -38,6 +35,8 @@ const ROParts = () => {
 
         fetchProducts();
     }, []);
+
+
 
     const categories = useMemo(() => {
         const cats = new Set(products.map(p => p.category?.name).filter(Boolean));
@@ -65,22 +64,43 @@ const ROParts = () => {
         return result;
     }, [searchQuery, activeCategory, sortBy, products]);
 
-    // Pagination for Swiper
-    const paginatedProducts = useMemo(() => {
-        const pages = [];
-        for (let i = 0; i < filteredAndSortedProducts.length; i += 8) {
-            pages.push(filteredAndSortedProducts.slice(i, i + 8));
+    // Infinite Scroll Observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0].isIntersecting && visibleCount < filteredAndSortedProducts.length) {
+                     // Load next 4 items (1 row) for smoother "one by one" feel
+                     setVisibleCount(prev => Math.min(prev + 4, filteredAndSortedProducts.length)); 
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (observerTarget.current) {
+            observer.observe(observerTarget.current);
         }
-        return pages;
-    }, [filteredAndSortedProducts]);
+
+        return () => {
+            if (observerTarget.current) {
+                observer.unobserve(observerTarget.current);
+            }
+        };
+    }, [observerTarget, visibleCount, filteredAndSortedProducts]);
+
+    // Reset visible count when filters change
+    useEffect(() => {
+        setVisibleCount(8);
+    }, [searchQuery, activeCategory, sortBy]);
+
+    const visibleProducts = useMemo(() => {
+        return filteredAndSortedProducts.slice(0, visibleCount);
+    }, [filteredAndSortedProducts, visibleCount]);
 
     const sortOptions = ['Featured', 'Newest', 'Price: Low to High', 'Price: High to Low'];
 
     return (
         <div className="bg-[var(--color-surface)] min-h-screen font-['Outfit',sans-serif]">
 
-            {/* Hero Section */}
-            {/* Hero Section */}
             {/* Hero Section */}
             <section className="relative pt-20 pb-12 md:pt-28 md:pb-16 px-6 text-center bg-slate-50 border-b border-slate-200 rounded-b-[40px] md:rounded-b-[80px] overflow-hidden">
                 {/* High Visibility Water Bubbles */}
@@ -109,7 +129,7 @@ const ROParts = () => {
                         </span>
                     </div>
 
-                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900">
+                    <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900">
                         RO Parts <span className="text-[var(--color-primary)]">Store</span>
                     </h1>
 
@@ -118,7 +138,7 @@ const ROParts = () => {
                         Authentic filters, membranes, and accessories delivered to your door.
                     </p>
 
-                    {/* Search Bar - Integrated into Hero like Contact/Home style if needed, or kept simple */}
+                    {/* Search Bar */}
                     <div className="max-w-xl mx-auto relative group mt-8">
                         <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-[32px] opacity-0 group-focus-within:opacity-10 blur-xl transition-all duration-500" />
                         <div className="relative flex items-center bg-white border border-slate-200 rounded-[30px] p-2 shadow-sm transition-all duration-300 focus-within:shadow-md focus-within:border-blue-300">
@@ -146,15 +166,15 @@ const ROParts = () => {
             </section>
 
             {/* Filters & Sorting */}
-            <section className="sticky top-[70px] md:top-[74px] z-50 py-4 px-6 md:px-12 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+            <section className="sticky top-[70px] md:top-[74px] z-40 py-4 px-6 md:px-12 bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm transition-all duration-300">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                     {/* Categories */}
-                    <div className="flex items-center gap-1.5 p-1.5 bg-slate-50 border border-slate-100 rounded-2xl overflow-x-auto no-scrollbar w-full md:w-auto">
+                    <div className="flex items-center gap-2 p-1.5 bg-slate-50 border border-slate-100 rounded-2xl overflow-x-auto no-scrollbar w-full md:w-auto mask-linear-fade">
                         {categories.map(cat => (
                             <button 
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`whitespace-nowrap px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeCategory === cat ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}
+                                className={`whitespace-nowrap px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all select-none ${activeCategory === cat ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' : 'text-slate-400 hover:text-slate-700 hover:bg-white'}`}
                             >
                                 {cat}
                             </button>
@@ -163,7 +183,7 @@ const ROParts = () => {
 
                     {/* Stats & Sort */}
                     <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
-                        <div className="flex flex-col items-end">
+                        <div className="hidden md:flex flex-col items-end">
                             <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Inventory</span>
                             <span className="text-xs font-black text-slate-900 mt-1">{filteredAndSortedProducts.length} Parts Found</span>
                         </div>
@@ -171,7 +191,7 @@ const ROParts = () => {
                         <div className="relative">
                             <button 
                                 onClick={() => setIsSortOpen(!isSortOpen)}
-                                className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:border-slate-300 transition-all shadow-sm"
+                                className="flex items-center gap-3 px-5 py-3 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:border-slate-300 transition-all shadow-sm active:scale-95"
                             >
                                 <ArrowUpDown size={14} className="text-blue-500" />
                                 <span>{sortBy}</span>
@@ -201,7 +221,7 @@ const ROParts = () => {
             </section>
 
             {/* Product Grid */}
-            <section className="py-16 px-6 md:px-12 relative z-10 overflow-hidden bg-slate-50/50">
+            <section className="py-16 px-6 md:px-12 relative z-10 bg-slate-50/50 min-h-[600px]">
                 <div className="max-w-7xl mx-auto">
                     {loading ? (
                         <div className="py-32 flex flex-col items-center">
@@ -209,60 +229,42 @@ const ROParts = () => {
                         </div>
                     ) : (
                         <>
-                            {paginatedProducts.length > 0 ? (
-                                <div className="purifier-slider-container relative">
-                                    <Swiper
-                                        modules={[Navigation, Pagination, EffectFade]}
-                                        spaceBetween={0}
-                                        slidesPerView={1}
-                                        navigation={{
-                                            nextEl: '.swiper-button-next-custom',
-                                            prevEl: '.swiper-button-prev-custom',
-                                        }}
-                                        pagination={{ 
-                                            clickable: true,
-                                            dynamicBullets: true,
-                                            renderBullet: (index, className) => {
-                                                return `<span class="${className} custom-bullet">${index + 1}</span>`;
-                                            }
-                                        }}
-                                        className="purifier-swiper pb-20"
-                                    >
-                                        {paginatedProducts.map((page, pageIdx) => (
-                                            <SwiperSlide key={pageIdx}>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                                    {page.map((product) => (
-                                                        <ProductCard
-                                                            key={product._id}
-                                                            product={{
-                                                                id: product._id,
-                                                                name: product.name,
-                                                                img: product.mainImage?.url,
-                                                                price: product.price,
-                                                                finalPrice: product.finalPrice,
-                                                                discountPercent: product.discountPercent,
-                                                                description: product.description,
-                                                                category: product.category?.name
-                                                            }}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </SwiperSlide>
+                            {visibleProducts.length > 0 ? (
+                                <div className="space-y-4">
+                                    <div className="grid grid-rows-2 grid-flow-col gap-6 overflow-x-auto w-full snap-x snap-mandatory pb-6 custom-scrollbar px-4 scroll-smooth" id="ro-parts-scroll-container">
+                                        {visibleProducts.map((product) => (
+                                            <div key={product._id} className="w-[280px] md:w-[320px] snap-start animate-in fade-in zoom-in-50 duration-500 fill-mode-backwards" style={{ animationDelay: `${Math.random() * 200}ms` }}>
+                                                <ProductCard
+                                                    product={{
+                                                        id: product._id,
+                                                        p_id: product.p_id,
+                                                        name: product.name,
+                                                        img: product.mainImage?.url,
+                                                        price: product.price,
+                                                        finalPrice: product.finalPrice,
+                                                        discountPercent: product.discountPercent,
+                                                        description: product.description,
+                                                        category: product.category?.name
+                                                    }}
+                                                />
+                                            </div>
                                         ))}
-                                    </Swiper>
+                                        
+                                        {/* Infinite Scroll Observer Target (Horizontal) */}
+                                        {visibleCount < filteredAndSortedProducts.length && (
+                                            <div ref={observerTarget} className="flex items-center justify-center p-4 snap-start w-[100px] h-full">
+                                                <Loader size="sm" />
+                                            </div>
+                                        )}
+                                    </div>
                                     
-                                     {/* Custom Navigation Buttons */}
-                                     {paginatedProducts.length > 1 && (
-                                        <>
-                                            <button className="swiper-button-prev-custom absolute left-[-20px] md:left-[-50px] top-[40%] z-30 w-10 h-10 md:w-14 md:h-14 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all hover:bg-slate-900 hover:text-white group">
-                                                <ChevronDown size={24} className="rotate-90 group-hover:-translate-x-1 transition-transform" />
-                                            </button>
-                                            <button className="swiper-button-next-custom absolute right-[-20px] md:right-[-50px] top-[40%] z-30 w-10 h-10 md:w-14 md:h-14 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all hover:bg-slate-900 hover:text-white group">
-                                                <ChevronDown size={24} className="-rotate-90 group-hover:translate-x-1 transition-transform" />
-                                            </button>
-                                        </>
-                                    )}
+                                     {/* Desktop Scroll Hint */}
+                                    <div className="hidden md:flex justify-end pr-8 text-slate-400 text-xs font-bold uppercase tracking-widest gap-2 items-center opacity-60">
+                                         <span>Scroll right for more</span>
+                                         <ArrowUpDown className="-rotate-90" size={14} />
+                                    </div>
                                 </div>
+
                             ) : (
                                 <div className="py-32 text-center space-y-6 animate-in fade-in slide-in-from-bottom-5">
                                     <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto text-slate-200 border border-slate-100">
