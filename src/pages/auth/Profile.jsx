@@ -316,6 +316,12 @@ const Profile = () => {
         }
     };
 
+    const handleGoToDashboard = () => {
+        const token = getToken();
+        const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL || 'http://localhost:5177';
+        window.location.href = `${dashboardUrl}/login?token=${token}`;
+    };
+
     const handleSaveProfile = async () => {
         setIsLoading(true);
         try {
@@ -449,8 +455,34 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Security Section */}
+                        {/* Right Sidebar Section */}
                         <div className="space-y-6">
+                            {/* Dashboard Access Card */}
+                            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 p-8 rounded-[32px] text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group border border-slate-700/50">
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform">
+                                            <Zap className="text-blue-400" size={24} />
+                                        </div>
+                                        <span className="text-[8px] font-bold uppercase tracking-[0.2em] bg-blue-500/20 px-2 py-1 rounded text-blue-300 border border-blue-500/30">Live Support</span>
+                                    </div>
+                                    <h3 className="text-xl font-black mb-2">Service Dashboard</h3>
+                                    <p className="text-blue-100/60 text-[11px] font-medium mb-8 leading-relaxed">
+                                        Manage AMC, track service history, and request filter changes in real-time.
+                                    </p>
+                                    <button 
+                                        onClick={handleGoToDashboard}
+                                        className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                    >
+                                        Access Portal <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                                {/* Decorative elements */}
+                                <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl group-hover:bg-blue-600/40 transition-all duration-500"></div>
+                                <div className="absolute top-0 right-0 w-full h-full bg-[url('/water-bg.png')] opacity-5 mix-blend-overlay"></div>
+                            </div>
+
+                            {/* Security Section */}
                             <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
                                 <h2 className="text-xl font-bold mb-6 text-slate-900 flex items-center gap-2">
                                     <Lock size={20} className="text-[var(--color-primary)]" /> Update Password

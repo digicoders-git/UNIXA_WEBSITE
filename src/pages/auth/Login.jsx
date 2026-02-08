@@ -27,7 +27,15 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        await performLogin(false);
+    };
 
+    const handleDashboardLogin = async (e) => {
+        e.preventDefault();
+        await performLogin(true);
+    };
+
+    const performLogin = async (toDashboard) => {
         if (!formData.email || !formData.password) {
             toast.error('Please fill in all fields');
             return;
@@ -39,11 +47,17 @@ const Login = () => {
             const { data } = await axios.post(`${apiUrl}/users/login`, formData);
             
             if (data.token) {
+                if (toDashboard) {
+                    const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL || 'http://localhost:5177';
+                    window.location.href = `${dashboardUrl}/login?token=${data.token}`;
+                    return;
+                }
+
                 saveToken(data.token);
                 localStorage.setItem('userId', data.user.id);
                 localStorage.setItem('userData', JSON.stringify(data.user));
                 toast.success('Login successful!');
-                navigate(-1 || '/'); // Go back or home
+                navigate(-1 || '/');
             }
         } catch (error) {
             console.error("Login Error:", error);
@@ -57,7 +71,7 @@ const Login = () => {
         <div>
             <Navbar />
             <div className="min-h-[calc(100vh-80px)] mt-20 flex items-center justify-center px-4 py-12 relative overflow-hidden" style={{ backgroundColor: `var(--color-surface)` }}>
-                {/* Animated Background Bubbles */}
+                {/* ... existing styles and bubbles ... */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="auth-bubble auth-bubble-1"></div>
                     <div className="auth-bubble auth-bubble-2"></div>
@@ -97,7 +111,7 @@ const Login = () => {
                         <p className="text-sm md:text-base" style={{ color: `var(--color-text-muted)` }}>Sign in to your UNIXA account</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                    <form className="space-y-4 md:space-y-6">
                         <div>
                             <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Email Address</label>
                             <div className="relative">
@@ -116,7 +130,6 @@ const Login = () => {
                                     placeholder="Enter your email"
                                 />
                             </div>
-
                         </div>
 
                         <div>
@@ -141,34 +154,40 @@ const Login = () => {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
                                     style={{ color: `var(--color-text-muted)` }}
-                                    onMouseEnter={(e) => e.target.style.color = 'var(--color-text)'}
-                                    onMouseLeave={(e) => e.target.style.color = 'var(--color-text-muted)'}
                                 >
                                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
-
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full py-3 rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-xl transform hover:scale-[1.02]"
-                            style={{
-                                backgroundColor: `var(--color-secondary)`,
-                                color: `white`,
-                                background: `linear-gradient(135deg, var(--color-secondary) 0%, rgba(6, 182, 212, 0.8) 100%)`
-                            }}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: `white` }}></div>
-                                    <span>Logging in...</span>
-                                </>
-                            ) : (
-                                'Login'
-                            )}
-                        </button>
+                        <div className="grid grid-cols-1 gap-3">
+                            <button
+                                onClick={handleSubmit}
+                                type="button"
+                                disabled={isLoading}
+                                className="w-full py-3 rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-xl transform hover:scale-[1.01]"
+                                style={{
+                                    backgroundColor: `var(--color-secondary)`,
+                                    color: `white`,
+                                    background: `linear-gradient(135deg, var(--color-secondary) 0%, rgba(6, 182, 212, 0.8) 100%)`
+                                }}
+                            >
+                                {isLoading ? <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"></div> : 'Login to Website'}
+                            </button>
+
+                            <button
+                                onClick={handleDashboardLogin}
+                                type="button"
+                                disabled={isLoading}
+                                className="w-full py-3 rounded-xl font-black transition-all shadow-lg disabled:opacity-50 border-2 hover:bg-slate-50 flex items-center justify-center gap-2 transform hover:scale-[1.01] uppercase tracking-widest text-[10px]"
+                                style={{
+                                    borderColor: `var(--color-primary)`,
+                                    color: `var(--color-primary)`
+                                }}
+                            >
+                                Go to User Dashboard
+                            </button>
+                        </div>
                     </form>
 
                     <div className="mt-6 text-center">
