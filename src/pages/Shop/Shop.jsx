@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import { ShoppingBag, Trash2, MapPin, CreditCard, CheckCircle2, Plus, Minus, Banknote, Smartphone, X, Home, Briefcase, User, Pencil, Tag, ChevronRight, Check, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -46,10 +46,7 @@ const Shop = () => {
         if (!isLoggedIn) return;
         setIsLoadingAddresses(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const response = await axios.get(`${apiUrl}/users/addresses`, {
-                headers: { Authorization: `Bearer ${getToken()}` }
-            });
+            const response = await api.get('/users/addresses');
             setSavedAddresses(response.data.addresses || []);
             const defaultAddr = response.data.addresses?.find(a => a.isDefault);
             if (defaultAddr) setSelectedAddressId(defaultAddr._id);
@@ -72,17 +69,12 @@ const Shop = () => {
         }
         setIsAddressSaving(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             if (editingAddressId) {
-                const { data } = await axios.put(`${apiUrl}/users/addresses/${editingAddressId}`, addressForm, {
-                    headers: { Authorization: `Bearer ${getToken()}` }
-                });
+                const { data } = await api.put(`/users/addresses/${editingAddressId}`, addressForm);
                 setSavedAddresses(data.addresses);
                 toast.success("Address updated successfully!");
             } else {
-                const { data } = await axios.post(`${apiUrl}/users/addresses`, addressForm, {
-                    headers: { Authorization: `Bearer ${getToken()}` }
-                });
+                const { data } = await api.post(`/users/addresses`, addressForm);
                 setSavedAddresses(data.addresses);
                 toast.success("New address added!");
             }
@@ -126,7 +118,6 @@ const Shop = () => {
 
         setIsPlacingOrder(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const userId = localStorage.getItem('userId');
             
             if (!userId) {
@@ -156,9 +147,7 @@ const Shop = () => {
                 total: totalAmount
             };
 
-            const { data } = await axios.post(`${apiUrl}/orders`, orderData, {
-                headers: { Authorization: `Bearer ${getToken()}` }
-            });
+            const { data } = await api.post(`/orders`, orderData);
             
             if (data) {
                 Swal.fire({

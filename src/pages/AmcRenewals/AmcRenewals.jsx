@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { getToken } from '../../utils/auth';
 import { ShieldCheck, Zap, RefreshCw, Clock, Calendar, Info, ChevronRight, ArrowRight, X, Check, Star, Shield, Smartphone, Activity, Wrench, History, FileText, Droplets, Target, Cpu, HardDrive, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -341,8 +341,7 @@ const PlanSelectorModal = ({ isOpen, onClose, onSelect }) => {
     useEffect(() => {
         const fetchPlans = async () => {
             try {
-                const url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const { data } = await axios.get(`${url}/amc-plans?activeOnly=true`);
+                const { data } = await api.get(`/amc-plans?activeOnly=true`);
                 if (data.success) {
                     setPlans(data.plans);
                 }
@@ -442,7 +441,6 @@ const SuccessModal = ({ isOpen, onClose, plan, transactionId }) => {
 };
 
 const AmcRenewals = () => {
-    const navigate = useNavigate();
     const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
@@ -469,17 +467,7 @@ const AmcRenewals = () => {
     const fetchAmcData = async () => {
         try {
             setLoading(true);
-            const token = getToken(); 
-            
-            if (!token) {
-                 setLoading(false);
-                 return; // Or show empty state
-            }
-
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const { data } = await axios.get(`${apiUrl}/amc-user/my-subscriptions`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data } = await api.get(`/amc-user/my-subscriptions`);
 
             if (data.success) {
                 setAmcData(data.amc);
@@ -580,19 +568,9 @@ const AmcRenewals = () => {
             customClass: { popup: 'rounded-[32px]' }
         }).then(async () => {
              try {
-                const token = getToken();
-                if (!token) {
-                    toast.error("Please login to purchase a plan");
-                    navigate('/login');
-                    return;
-                }
-
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                await axios.post(`${apiUrl}/amc-user/subscribe`, {
+                await api.post(`/amc-user/subscribe`, {
                     planName: plan.name,
                     price: plan.price
-                }, {
-                     headers: { Authorization: `Bearer ${token}` }
                 });
 
                 const tid = `UX_${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
@@ -611,7 +589,7 @@ const AmcRenewals = () => {
         const result = await Swal.fire({
             title: 'Secure Extension?',
             text: `Renew ${amc.planName} for ₹${amc.price} and extend pure water guarantee by 365 days.`,
-            icon: 'shield',
+            icon: 'info',
             showCancelButton: true,
             confirmButtonColor: '#3b82f6',
             confirmButtonText: 'PROCEED TO RENEW',
@@ -631,12 +609,8 @@ const AmcRenewals = () => {
                 didOpen: () => Swal.showLoading()
             }).then(async () => {
                 try {
-                    const token = getToken();
-                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                    await axios.post(`${apiUrl}/amc-user/renew`, {
+                    await api.post(`/amc-user/renew`, {
                         amcId: amc._id
-                    }, {
-                        headers: { Authorization: `Bearer ${token}` }
                     });
 
                     setSelectedPlan({ name: amc.planName, price: amc.price });
@@ -663,18 +637,7 @@ const AmcRenewals = () => {
         setIsServiceModalOpen(false);
         
         try {
-            const token = getToken();
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            
-            if (!token) {
-                toast.error("Authentication failed. Please login again.");
-                navigate('/login');
-                return;
-            }
-
-            await axios.post(`${apiUrl}/amc-user/request-service`, data, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.post(`/amc-user/request-service`, data);
 
             Swal.fire({
                 icon: 'success',
@@ -754,7 +717,12 @@ const AmcRenewals = () => {
                             </div>
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Contract Validity</p>
-                                <h4 className="text-2xl font-black text-slate-900 leading-none">342<span className="text-xs ml-1">Days Left</span></h4>
+                                <h4 className="text-2xl font-black text-slate-900 leading-none">
+                                    {amcData.length > 0 ? (
+                                        Math.max(0, Math.ceil((new Date(amcData[0].expiryDate) - new Date()) / (1000 * 60 * 60 * 24)))
+                                    ) : '0'}
+                                    <span className="text-xs ml-1">Days Left</span>
+                                </h4>
                             </div>
                         </div>
                         <div className="bg-white/60 backdrop-blur-md border border-white p-8 rounded-[40px] shadow-sm flex flex-col justify-between group hover:border-blue-200 transition-all hover:shadow-xl">

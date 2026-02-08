@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 
@@ -25,11 +25,9 @@ const ProductDetail = () => {
         const fetchProduct = async () => {
             setLoading(true);
             try {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                
                 // First try standard products
                 try {
-                    const { data } = await axios.get(`${apiUrl}/products/${id}`);
+                    const { data } = await api.get(`/products/${id}`);
                     if (data && (data.product || data)) {
                         setProduct(data.product || data);
                         setError(false);
@@ -41,7 +39,7 @@ const ProductDetail = () => {
                 }
 
                 // If not found, check RO Parts
-                const { data: roData } = await axios.get(`${apiUrl}/ro-parts/${id}`);
+                const { data: roData } = await api.get(`/ro-parts/${id}`);
                 if (roData && (roData.roPart || roData)) {
                     const foundPart = roData.roPart || roData;
                     setProduct(foundPart);

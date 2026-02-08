@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { isTokenValid, getToken } from '../../utils/auth';
@@ -310,19 +310,13 @@ const Orders = () => {
         }
 
         const fetchOrders = async () => {
-            try {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const userId = localStorage.getItem('userId');
-                
-                if (!userId) {
-                    toast.error("User identification failure. Re-authenticating...");
-                    navigate('/login');
-                    return;
-                }
-
-                const { data } = await axios.get(`${apiUrl}/orders/user/${userId}`, {
-                    headers: { Authorization: `Bearer ${getToken()}` }
-                });
+             const userId = localStorage.getItem('userId');
+             if (!userId) {
+                 setLoading(false);
+                 return;
+             }
+             try {
+                const { data } = await api.get(`/orders/user/${userId}`);
                 
                 if (data && data.orders) {
                     setOrders(data.orders);
@@ -339,21 +333,16 @@ const Orders = () => {
 
     const handleRefundSubmit = async (order, type, reason, bankDetails) => {
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const userId = localStorage.getItem('userId');
-            
             const payload = {
                 orderId: order._id,
-                userId: userId,
-                type: type, 
-                reason: reason,
-                amount: order.total,
-                bankDetails: bankDetails
+                userId,
+                type,
+                reason,
+                amount: order.total || 0,
+                bankDetails
             };
-
-            await axios.post(`${apiUrl}/refunds`, payload, {
-                headers: { Authorization: `Bearer ${getToken()}` }
-            });
+            await api.post(`/refunds`, payload);
 
             Swal.fire({
                 title: 'Request Received',

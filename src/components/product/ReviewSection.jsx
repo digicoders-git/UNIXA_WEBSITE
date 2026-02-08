@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
+import api from '../../services/api';
 import { Star, Send, User, Calendar, CheckCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const ReviewSection = ({ productId }) => {
     const [reviews, setReviews] = useState([]);
@@ -18,14 +16,10 @@ const ReviewSection = ({ productId }) => {
     const [userName, setUserName] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchReviews();
-    }, [productId]);
-
-    const fetchReviews = async () => {
+    const fetchReviews = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${API_BASE_URL}/reviews/${productId}`);
+            const response = await api.get(`/reviews/${productId}`);
             if (response.data.success) {
                 setReviews(response.data.reviews || []);
                 setAverageRating(response.data.averageRating || 0);
@@ -38,7 +32,11 @@ const ReviewSection = ({ productId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [productId]);
+
+    useEffect(() => {
+        fetchReviews();
+    }, [fetchReviews]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -55,7 +53,7 @@ const ReviewSection = ({ productId }) => {
 
         setIsSubmitting(true);
         try {
-            const response = await axios.post(`${API_BASE_URL}/reviews/add`, {
+            const response = await api.post(`/reviews/add`, {
                 productId,
                 user: userName,
                 rating,
@@ -79,18 +77,18 @@ const ReviewSection = ({ productId }) => {
     };
 
     return (
-        <div id="reviews-section" className="mt-20 border-t border-slate-100 pt-16 font-[var(--font-body)]">
+        <div id="reviews-section" className="mt-20 border-t border-slate-100 pt-16 font-(--font-body)">
             <div className="flex flex-col md:flex-row gap-12">
                 
                 {/* Summary Section */}
                 <div className="w-full md:w-1/3">
-                    <h3 className="text-2xl font-black text-[var(--color-secondary)] mb-6 flex items-center gap-2">
+                    <h3 className="text-2xl font-black text-(--color-secondary) mb-6 flex items-center gap-2">
                         Customer Reviews
                     </h3>
                     
-                    <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 shadow-sm">
+                    <div className="bg-white p-8 rounded-4xl border border-slate-100 shadow-xl shadow-slate-100/50">
                         <div className="text-center mb-6">
-                            <div className="text-6xl font-black text-[var(--color-primary)] mb-2">
+                            <div className="text-6xl font-black text-(--color-primary) mb-2">
                                 {averageRating > 0 ? averageRating : '0.0'}
                             </div>
                             <div className="flex justify-center text-yellow-400 mb-2">
@@ -106,7 +104,7 @@ const ReviewSection = ({ productId }) => {
                             <p className="text-slate-500 font-bold text-sm">Based on {totalReviews} reviews</p>
                         </div>
                         
-                        {/* Rating Bars Placeholder (Visual enhancement) */}
+                        {/* Rating Bars */}
                         <div className="space-y-3">
                             {[5, 4, 3, 2, 1].map((num) => {
                                 const count = reviews.filter(r => r.rating === num).length;
@@ -116,7 +114,7 @@ const ReviewSection = ({ productId }) => {
                                         <span className="text-xs font-black text-slate-500 w-4">{num}</span>
                                         <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                                             <div 
-                                                className="h-full bg-[var(--color-primary)] rounded-full transition-all duration-1000"
+                                                className="h-full bg-(--color-primary) rounded-full transition-all duration-1000"
                                                 style={{ width: `${percent}%` }}
                                             />
                                         </div>
@@ -132,8 +130,8 @@ const ReviewSection = ({ productId }) => {
                 <div className="w-full md:w-2/3">
                     
                     {/* Form */}
-                    <div className="bg-white rounded-[2rem] p-8 border-2 border-slate-50 shadow-xl mb-12">
-                        <h4 className="text-xl font-black text-[var(--color-secondary)] mb-6 flex items-center gap-2 uppercase tracking-wider">
+                    <div className="bg-white rounded-4xl p-8 border-2 border-slate-50 shadow-xl mb-12">
+                        <h4 className="text-xl font-black text-(--color-secondary) mb-6 flex items-center gap-2 uppercase tracking-wider">
                             Share Your Experience
                         </h4>
                         
@@ -148,7 +146,7 @@ const ReviewSection = ({ productId }) => {
                                             value={userName}
                                             onChange={(e) => setUserName(e.target.value)}
                                             placeholder="Enter your name"
-                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none transition-all font-bold text-slate-700"
+                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-(--color-primary)/20 outline-none transition-all font-bold text-slate-700"
                                         />
                                     </div>
                                 </div>
@@ -171,7 +169,7 @@ const ReviewSection = ({ productId }) => {
                                                 />
                                             </button>
                                         ))}
-                                        <span className="ml-3 font-black text-[var(--color-primary)] self-center">{rating}/5</span>
+                                        <span className="ml-3 font-black text-(--color-primary) self-center">{rating}/5</span>
                                     </div>
                                 </div>
                             </div>
@@ -183,14 +181,14 @@ const ReviewSection = ({ productId }) => {
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
                                     placeholder="Tell us what you like or dislike about this product..."
-                                    className="w-full p-6 bg-slate-50 border border-slate-100 rounded-3xl focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none transition-all font-medium text-slate-600 leading-relaxed"
+                                    className="w-full p-6 bg-slate-50 border border-slate-100 rounded-3xl focus:ring-2 focus:ring-(--color-primary)/20 outline-none transition-all font-medium text-slate-600 leading-relaxed"
                                 />
                             </div>
 
                             <button 
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-5 bg-[var(--color-secondary)] text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-[var(--color-primary)] transition-all shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 disabled:opacity-70 active:scale-95"
+                                className="w-full py-5 bg-(--color-secondary) text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-(--color-primary) transition-all shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 disabled:opacity-70 active:scale-95"
                             >
                                 {isSubmitting ? (
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -205,7 +203,7 @@ const ReviewSection = ({ productId }) => {
                     {/* Reviews List */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between mb-8">
-                            <h4 className="text-xl font-black text-[var(--color-secondary)] uppercase tracking-wider">
+                            <h4 className="text-xl font-black text-(--color-secondary) uppercase tracking-wider">
                                 Filtered Reviews ({reviews.length})
                             </h4>
                             <div className="text-xs font-bold text-slate-400 bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
@@ -215,10 +213,10 @@ const ReviewSection = ({ productId }) => {
 
                         {loading ? (
                             <div className="flex justify-center py-12">
-                                <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+                                <div className="w-8 h-8 border-4 border-(--color-primary) border-t-transparent rounded-full animate-spin" />
                             </div>
                         ) : reviews.length === 0 ? (
-                            <div className="text-center py-16 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                            <div className="text-center py-16 bg-slate-50 rounded-4xl border-2 border-dashed border-slate-200">
                                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-slate-300 text-3xl">💬</div>
                                 <p className="text-slate-400 font-bold italic">No reviews yet. Be the first to share your thoughts!</p>
                             </div>
@@ -227,18 +225,26 @@ const ReviewSection = ({ productId }) => {
                                 <div key={review._id || index} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-gradient-to-br from-[var(--color-primary)] to-cyan-400 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg group-hover:rotate-6 transition-transform">
+                                            <div className="w-12 h-12 bg-linear-to-br from-(--color-primary) to-cyan-400 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg group-hover:rotate-6 transition-transform">
                                                 {review.user?.[0]?.toUpperCase()}
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <h5 className="font-black text-[var(--color-secondary)]">{review.user}</h5>
+                                                    <h5 className="font-black text-(--color-secondary)">{review.user}</h5>
                                                     <CheckCircle size={14} className="text-green-500" />
                                                     <span className="text-[10px] font-bold text-green-500 uppercase tracking-tighter">Verified Buyer</span>
                                                 </div>
                                                 <div className="flex text-yellow-400 scale-75 -ml-4">
                                                     {[...Array(5)].map((_, i) => (
-                                                        <Star key={i} size={16} fill={i < review.rating ? "currentColor" : "none"} />
+                                                        <Star
+                                                            key={i}
+                                                            size={12}
+                                                            className={`${
+                                                                i < review.rating
+                                                                    ? 'text-yellow-400 fill-yellow-400'
+                                                                    : 'text-slate-200'
+                                                            }`}
+                                                        />
                                                     ))}
                                                 </div>
                                             </div>

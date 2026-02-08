@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from 'react-slick';
-import axios from 'axios';
+import api from '../../services/api';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -15,8 +15,7 @@ const HeroSlider = memo(() => {
     useEffect(() => {
         const fetchSliders = async () => {
             try {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const res = await axios.get(`${apiUrl}/sliders`);
+                const res = await api.get('/sliders');
                 if (res.data && res.data.sliders && res.data.sliders.length > 0) {
                     setSliders(res.data.sliders);
                 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { getToken, removeToken, isTokenValid } from '../../utils/auth';
 import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, ChevronRight, Package, Download, Calendar, ShoppingBag, ShieldCheck, Zap, RefreshCw, Clock, Info, CreditCard } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -227,11 +227,8 @@ const Profile = () => {
 
         setIsInitialLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const headers = { Authorization: `Bearer ${getToken()}` };
-            
             // Fetch Profile
-            const profileRes = await axios.get(`${apiUrl}/users/profile`, { headers });
+            const profileRes = await api.get(`/users/profile`);
             if (profileRes.data.user) {
                 setProfileData({
                     firstName: profileRes.data.user.firstName || '',
@@ -246,7 +243,7 @@ const Profile = () => {
             // Fetch Orders
             const userId = localStorage.getItem('userId');
             if (userId) {
-                const ordersRes = await axios.get(`${apiUrl}/orders/user/${userId}`, { headers });
+                const ordersRes = await api.get(`/orders/user/${userId}`);
                 setOrders(ordersRes.data.orders || []);
             }
         } catch (error) {
@@ -296,12 +293,9 @@ const Profile = () => {
 
         setIsLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.put(`${apiUrl}/users/change-password`, {
+            await api.put(`/users/change-password`, {
                 currentPassword: passwordData.currentPassword,
                 newPassword: passwordData.newPassword
-            }, {
-                headers: { Authorization: `Bearer ${getToken()}` }
             });
 
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -325,10 +319,7 @@ const Profile = () => {
     const handleSaveProfile = async () => {
         setIsLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const { data } = await axios.put(`${apiUrl}/users/profile`, profileData, {
-                headers: { Authorization: `Bearer ${getToken()}` }
-            });
+            const { data } = await api.put(`/users/profile`, profileData);
             setProfileData(data.user);
             setIsEditing(false);
             toast.success('Profile updated successfully!');

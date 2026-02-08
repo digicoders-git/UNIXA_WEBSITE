@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { 
   CheckCircle2, 
   Droplets, 
@@ -48,8 +48,7 @@ const RentOnRO = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const { data } = await axios.get(`${apiUrl}/rental-plans`);
+        const { data } = await api.get(`/rental-plans`);
         if (data && data.plans) {
            // Map DB structure to Frontend structure
            const mappedPlans = data.plans.filter(p => p.isActive).map(plan => ({
@@ -125,21 +124,11 @@ const RentOnRO = () => {
     }
 
     try {
-      // Use existing Enquiry API to save the request
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const subject = activeTab === 'renew' 
-        ? `AMC Renewal Request for ID: ${formData.message || 'Not Provided'}` 
-        : `New ${selectedPlan?.name || 'Service'} Request`;
-        
-      const messageBody = `
-        Request Type: ${activeTab.toUpperCase()}
-        Plan: ${selectedPlan?.name || 'N/A'}
-        Price: ${selectedPlan?.price || 'N/A'}
-        Address: ${formData.address}
-        User Message: ${formData.message}
-      `;
+      const subject = selectedPlan ? `Booking: ${selectedPlan.name}` : 'Booking Request';
+      const messageBody = `Plan: ${selectedPlan?.name}\nPrice: ${selectedPlan?.price}\nAddress: ${formData.address}\nMessage: ${formData.message}`;
 
-      await axios.post(`${apiUrl}/enquiry`, {
+      // Use existing Enquiry API to save the request
+      await api.post(`/enquiry`, {
         name: formData.name,
         phone: formData.phone,
         email: formData.email,
@@ -180,7 +169,7 @@ const RentOnRO = () => {
             
             <h1 className="text-4xl md:text-7xl font-black text-slate-900 leading-tight tracking-tight">
               Smart Water <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Solutions</span>
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-cyan-500">Solutions</span>
             </h1>
             
             <p className="text-slate-500 text-lg font-medium max-w-lg leading-relaxed">
@@ -280,7 +269,7 @@ const RentOnRO = () => {
                              {/* Plan Image if available */}
                              {plan.image ? (
                                 <div className="mb-6 -mx-8 -mt-8 h-56 bg-slate-50 overflow-hidden relative">
-                                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10"/>
+                                   <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent z-10"/>
                                    <img src={plan.image} alt={plan.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                    
                                    {/* Badge over Image */}
@@ -428,7 +417,7 @@ const RentOnRO = () => {
 
       {/* Booking Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
               <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                  <div>

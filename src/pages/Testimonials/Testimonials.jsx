@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Droplets, X, Check, AlertTriangle, Shield, Heart, Zap, Filter, ArrowRight, Star, Quote } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 import UnixaBrand from '../../components/common/UnixaBrand';
@@ -39,8 +39,7 @@ const Testimonials = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const { data } = await axios.get(`${apiUrl}/reviews/all`);
+        const { data } = await api.get('/reviews/all');
         if (data.success) {
           setReviews(data.reviews);
         }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Mail, Phone, MapPin, Loader2, Droplets, ArrowRight } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 // Removed API import for local system
@@ -103,8 +103,7 @@ const Contact = () => {
 
         setLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            await axios.post(`${apiUrl}/enquiry`, formData);
+            await api.post(`/enquiry`, formData);
 
             toast.success("Thank you! Your message has been sent.");
             setFormData({
@@ -161,14 +160,14 @@ const Contact = () => {
 
                 <div className="relative z-10 max-w-4xl mx-auto space-y-4">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full mx-auto shadow-sm">
-                        <Phone size={16} className="text-[var(--color-primary)]" />
+                        <Phone size={16} className="text-(--color-primary)" />
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                             Support Desk
                         </span>
                     </div>
 
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900">
-                        Contact <span className="text-[var(--color-primary)]">Us</span>
+                        Contact <span className="text-(--color-primary)">Us</span>
                     </h1>
 
                     <p className="text-slate-500 text-sm md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
@@ -183,41 +182,41 @@ const Contact = () => {
                     <div ref={addToRefs} className="flex-1 space-y-6">
                         <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 space-y-8">
                             <div className="space-y-2">
-                                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Reach <span className="text-[var(--color-primary)]">Us</span></h2>
+                                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Reach <span className="text-(--color-primary)">Us</span></h2>
                                 <p className="text-slate-500 text-sm font-medium">Use any of the following channels to connect with us.</p>
                             </div>
 
                             <div className="space-y-6">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[var(--color-primary)]">
+                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-(--color-primary)">
                                         <Mail size={20} />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-800 text-sm">Email</h4>
-                                        <a href="mailto:info@unixa.com" className="text-slate-500 text-sm font-medium hover:text-[var(--color-primary)] transition-colors">info@unixa.com</a>
+                                        <a href="mailto:info@unixa.com" className="text-slate-500 text-sm font-medium hover:text-(--color-primary) transition-colors">info@unixa.com</a>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[var(--color-primary)]">
+                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-(--color-primary)">
                                         <Phone size={20} />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-800 text-sm">Phone</h4>
                                         <div className="flex flex-col text-slate-500 text-sm font-medium">
-                                            <a href="tel:+911800123456" className="hover:text-[var(--color-primary)] transition-colors">+91 1800-123-456</a>
-                                            <a href="tel:+919876543210" className="hover:text-[var(--color-primary)] transition-colors">+91 9876543210</a>
+                                            <a href="tel:+911800123456" className="hover:text-(--color-primary) transition-colors">+91 1800-123-456</a>
+                                            <a href="tel:+919876543210" className="hover:text-(--color-primary) transition-colors">+91 9876543210</a>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[var(--color-primary)]">
+                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-(--color-primary)">
                                         <MapPin size={20} />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-800 text-sm">Location</h4>
-                                        <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-slate-500 text-sm font-medium hover:text-[var(--color-primary)] leading-relaxed block">
+                                        <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-slate-500 text-sm font-medium hover:text-(--color-primary) leading-relaxed block">
                                             UNIXA Head Office, Industrial Area, <br />New Delhi, India
                                         </a>
                                     </div>
@@ -231,7 +230,7 @@ const Contact = () => {
                     {/* Contact Form */}
                     <div ref={addToRefs} className="flex-[1.5] p-8 md:p-10 rounded-3xl bg-white border border-slate-200 shadow-sm">
                         <div className="space-y-2 mb-8">
-                            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Send a <span className="text-[var(--color-primary)]">Message</span></h2>
+                            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Send a <span className="text-(--color-primary)">Message</span></h2>
                             <p className="text-slate-500 text-sm font-medium">We'll get back to you as soon as possible.</p>
                         </div>
 
@@ -245,7 +244,7 @@ const Contact = () => {
                                         value={formData.name}
                                         onChange={handleChange}
                                         placeholder="Ricky Singh"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-[var(--color-primary)] transition-all"
+                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                         required
                                     />
                                     {errors.name && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.name}</p>}
@@ -258,7 +257,7 @@ const Contact = () => {
                                         value={formData.email}
                                         onChange={handleChange}
                                         placeholder="ricky@example.com"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-[var(--color-primary)] transition-all"
+                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                     />
                                 </div>
                             </div>
@@ -271,7 +270,7 @@ const Contact = () => {
                                         value={formData.phone}
                                         onChange={handleChange}
                                         placeholder="9876543210"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-[var(--color-primary)] transition-all"
+                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                         required
                                     />
                                     {errors.phone && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.phone}</p>}
@@ -284,7 +283,7 @@ const Contact = () => {
                                         value={formData.subject}
                                         onChange={handleChange}
                                         placeholder="Inquiry Topic"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-[var(--color-primary)] transition-all"
+                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                     />
                                 </div>
                             </div>
@@ -296,7 +295,7 @@ const Contact = () => {
                                     onChange={handleChange}
                                     placeholder="Tell us how we can help..."
                                     rows="4"
-                                    className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-[var(--color-primary)] transition-all resize-none"
+                                    className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all resize-none"
                                     required
                                 ></textarea>
                                 {errors.message && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.message}</p>}
@@ -304,7 +303,7 @@ const Contact = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-all bg-[var(--color-primary)] text-white hover:bg-slate-900 disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-all bg-(--color-primary) text-white hover:bg-slate-900 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? 'Sending...' : 'Send Message'}
                             </button>

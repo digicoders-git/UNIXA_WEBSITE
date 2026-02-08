@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -43,12 +43,11 @@ const Login = () => {
 
         setIsLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const { data } = await axios.post(`${apiUrl}/users/login`, formData);
+            const { data } = await api.post(`/users/login`, formData);
             
             if (data.token) {
                 if (toDashboard) {
-                    const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL || 'http://localhost:5177';
+                    const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL;
                     window.location.href = `${dashboardUrl}/login?token=${data.token}`;
                     return;
                 }

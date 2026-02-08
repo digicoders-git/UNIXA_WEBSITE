@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, memo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import axios from 'axios';
+import api from '../../services/api';
 import { Shield, Droplets, Heart as HeartIcon, Award, Zap, Activity, Settings, Phone, Wrench, CheckCircle2, ArrowRight } from 'lucide-react';
 
 import { throttle } from '../../utils/performance';
@@ -27,8 +27,7 @@ const Home = memo(() => {
     const fetchProducts = async () => {
       try {
         // VITE_API_URL is expected to include /api, e.g., http://localhost:5000/api
-        const apiUrl = import.meta.env.VITE_API_URL; 
-        const { data } = await axios.get(`${apiUrl}/products`);
+        const { data } = await api.get('/products');
         if (data && data.products) {
           // Show top 3 products for the home page showcase as requested
           setProducts(data.products.slice(0, 3));

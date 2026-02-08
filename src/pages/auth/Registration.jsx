@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronDown } from 'lucide-react';
 // import { createUserApi } from '../../api/user';
@@ -87,12 +87,11 @@ const Registration = () => {
         if (Object.keys(newErrors).length === 0) {
             setIsLoading(true);
             try {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
                 const submissionData = {
                     ...formData,
                     gender: formData.gender.toLowerCase()
                 };
-                const { data } = await axios.post(`${apiUrl}/users/register`, submissionData);
+                const { data } = await api.post(`/users/register`, submissionData);
                 
                 if (data.token) {
                     saveToken(data.token);
