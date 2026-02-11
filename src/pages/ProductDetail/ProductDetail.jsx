@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 
 
-import { ShoppingCart, ArrowLeft, Star, Package, Truck, ShieldCheck, Droplets, Zap, Activity, Info } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Star, Package, Truck, ShieldCheck, CheckCircle, Droplets, Zap, Activity, Info, Clock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import Footer from '../../components/layout/Footer';
@@ -225,6 +225,114 @@ const ProductDetail = () => {
                             </div>
                         )}
 
+
+                        {/* Show Associated AMC Plans */}
+                        {(() => {
+                            // Get AMC plans from various possible locations
+                            const amcPlans = product.amcPlans || product.amcPlansData || [];
+                            
+                            // Filter out non-object entries (in case IDs are present)
+                            const validPlans = amcPlans.filter(plan => 
+                                plan && typeof plan === 'object' && plan.name
+                            );
+                            
+                            console.log('AMC Plans Debug:', { 
+                                raw: amcPlans, 
+                                valid: validPlans,
+                                count: validPlans.length 
+                            });
+                            
+                            if (validPlans.length === 0) return null;
+                            
+                            return (
+                                <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-xs font-black text-(--color-secondary) uppercase tracking-[0.2em] flex items-center gap-2">
+                                            <ShieldCheck size={14} className="text-(--color-primary)" /> Annual Maintenance Plans
+                                        </h3>
+                                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Protect Your Investment</span>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {validPlans.map((plan) => (
+                                            <div key={plan._id || plan.id} className="relative p-6 rounded-[2.5rem] border-2 border-slate-100 bg-white hover:border-(--color-primary)/30 hover:shadow-xl hover:shadow-blue-500/5 transition-all group overflow-hidden">
+                                                {/* Glow Effect */}
+                                                <div className="absolute -right-8 -top-8 w-24 h-24 bg-blue-500/5 blur-3xl group-hover:bg-blue-500/10 transition-colors" />
+                                                
+                                                <div className="relative z-10">
+                                                    <div className="flex justify-between items-start mb-6">
+                                                        <div>
+                                                            <h4 className="font-black text-slate-800 text-xl tracking-tight mb-2">{plan.name}</h4>
+                                                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">
+                                                                <Clock size={10} strokeWidth={3} />
+                                                                <span className="text-[9px] font-black uppercase tracking-widest">{plan.durationMonths || 12} Months</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-2xl font-black text-(--color-secondary) leading-none">₹{(plan.price || 0).toLocaleString()}</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Inc. GST</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-3 mb-8">
+                                                        {plan.features && plan.features.length > 0 ? (
+                                                            plan.features.slice(0, 4).map((f, i) => (
+                                                                <div key={i} className="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                                                                    <div className="w-5 h-5 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shrink-0">
+                                                                        <CheckCircle size={10} strokeWidth={3} />
+                                                                    </div>
+                                                                    <span className="leading-tight">{f}</span>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <>
+                                                                <div className="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                                                                    <div className="w-5 h-5 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shrink-0">
+                                                                        <CheckCircle size={10} strokeWidth={3} />
+                                                                    </div>
+                                                                    <span className="leading-tight">{plan.servicesIncluded || 4} Free Service Visits</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                                                                    <div className="w-5 h-5 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shrink-0">
+                                                                        <CheckCircle size={10} strokeWidth={3} />
+                                                                    </div>
+                                                                    <span className="leading-tight">Priority Support</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                                                                    <div className="w-5 h-5 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shrink-0">
+                                                                        <CheckCircle size={10} strokeWidth={3} />
+                                                                    </div>
+                                                                    <span className="leading-tight">Genuine Parts Replacement</span>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                                        <div className="flex items-center gap-2">
+                                                            <Activity size={12} className="text-blue-400 animate-pulse" />
+                                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.1em]">24/7 Support</span>
+                                                        </div>
+                                                        {plan.isActive !== false && (
+                                                            <span className="text-[10px] font-black text-(--color-primary) uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md group-hover:bg-blue-600 group-hover:text-white transition-colors duration-500">
+                                                                Available Now
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="mt-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                                        <p className="text-xs text-slate-500 text-center font-medium">
+                                            <ShieldCheck size={12} className="inline mr-1 text-(--color-primary)" />
+                                            AMC plans ensure optimal performance and extend the life of your water purifier
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
                         {/* Actions */}
                         <div className="flex gap-4 mt-auto">
