@@ -29,7 +29,7 @@ const OrderLifecycle = ({ status }) => {
 
     return (
         <div className="relative pt-10 pb-4 px-2">
-            <div className="absolute top-14 left-0 w-full h-0.5 bg-slate-100" />
+            <div className="absolute top-14 left-0 w-full h-0.5 bg-slate-300" />
             <div 
                 className="absolute top-14 left-0 h-0.5 bg-blue-500 transition-all duration-1000 ease-in-out" 
                 style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
@@ -37,10 +37,10 @@ const OrderLifecycle = ({ status }) => {
             <div className="relative flex justify-between">
                 {steps.map((step, idx) => (
                     <div key={idx} className="flex flex-col items-center gap-3 relative z-10">
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${isCancelled ? 'bg-slate-50 border border-slate-100 text-slate-200' : (idx <= currentStep ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 scale-110' : 'bg-white border border-slate-100 text-slate-300')}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 ${isCancelled ? 'bg-slate-50 border border-slate-200 text-slate-300' : (idx <= currentStep ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 scale-110' : 'bg-white border border-slate-300 text-slate-500')}`}>
                             {step.icon}
                         </div>
-                        <span className={`text-[9px] font-black uppercase tracking-wider ${idx <= currentStep ? 'text-slate-900' : 'text-slate-300'}`}>{step.label}</span>
+                        <span className={`text-[9px] font-black uppercase tracking-wider ${idx <= currentStep ? 'text-slate-900' : 'text-slate-500'}`}>{step.label}</span>
                     </div>
                 ))}
             </div>
