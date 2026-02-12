@@ -12,7 +12,7 @@ const HeroSlider = lazy(() => import('../../components/Slider/HeroSlider'));
 import UnixaBrand from '../../components/common/UnixaBrand';
 
 // Import images directly
-import water2 from '../../assets/images/water2.webp';
+import water2 from '../../assets/images/mhImage.png';
 
 const Home = memo(() => {
   const navigate = useNavigate();

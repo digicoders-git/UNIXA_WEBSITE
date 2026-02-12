@@ -24,7 +24,7 @@ import Loader from '../../components/common/Loader';
 import Swal from 'sweetalert2';
 
 // Assets (reusing existing if possible or placeholders)
-import water2 from '../../assets/images/water2.webp'; 
+import water2 from '../../assets/images/mhImage.png'; 
 
 const RentOnRO = () => {
   const navigate = useNavigate();

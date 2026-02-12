@@ -3,7 +3,7 @@ import { Droplets, Shield, Award, Truck, RotateCcw, FileText, CheckCircle, Zap, 
 import { Link } from 'react-router-dom';
 import Footer from '../../components/layout/Footer';
 import UnixaBrand from '../../components/common/UnixaBrand';
-import ourMissionImg from '../../assets/images/ourMissson.webp';
+import ourMissionImg from '../../assets/images/mission.png';
 
 const About = memo(() => {
   const sectionRefs = useRef([]);

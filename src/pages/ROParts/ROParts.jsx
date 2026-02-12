@@ -16,7 +16,8 @@ const ROParts = () => {
     
     // Pagination state
     const [visibleCount, setVisibleCount] = useState(8);
-    const observerTarget = React.useRef(null);
+    const observerTarget1 = React.useRef(null);
+    const observerTarget2 = React.useRef(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -65,26 +66,26 @@ const ROParts = () => {
 
     // Infinite Scroll Observer
     useEffect(() => {
+        const target1 = observerTarget1.current;
+        const target2 = observerTarget2.current;
+
         const observer = new IntersectionObserver(
             entries => {
-                if (entries[0].isIntersecting && visibleCount < filteredAndSortedProducts.length) {
-                     // Load next 4 items (1 row) for smoother "one by one" feel
+                if (entries.some(entry => entry.isIntersecting) && visibleCount < filteredAndSortedProducts.length) {
                      setVisibleCount(prev => Math.min(prev + 4, filteredAndSortedProducts.length)); 
                 }
             },
             { threshold: 0.1 }
         );
 
-        if (observerTarget.current) {
-            observer.observe(observerTarget.current);
-        }
+        if (target1) observer.observe(target1);
+        if (target2) observer.observe(target2);
 
         return () => {
-            if (observerTarget.current) {
-                observer.unobserve(observerTarget.current);
-            }
+            if (target1) observer.unobserve(target1);
+            if (target2) observer.unobserve(target2);
         };
-    }, [observerTarget, visibleCount, filteredAndSortedProducts]);
+    }, [visibleCount, filteredAndSortedProducts]);
 
     // Reset visible count when filters change
     useEffect(() => {
@@ -229,10 +230,11 @@ const ROParts = () => {
                     ) : (
                         <>
                             {visibleProducts.length > 0 ? (
-                                <div className="space-y-4">
-                                    <div className="grid grid-rows-2 grid-flow-col gap-6 overflow-x-auto w-full snap-x snap-mandatory pb-6 custom-scrollbar px-4 scroll-smooth" id="ro-parts-scroll-container">
-                                        {visibleProducts.map((product) => (
-                                            <div key={product._id} className="w-[280px] md:w-[320px] snap-start animate-in fade-in zoom-in-50 duration-500 fill-mode-backwards" style={{ animationDelay: `${Math.random() * 200}ms` }}>
+                                <div className="space-y-12">
+                                    {/* Row 1 */}
+                                    <div className="flex overflow-x-auto w-full snap-x snap-mandatory pb-6 no-scrollbar px-4 scroll-smooth gap-6">
+                                        {visibleProducts.filter((_, idx) => idx % 2 === 0).map((product) => (
+                                            <div key={product._id} className="w-[280px] md:w-[320px] shrink-0 snap-start animate-in fade-in zoom-in-50 duration-500 fill-mode-backwards" style={{ animationDelay: `${Math.random() * 200}ms` }}>
                                                 <ProductCard
                                                     product={{
                                                         id: product._id,
@@ -249,15 +251,41 @@ const ROParts = () => {
                                             </div>
                                         ))}
                                         
-                                        {/* Infinite Scroll Observer Target (Horizontal) */}
                                         {visibleCount < filteredAndSortedProducts.length && (
-                                            <div ref={observerTarget} className="flex items-center justify-center p-4 snap-start w-[100px] h-full">
+                                            <div ref={observerTarget1} className="flex items-center justify-center p-4 snap-start w-[100px] h-full shrink-0">
                                                 <Loader size="sm" />
                                             </div>
                                         )}
                                     </div>
-                                    
-                                     {/* Desktop Scroll Hint */}
+
+                                    {/* Row 2 */}
+                                    <div className="flex overflow-x-auto w-full snap-x snap-mandatory pb-6 no-scrollbar px-4 scroll-smooth gap-6">
+                                        {visibleProducts.filter((_, idx) => idx % 2 !== 0).map((product) => (
+                                            <div key={product._id} className="w-[280px] md:w-[320px] shrink-0 snap-start animate-in fade-in zoom-in-50 duration-500 fill-mode-backwards" style={{ animationDelay: `${Math.random() * 200}ms` }}>
+                                                <ProductCard
+                                                    product={{
+                                                        id: product._id,
+                                                        p_id: product.p_id,
+                                                        name: product.name,
+                                                        img: product.mainImage?.url,
+                                                        price: product.price,
+                                                        finalPrice: product.finalPrice,
+                                                        discountPercent: product.discountPercent,
+                                                        description: product.description,
+                                                        category: product.category?.name
+                                                    }}
+                                                />
+                                            </div>
+                                        ))}
+                                        
+                                        {visibleCount < filteredAndSortedProducts.length && (
+                                            <div ref={observerTarget2} className="flex items-center justify-center p-4 snap-start w-[100px] h-full shrink-0">
+                                                <Loader size="sm" />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Desktop Scroll Hint */}
                                     <div className="hidden md:flex justify-end pr-8 text-slate-400 text-xs font-bold uppercase tracking-widest gap-2 items-center opacity-60">
                                          <span>Scroll right for more</span>
                                          <ArrowUpDown className="-rotate-90" size={14} />
