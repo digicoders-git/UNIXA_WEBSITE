@@ -79,7 +79,7 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
                     <div className="flex justify-between items-start mb-10">
                         <div className="flex flex-col gap-1">
                             <div className="w-12 h-12 flex items-center justify-center rounded-2xl mb-2" style={{ backgroundColor: '#eff6ff' }}>
-                                <img src="/sks-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                                <img src="/sks-logo1.png" alt="Logo" className="w-8 h-8 object-contain" />
                             </div>
                             <h2 className="text-xl font-black tracking-tighter" style={{ color: '#0f172a' }}>UNIXA <span style={{ color: '#0ea5e9' }}>PURE</span></h2>
                         </div>
@@ -465,7 +465,7 @@ const Profile = () => {
                                         onClick={handleGoToDashboard}
                                         className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 active:scale-95"
                                     >
-                                        Access Portal <ChevronRight size={16} />
+                                        GO TO USER-PANAL <ChevronRight size={16} />
                                     </button>
                                 </div>
                                 {/* Decorative elements */}

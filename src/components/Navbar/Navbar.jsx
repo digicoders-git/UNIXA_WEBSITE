@@ -40,12 +40,8 @@ const Navbar = () => {
                     className="flex items-center gap-3 cursor-pointer group"
                     onClick={() => navigate('/')}
                 >
-                    <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center transition-transform hover:scale-105">
-                        <img src="/sks-logo.png" alt="Logo" className="w-full h-full object-contain" />
-                    </div>
-                    <div className="flex flex-col">
-                        <UnixaBrand className="text-lg md:text-xl" size="1.2em" />
-                        <span className="text-[8px] font-bold tracking-[0.25em] uppercase text-[var(--color-primary)] leading-none mt-1">Pure Water</span>
+                    <div className="h-30 w-40 md:h-15 md:w-34 flex items-center justify-start transition-transform hover:scale-105">
+                        <img src="/logo1.png" alt="UNIXA" className="w-30 h-50 object-contain object-left" />
                     </div>
                 </div>
 

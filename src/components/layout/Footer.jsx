@@ -16,13 +16,13 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-2 space-y-8">
             <div className="flex items-center gap-4">
-              <div className="p-1">
-                <img src="/sks-logo.png" alt="UNIXA" className="w-16 h-16 object-contain" />
-              </div>
-              <div>
+             <div className="h-30 w-40 md:h-15 md:w-34 flex items-center justify-start transition-transform hover:scale-105">
+                        <img src="/logo1.png" alt="UNIXA" className="w-50 h-50 object-contain object-left" />
+                    </div>
+              {/* <div>
                 <UnixaBrand className="text-4xl" color="white" />
                 <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">Pure Water Solutions</p>
-              </div>
+              </div> */}
             </div>
 
             <p className="text-xl leading-relaxed text-slate-300 max-w-md font-medium">
