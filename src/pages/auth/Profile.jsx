@@ -312,7 +312,7 @@ const Profile = () => {
 
     const handleGoToDashboard = () => {
         const token = getToken();
-        const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL || 'http://localhost:5177';
+        const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL;
         window.location.href = `${dashboardUrl}/login?token=${token}`;
     };
 
