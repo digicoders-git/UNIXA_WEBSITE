@@ -189,10 +189,12 @@ const RentOnRO = () => {
                       setSelectedPlan(null);
                    } else {
                       Swal.fire('Error', 'Payment verification failed', 'error');
+                      setLoading(false);
                    }
                 } catch (verifyErr) {
                    console.error("Verify Error", verifyErr);
                    Swal.fire('Error', 'Payment verified but booking update failed. Contact support.', 'warning');
+                   setLoading(false);
                 }
              },
              prefill: {
