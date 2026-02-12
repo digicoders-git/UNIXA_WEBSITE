@@ -104,6 +104,16 @@ const Shop = () => {
         setShowAddressForm(true);
     };
 
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
     const handleConfirmOrder = async () => {
         if (cart.length === 0) {
             toast.error("Your cart is empty!");
@@ -122,10 +132,22 @@ const Shop = () => {
             
             if (!userId) {
                 toast.error("User ID not found. Please login again.");
+                setIsPlacingOrder(false);
                 return;
             }
 
-            const orderData = {
+            // Prepare Shipping Address Object
+            const shippingAddress = {
+                name: selectedAddress.name,
+                phone: selectedAddress.phone,
+                addressLine1: selectedAddress.addressLine1,
+                city: selectedAddress.city,
+                state: selectedAddress.state,
+                pincode: selectedAddress.pincode,
+                country: 'India'
+            };
+
+            const orderDataPayload = {
                 userId,
                 items: cart.map(item => ({
                     productId: item.id || item._id,
@@ -133,37 +155,108 @@ const Shop = () => {
                     productName: item.name,
                     productPrice: item.price
                 })),
-                shippingAddress: {
-                    name: selectedAddress.name,
-                    phone: selectedAddress.phone,
-                    addressLine1: selectedAddress.addressLine1,
-                    city: selectedAddress.city,
-                    state: selectedAddress.state,
-                    pincode: selectedAddress.pincode,
-                    country: 'India'
-                },
-                paymentMethod: paymentMethod.toUpperCase(),
+                shippingAddress,
                 subtotal: totalAmount,
                 total: totalAmount
             };
 
-            const { data } = await api.post(`/orders`, orderData);
-            
-            if (data) {
-                Swal.fire({
-                    title: 'Order Placed!',
-                    text: 'Your pure water journey begins soon.',
-                    icon: 'success',
-                    confirmButtonColor: 'var(--color-primary)'
-                }).then(() => {
-                    clearCart();
-                    navigate('/orders');
+            // IF ONLINE PAYMENT
+            if (paymentMethod === 'online') {
+                const isLoaded = await loadRazorpay();
+                if (!isLoaded) {
+                    toast.error("Razorpay SDK failed to load. Check your internet connection.");
+                    setIsPlacingOrder(false);
+                    return;
+                }
+
+                // 1. Create Order on Server
+                const { data: orderData } = await api.post('/payment/create-order', {
+                    amount: totalAmount
                 });
+
+                if (!orderData.success) {
+                    toast.error("Failed to initiate payment. Please try again.");
+                    setIsPlacingOrder(false);
+                    return;
+                }
+
+                // 2. Open Razorpay Checkout
+                const options = {
+                    key: orderData.key_id,
+                    amount: orderData.order.amount,
+                    currency: orderData.order.currency,
+                    name: "UNIXA Water Solutions",
+                    description: "Order Payment",
+                    order_id: orderData.order.id,
+                    handler: async function (response) {
+                        try {
+                            // 3. Place Order with Verification
+                            const orderPayload = {
+                                ...orderDataPayload, // We need to construct this scope-wide or repeated
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                paymentMethod: 'ONLINE'
+                            };
+
+                            const { data: finalOrder } = await api.post('/orders', orderPayload);
+
+                            if (finalOrder) {
+                                Swal.fire({
+                                    title: 'Payment Successful!',
+                                    text: 'Your order has been placed successfully.',
+                                    icon: 'success',
+                                    confirmButtonColor: 'var(--color-primary)'
+                                }).then(() => {
+                                    clearCart();
+                                    navigate('/orders');
+                                });
+                            }
+                        } catch (verifyErr) {
+                            console.error("Order Placement Error:", verifyErr);
+                            toast.error("Payment deducted but order placement failed. Contact support.");
+                        } finally {
+                            setIsPlacingOrder(false);
+                        }
+                    },
+                    prefill: {
+                        name: selectedAddress.name,
+                        email: "user@example.com", 
+                        contact: selectedAddress.phone
+                    },
+                    theme: { color: "#2563EB" },
+                    modal: {
+                        ondismiss: function() {
+                            setIsPlacingOrder(false);
+                            toast.info("Payment cancelled.");
+                        }
+                    }
+                };
+
+                const paymentObject = new window.Razorpay(options);
+                paymentObject.open();
+
+            } else {
+                // COD FLOW
+                const { data } = await api.post(`/orders`, { ...orderDataPayload, paymentMethod: 'COD' });
+                
+                if (data) {
+                    Swal.fire({
+                        title: 'Order Placed!',
+                        text: 'Your pure water journey begins soon.',
+                        icon: 'success',
+                        confirmButtonColor: 'var(--color-primary)'
+                    }).then(() => {
+                        clearCart();
+                        navigate('/orders');
+                    });
+                }
+                setIsPlacingOrder(false);
             }
+
         } catch (err) {
             console.error("Order error:", err);
             toast.error(err.response?.data?.message || "Failed to place order");
-        } finally {
             setIsPlacingOrder(false);
         }
     };

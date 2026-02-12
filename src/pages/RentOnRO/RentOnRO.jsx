@@ -105,6 +105,18 @@ const RentOnRO = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -120,33 +132,116 @@ const RentOnRO = () => {
       const subject = selectedPlan ? `Booking: ${selectedPlan.name}` : 'Booking Request';
       const messageBody = `Plan: ${selectedPlan?.name}\nPrice: ${selectedPlan?.price}\nAddress: ${formData.address}\nMessage: ${formData.message}`;
 
-      // Use existing Enquiry API to save the request
-      await api.post(`/enquiry`, {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        subject: subject,
-        message: messageBody,
-        planId: selectedPlan?.id,
-        amount: selectedPlan?.price
-      });
+      if (paymentMethod === 'online') {
+          // ONLINE PAYMENT FLOW
+          if (!selectedPlan?.price) {
+             Swal.fire('Error', 'Cannot pay online for custom plans. Please request call back.', 'warning');
+             setLoading(false);
+             return;
+          }
 
-      Swal.fire({
-        title: 'Request Received!',
-        text: 'Our team will contact you shortly to confirm your booking.',
-        icon: 'success',
-        confirmButtonColor: 'var(--color-primary)'
-      });
+          const isLoaded = await loadRazorpay();
+          if (!isLoaded) {
+             Swal.fire('Error', 'Razorpay SDK failed to load', 'error');
+             setLoading(false);
+             return;
+          }
 
-      setIsModalOpen(false);
-      setFormData({ name: '', phone: '', email: '', address: '', message: '' });
-      setSelectedPlan(null);
+          const { data: orderData } = await api.post('/payment/create-order', {
+             amount: selectedPlan.price
+          });
+
+          if (!orderData.success) {
+             throw new Error("Failed to create payment order");
+          }
+
+          const options = {
+             key: orderData.key_id,
+             amount: orderData.order.amount,
+             currency: orderData.order.currency,
+             name: "UNIXA Water Solutions",
+             description: `Rental: ${selectedPlan.name}`,
+             order_id: orderData.order.id,
+             handler: async function (response) {
+                try {
+                   const { data: verifyData } = await api.post('/payment/verify-rental', {
+                      razorpay_order_id: response.razorpay_order_id,
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_signature: response.razorpay_signature,
+                      name: formData.name,
+                      phone: formData.phone,
+                      email: formData.email,
+                      address: formData.address,
+                      message: formData.message,
+                      planId: selectedPlan.id,
+                      amount: selectedPlan.price
+                   });
+
+                   if (verifyData.success) {
+                      Swal.fire({
+                         title: 'Payment Successful!',
+                         text: 'Your rental booking is confirmed.',
+                         icon: 'success',
+                         confirmButtonColor: 'var(--color-primary)'
+                      });
+                      setIsModalOpen(false);
+                      setFormData({ name: '', phone: '', email: '', address: '', message: '' });
+                      setSelectedPlan(null);
+                   } else {
+                      Swal.fire('Error', 'Payment verification failed', 'error');
+                   }
+                } catch (verifyErr) {
+                   console.error("Verify Error", verifyErr);
+                   Swal.fire('Error', 'Payment verified but booking update failed. Contact support.', 'warning');
+                }
+             },
+             prefill: {
+                name: formData.name,
+                email: formData.email,
+                contact: formData.phone
+             },
+             theme: { color: "#2563EB" },
+             modal: {
+                ondismiss: function() {
+                    setLoading(false);
+                }
+             }
+          };
+
+          const rzp = new window.Razorpay(options);
+          rzp.open();
+          // Reset loading state handled by modal dismiss or success
+
+      } else {
+          // COD / REQUEST CALL BACK FLOW
+          await api.post(`/enquiry`, {
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            subject: subject,
+            message: messageBody,
+            planId: selectedPlan?.id,
+            amount: selectedPlan?.price
+          });
+
+          Swal.fire({
+            title: 'Request Received!',
+            text: 'Our team will contact you shortly to confirm your booking.',
+            icon: 'success',
+            confirmButtonColor: 'var(--color-primary)'
+          });
+
+          setIsModalOpen(false);
+          setFormData({ name: '', phone: '', email: '', address: '', message: '' });
+          setSelectedPlan(null);
+          setLoading(false);
+      }
+
     } catch (error) {
       console.error('Submission failed:', error);
       Swal.fire('Error', 'Failed to submit request. Please try again.', 'error');
-    } finally {
       setLoading(false);
-    }
+    } 
   };
 
   return (
@@ -603,6 +698,17 @@ const RentOnRO = () => {
                                  placeholder="Any specific timing or details..." 
                               />
                            </div>
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                           <label className={`flex-1 p-4 rounded-xl border-2 cursor-pointer flex items-center justify-center gap-2 transition-all ${paymentMethod === 'cod' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'}`}>
+                              <input type="radio" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="hidden" />
+                              <span className="text-xs font-black uppercase tracking-widest">Pay Later</span>
+                           </label>
+                           <label className={`flex-1 p-4 rounded-xl border-2 cursor-pointer flex items-center justify-center gap-2 transition-all ${paymentMethod === 'online' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'border-slate-100 text-slate-500 hover:bg-slate-50'}`}>
+                              <input type="radio" value="online" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} className="hidden" />
+                              <span className="text-xs font-black uppercase tracking-widest flex items-center gap-1"><CreditCard size={14}/> Pay Online</span>
+                           </label>
                         </div>
 
                         <button 
