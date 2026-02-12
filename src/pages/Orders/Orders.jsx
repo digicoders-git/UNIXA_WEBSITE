@@ -75,13 +75,21 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
         }
         setIsGenerating(true);
         try {
+            // Options to ensure full capture even if scrolled
             const canvas = await html2canvas(element, { 
                 scale: 2, 
                 useCORS: true, 
                 logging: false,
                 backgroundColor: '#ffffff',
-                windowWidth: element.scrollWidth,
-                windowHeight: element.scrollHeight
+                onclone: (clonedDoc) => {
+                    const clonedElement = clonedDoc.getElementById('printable-invoice');
+                    if (clonedElement) {
+                        clonedElement.style.height = 'auto';
+                        clonedElement.style.maxHeight = 'none';
+                        clonedElement.style.overflow = 'visible';
+                        clonedElement.style.paddingBottom = '40px'; // Extra safety margin
+                    }
+                }
             });
             
             const imgData = canvas.toDataURL('image/png');
@@ -89,7 +97,21 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
             
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            // Handle multi-page if height exceeds A4 (approx 297mm)
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            let heightLeft = pdfHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pageHeight;
+            }
+
             pdf.save(`UNIXA_INV_${order._id.slice(-6).toUpperCase()}.pdf`);
             toast.success("Security Ledger Downloaded!");
         } catch (error) {
@@ -103,57 +125,77 @@ const InvoiceModal = ({ order, isOpen, onClose }) => {
     return (
         <div className={`fixed inset-0 z-[11000] flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-md transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`} onClick={onClose}>
             <div className={`bg-white w-full max-w-xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all duration-500 ${show ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}`} onClick={e => e.stopPropagation()}>
-                <div id="printable-invoice" className="flex flex-col flex-1 overflow-y-auto p-12 bg-white">
+                <div id="printable-invoice" className="flex flex-col flex-1 overflow-y-auto p-12" style={{ backgroundColor: '#ffffff', color: '#0f172a', fontFamily: 'sans-serif' }}>
                     <div className="flex justify-between items-start mb-16">
                         <div>
-                            <div className="w-16 h-16 bg-blue-500 rounded-[28px] flex items-center justify-center text-white mb-6 shadow-xl shadow-blue-500/20">
+                            <div className="w-16 h-16 rounded-[28px] flex items-center justify-center mb-6" style={{ backgroundColor: '#3b82f6', color: '#ffffff', boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.2)' }}>
                                 <ShieldCheck size={32} />
                             </div>
-                            <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Unixa <span className="text-blue-500">Pure</span></h2>
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mt-1">Official Proof of Authenticity</p>
+                            <h2 className="text-2xl font-black tracking-tighter uppercase" style={{ color: '#0f172a' }}>Unixa <span style={{ color: '#3b82f6' }}>Pure</span></h2>
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-1" style={{ color: '#94a3b8' }}>Official Proof of Authenticity</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Digital Signature</p>
-                            <p className="text-lg font-black text-slate-900">#UX-{order._id.slice(-6).toUpperCase()}</p>
-                            <p className="text-xs font-bold text-slate-400 mt-1">{new Date(order.createdAt).toLocaleDateString()}</p>
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em] mb-2" style={{ color: '#94a3b8' }}>Digital Signature</p>
+                            <p className="text-lg font-black" style={{ color: '#0f172a' }}>#UX-{order._id.slice(-6).toUpperCase()}</p>
+                            <p className="text-xs font-bold mt-1" style={{ color: '#94a3b8' }}>{new Date(order.createdAt).toLocaleDateString()}</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-12 mb-16">
                         <div className="space-y-3">
-                            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500/60">Issued From</p>
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em]" style={{ color: 'rgba(59, 130, 246, 0.6)' }}>Issued From</p>
                             <div className="space-y-1">
-                                <p className="text-sm font-black text-slate-900">Unixa Pure HQ</p>
-                                <p className="text-[11px] font-bold text-slate-400 leading-relaxed">Ahirawan, Sandila, Uttar Pradesh, 241204</p>
+                                <p className="text-sm font-black" style={{ color: '#0f172a' }}>Unixa Pure HQ</p>
+                                <p className="text-[11px] font-bold leading-relaxed" style={{ color: '#94a3b8' }}>Ahirawan, Sandila, Uttar Pradesh, 241204</p>
                             </div>
                         </div>
                         <div className="text-right space-y-3">
-                            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-500/60">Recipient Identity</p>
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em]" style={{ color: 'rgba(59, 130, 246, 0.6)' }}>Recipient Identity</p>
                             <div className="space-y-1">
-                                <p className="text-sm font-black text-slate-900">{order.shippingAddress?.name}</p>
-                                <p className="text-[11px] font-bold text-slate-400 leading-relaxed">{order.shippingAddress?.addressLine1}, {order.shippingAddress?.city}</p>
+                                <p className="text-sm font-black" style={{ color: '#0f172a' }}>{order.shippingAddress?.name}</p>
+                                <p className="text-[11px] font-bold leading-relaxed" style={{ color: '#94a3b8' }}>{order.shippingAddress?.addressLine1}, {order.shippingAddress?.city}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="border-t border-slate-50 mb-12">
+                    <div className="border-t mb-12" style={{ borderColor: '#f1f5f9' }}>
                         {order.items.map((item, idx) => (
-                            <div key={idx} className="grid grid-cols-12 py-8 border-b border-slate-50 items-center">
+                            <div key={idx} className="grid grid-cols-12 py-8 border-b items-center" style={{ borderColor: '#f1f5f9' }}>
                                 <div className="col-span-8">
-                                    <h4 className="text-sm font-black text-slate-900 uppercase">{item.productName}</h4>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-1">S/N: UX-PRD-{Math.random().toString(36).substr(2, 6).toUpperCase()}</p>
+                                    <h4 className="text-sm font-black uppercase" style={{ color: '#0f172a' }}>{item.productName}</h4>
+                                    
+                                    <div className="mt-2 space-y-1">
+                                        <p className="text-[10px] font-bold flex items-center gap-2" style={{ color: '#3b82f6' }}>
+                                            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: '#3b82f6' }}></span>
+                                            WARRANTY ID: <span style={{ color: '#0f172a' }}>{item.warrantyId || `WAR-REG-${Math.random().toString(36).substr(2, 6).toUpperCase()}`}</span>
+                                        </p>
+                                        
+                                        {item.amcPlan && (
+                                            <p className="text-[10px] font-bold flex items-center gap-2" style={{ color: '#3b82f6' }}>
+                                                <span className="w-1 h-1 rounded-full" style={{ backgroundColor: '#3b82f6' }}></span>
+                                                AMC PLAN: <span className="uppercase tracking-tight" style={{ color: '#0f172a' }}>{item.amcPlan}</span>
+                                            </p>
+                                        )}
+
+                                        {item.amcId && (
+                                            <p className="text-[10px] font-bold flex items-center gap-2" style={{ color: '#3b82f6' }}>
+                                                <span className="w-1 h-1 rounded-full" style={{ backgroundColor: '#3b82f6' }}></span>
+                                                AMC REF: <span className="uppercase" style={{ color: '#0f172a' }}>{item.amcId}</span>
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="col-span-1 text-center font-black text-slate-400">0{item.quantity}</div>
-                                <div className="col-span-3 text-right font-black text-slate-900">₹{item.productPrice.toLocaleString()}</div>
+                                <div className="col-span-1 text-center font-black" style={{ color: '#94a3b8' }}>0{item.quantity}</div>
+                                <div className="col-span-3 text-right font-black" style={{ color: '#0f172a' }}>₹{item.productPrice.toLocaleString()}</div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="mt-auto pt-10 border-t-4 border-slate-900 border-double">
+                    <div className="mt-auto pt-10 border-t-4 border-double" style={{ borderColor: '#0f172a' }}>
                         <div className="flex flex-col gap-4 text-xs font-black uppercase tracking-widest">
                             <div className="flex justify-between items-center px-4">
-                                <span className="text-slate-400">Total Valuation</span>
-                                <span className="text-2xl font-black text-slate-900 tracking-tighter">₹{order.total.toLocaleString()}</span>
+                                <span style={{ color: '#94a3b8' }}>Total Valuation</span>
+                                <span className="text-2xl font-black tracking-tighter" style={{ color: '#0f172a' }}>₹{order.total.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
@@ -334,6 +376,8 @@ const Orders = () => {
     const handleRefundSubmit = async (order, type, reason, bankDetails) => {
         try {
             const userId = localStorage.getItem('userId');
+            
+            // 1. Log the Refund/Cancellation Request
             const payload = {
                 orderId: order._id,
                 userId,
@@ -344,18 +388,46 @@ const Orders = () => {
             };
             await api.post(`/refunds`, payload);
 
+            // 2. If it's a Cancellation, trigger the actual order status update
+            if (type === 'Cancellation') {
+                await api.put(`/user-orders/${order._id}/cancel`);
+                
+                // Instant State Update
+                setOrders(prevOrders => 
+                    prevOrders.map(o => 
+                        o._id === order._id 
+                        ? { ...o, status: 'cancelled', cancelledAt: new Date() } 
+                        : o
+                    )
+                );
+            } else if (type === 'Return') {
+                await api.put(`/user-orders/${order._id}/return`);
+
+                // Instant State Update
+                setOrders(prevOrders => 
+                    prevOrders.map(o => 
+                        o._id === order._id 
+                        ? { ...o, status: 'returned' } 
+                        : o
+                    )
+                );
+            }
+
             Swal.fire({
-                title: 'Request Received',
-                text: `Your ${type.toLowerCase()} request has been logged and is under review.`,
+                title: 'Success!',
+                text: type === 'Cancellation' 
+                    ? 'Your order has been cancelled successfully.' 
+                    : type === 'Return'
+                    ? 'Your return request has been submitted and order status updated.'
+                    : `Your ${type.toLowerCase()} request has been logged and is under review.`,
                 icon: 'success',
                 confirmButtonColor: '#3b82f6',
                 borderRadius: '30px'
             });
 
-            // Update local state if needed
         } catch (error) {
             console.error(`${type} error:`, error);
-            toast.error(error.response?.data?.message || `Failed to submit ${type.toLowerCase()} request`);
+            toast.error(error.response?.data?.message || `Failed to process ${type.toLowerCase()} request`);
         }
     };
     const handleRepeatOrder = (order) => {
@@ -409,10 +481,14 @@ const Orders = () => {
 
 
     const filteredOrders = orders.filter(o => {
-        const matchesFilter = filter === 'All' || o.status === filter;
-        const matchesSearch = o.productName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            o._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            o.items[0].productName.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = filter === 'All' || o.status?.toLowerCase() === filter?.toLowerCase();
+        
+        const itemName = o.items?.[0]?.productName?.toLowerCase() || '';
+        const orderId = o._id?.toLowerCase() || '';
+        const search = searchQuery.toLowerCase();
+
+        const matchesSearch = itemName.includes(search) || orderId.includes(search);
+        
         return matchesFilter && matchesSearch;
     });
 
@@ -497,8 +573,8 @@ const Orders = () => {
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="flex gap-4 mb-10 p-2 bg-slate-100 w-fit rounded-[32px] animate-in fade-in zoom-in duration-700 delay-300">
-                    {['All', 'Shipped', 'Delivered', 'Cancelled', 'Returned'].map(t => (
+                <div className="flex flex-wrap gap-4 mb-10 p-2 bg-slate-100 w-fit rounded-[32px] animate-in fade-in zoom-in duration-700 delay-300">
+                    {['All', 'Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Returned'].map(t => (
                         <button 
                             key={t}
                             onClick={() => setFilter(t)}

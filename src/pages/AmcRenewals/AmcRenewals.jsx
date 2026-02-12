@@ -191,25 +191,28 @@ const ReceiptModal = ({ amc, isOpen, onClose }) => {
                 useCORS: true, 
                 logging: false,
                 backgroundColor: '#ffffff',
-                windowWidth: element.scrollWidth,
-                windowHeight: element.scrollHeight,
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.getElementById('printable-receipt');
-                    if (el) el.style.fontFamily = "Arial, sans-serif";
+                    if (el) {
+                        el.style.height = 'auto';
+                        el.style.maxHeight = 'none';
+                        el.style.overflow = 'visible';
+                        el.style.fontFamily = "Arial, sans-serif";
+                    }
                 }
             });
             
-            const imgData = canvas.toDataURL('image/png');
+            const imgData = canvas.toDataURL('image/png', 1.0);
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
             
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save(`Receipt_AMC_${amc._id.slice(-6).toUpperCase()}.pdf`);
-            toast.success("Receipt downloaded successfully!");
+            pdf.save(`UNIXA_AMC_REC_${amc._id.slice(-6).toUpperCase()}.pdf`);
+            toast.success("Security Receipt Downloaded!");
         } catch (error) {
             console.error("PDF Generation Error:", error);
-            toast.error("Failed to download PDF.");
+            toast.error("Failed to generate PDF. System colors might be incompatible.");
         } finally {
             setIsGenerating(false);
         }
@@ -227,15 +230,16 @@ const ReceiptModal = ({ amc, isOpen, onClose }) => {
                 className={`bg-[#ffffff] w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] relative border border-white/20 transition-all duration-500 ease-out ${show ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}`}
                 onClick={e => e.stopPropagation()}
             >
-                <div id="printable-receipt" className="flex flex-col flex-1 overflow-y-auto bg-white p-8 md:p-12" style={{ color: '#1e293b' }}>
+                <div id="printable-receipt" className="flex flex-col flex-1 overflow-y-auto p-12" style={{ backgroundColor: '#ffffff', color: '#1e293b', fontFamily: 'sans-serif' }}>
                     
                     {/* Header */}
                     <div className="flex justify-between items-start mb-10">
                         <div className="flex flex-col gap-1">
                             <div className="w-12 h-12 flex items-center justify-center rounded-2xl mb-2" style={{ backgroundColor: '#eff6ff' }}>
-                                <img src="/sks-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                                <ShieldCheck size={28} style={{ color: '#0ea5e9' }} />
                             </div>
-                            <h2 className="text-xl font-black tracking-tighter" style={{ color: '#0f172a' }}>UNIXA <span style={{ color: '#0ea5e9' }}>PURE</span></h2>
+                            <h2 className="text-xl font-black tracking-tighter uppercase" style={{ color: '#0f172a' }}>UNIXA <span style={{ color: '#0ea5e9' }}>PURE</span></h2>
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em] mt-1" style={{ color: '#94a3b8' }}>Security Ledger</p>
                         </div>
                         <div className="text-right">
                             <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>AMC Receipt</p>
@@ -247,14 +251,14 @@ const ReceiptModal = ({ amc, isOpen, onClose }) => {
                     {/* Parties */}
                     <div className="grid grid-cols-2 gap-8 mb-10">
                         <div>
-                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>From</p>
-                            <p className="font-bold" style={{ color: '#0f172a' }}>UNIXA PURE WATER</p>
-                            <p className="text-xs leading-relaxed mt-1" style={{ color: '#64748b' }}>Ahirawan, Sandila,<br />Hardoi, Uttar Pradesh</p>
+                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>Issued From</p>
+                            <p className="font-bold text-sm" style={{ color: '#0f172a' }}>UNIXA PURE HQ</p>
+                            <p className="text-[11px] font-medium leading-relaxed mt-1" style={{ color: '#64748b' }}>Ahirawan, Sandila,<br />Uttar Pradesh, 241204</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>Bill To</p>
-                            <p className="font-bold" style={{ color: '#0f172a' }}>{userData?.firstName || 'Valued'} {userData?.lastName || 'Customer'}</p>
-                            <p className="text-xs leading-relaxed mt-1" style={{ color: '#64748b' }}>
+                            <p className="text-[10px] uppercase font-black mb-2 tracking-widest" style={{ color: '#94a3b8' }}>Subscriber</p>
+                            <p className="font-bold text-sm" style={{ color: '#0f172a' }}>{userData?.firstName || 'User'} {userData?.lastName || ''}</p>
+                            <p className="text-[11px] font-medium leading-relaxed mt-1" style={{ color: '#64748b' }}>
                                 {userData?.phone || ''}<br />
                                 {userData?.email || ''}
                             </p>
@@ -264,46 +268,56 @@ const ReceiptModal = ({ amc, isOpen, onClose }) => {
                     {/* Details */}
                     <div className="mb-10">
                         <div className="grid grid-cols-12 border-b pb-3 mb-3 text-[10px] font-black uppercase tracking-widest" style={{ color: '#94a3b8', borderColor: '#f1f5f9' }}>
-                            <div className="col-span-8">Description</div>
-                            <div className="col-span-4 text-right">Amount</div>
+                            <div className="col-span-8">Coverage Protocol</div>
+                            <div className="col-span-4 text-right">Premium</div>
                         </div>
                         
-                        <div className="grid grid-cols-12 py-3 items-center border-b" style={{ borderColor: '#f8fafc' }}>
+                        <div className="grid grid-cols-12 py-5 items-center border-b" style={{ borderColor: '#f8fafc' }}>
                             <div className="col-span-8">
-                                <p className="text-sm font-bold" style={{ color: '#0f172a' }}>{amc.planName} Plan</p>
-                                <p className="text-[10px] mt-1 font-medium" style={{ color: '#64748b' }}>Product: {amc.productName}</p>
-                                <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#64748b' }}>
-                                    Validity: {formatDate(amc.startDate)} - {formatDate(amc.expiryDate)}
+                                <p className="text-sm font-black uppercase tracking-tight" style={{ color: '#0f172a' }}>{amc.planName} Plan</p>
+                                <p className="text-[10px] mt-2 font-bold" style={{ color: '#64748b' }}>
+                                    <span style={{ color: '#0ea5e9' }}>PRODUCT:</span> {amc.productName}
                                 </p>
+                                <div className="flex gap-4 mt-2">
+                                    <p className="text-[9px] font-black uppercase" style={{ color: '#94a3b8' }}>
+                                        START: <span style={{ color: '#0f172a' }}>{formatDate(amc.startDate)}</span>
+                                    </p>
+                                    <p className="text-[9px] font-black uppercase" style={{ color: '#94a3b8' }}>
+                                        EXPIRY: <span style={{ color: '#0f172a' }}>{formatDate(amc.expiryDate)}</span>
+                                    </p>
+                                </div>
                             </div>
-                            <div className="col-span-4 text-right text-sm font-bold" style={{ color: '#0f172a' }}>₹{amc.price}</div>
+                            <div className="col-span-4 text-right text-lg font-black" style={{ color: '#0f172a' }}>₹{amc.price}</div>
                         </div>
                     </div>
 
                     {/* Footer Totals */}
                     <div className="mt-auto border-t pt-8" style={{ borderColor: '#f1f5f9' }}>
                         <div className="flex flex-col items-end gap-3 text-sm">
-                            <div className="flex justify-between w-48 font-medium" style={{ color: '#64748b' }}>
-                                <span>Subtotal</span>
-                                <span className="font-bold" style={{ color: '#0f172a' }}>₹{amc.price}</span>
+                            <div className="flex justify-between w-48 font-bold" style={{ color: '#64748b' }}>
+                                <span className="text-[10px] uppercase tracking-widest">Base Amount</span>
+                                <span style={{ color: '#0f172a' }}>₹{amc.price}</span>
                             </div>
-                            <div className="flex justify-between w-48 font-medium" style={{ color: '#64748b' }}>
-                                <span>Tax (18% GST)</span>
-                                <span className="font-bold text-[10px]" style={{ color: '#64748b' }}>Included</span>
+                            <div className="flex justify-between w-48 font-bold" style={{ color: '#64748b' }}>
+                                <span className="text-[10px] uppercase tracking-widest">Tax (GST)</span>
+                                <span style={{ color: '#94a3b8' }}>Included</span>
                             </div>
-                            <div className="flex justify-between w-48 items-center mt-2 pt-4 border-t" style={{ borderColor: '#f1f5f9' }}>
-                                <span className="text-xs font-black uppercase tracking-widest" style={{ color: '#0f172a' }}>Total Paid</span>
+                            <div className="flex justify-between w-48 items-center mt-4 pt-6 border-t" style={{ borderColor: '#0f172a', borderTopWidth: '2px' }}>
+                                <span className="text-[11px] font-black uppercase tracking-[0.2em]" style={{ color: '#0f172a' }}>Grand Total</span>
                                 <span className="text-2xl font-black" style={{ color: '#0ea5e9' }}>₹{amc.price}</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div className="mt-12 text-center border-2 border-dashed rounded-2xl p-4 bg-slate-50/50" style={{ borderColor: '#f1f5f9' }}>
-                        <div className="flex justify-center mb-2">
-                             <ShieldCheck size={20} className="text-blue-500" />
+                    <div className="mt-12 text-center border border-dashed rounded-[24px] p-6" style={{ borderColor: '#cbd5e1', backgroundColor: '#f8fafc' }}>
+                        <div className="flex justify-center mb-3">
+                             <ShieldCheck size={20} style={{ color: '#0ea5e9' }} />
                         </div>
-                        <p className="text-[9px] font-medium uppercase tracking-widest" style={{ color: '#94a3b8' }}>
-                            Official AMC Document • {amc._id}
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: '#94a3b8' }}>
+                            Validated Device Protection Certificate
+                        </p>
+                        <p className="text-[8px] font-bold mt-1 uppercase" style={{ color: '#cbd5e1' }}>
+                            UID: {amc._id}
                         </p>
                     </div>
                 </div>
@@ -371,7 +385,7 @@ const PlanSelectorModal = ({ isOpen, onClose, onSelect }) => {
                 
                 <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-3 gap-6">
                     {plans.map((plan) => (
-                        <div key={plan.id} className={`relative flex flex-col p-8 rounded-[32px] border-2 transition-all cursor-pointer group ${plan.popular ? 'border-blue-500 bg-blue-50/20 shadow-xl shadow-blue-500/5' : 'border-slate-50 hover:border-blue-100 hover:bg-slate-50/50'}`}>
+                        <div key={plan._id} className={`relative flex flex-col p-8 rounded-[32px] border-2 transition-all cursor-pointer group ${plan.popular ? 'border-blue-500 bg-blue-50/20 shadow-xl shadow-blue-500/5' : 'border-slate-50 hover:border-blue-100 hover:bg-slate-50/50'}`}>
                             {plan.popular && (
                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-blue-500/20">
                                     Best Value
