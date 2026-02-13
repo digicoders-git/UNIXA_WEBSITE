@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import Footer from '../../components/layout/Footer';
 import UnixaBrand from '../../components/common/UnixaBrand';
 import ourMissionImg from '../../assets/images/mission.png';
+import iconRO from '../../assets/images/features/advanced_ro.svg';
+import iconUV from '../../assets/images/features/uv_guard.svg';
+import iconIQ from '../../assets/images/features/digital_iq.svg';
 
 const About = memo(() => {
   const sectionRefs = useRef([]);
@@ -45,12 +48,12 @@ const About = memo(() => {
               key={i}
               className="absolute rounded-full bg-blue-300/40 border border-white/40 blur-[0.5px] animate-float-bubble"
               style={{
-                width: `${Math.random() * 50 + 15}px`,
-                height: `${Math.random() * 50 + 15}px`,
-                left: `${Math.random() * 100}%`,
-                bottom: `-${Math.random() * 20 + 20}%`,
-                animationDuration: `${Math.random() * 4 + 4}s`,
-                animationDelay: `${Math.random() * 5}s`
+                width: `${(i * 7 + 15) % 50 + 15}px`,
+                height: `${(i * 7 + 15) % 50 + 15}px`,
+                left: `${(i * 13) % 100}%`,
+                bottom: `-${(i * 5 + 20) % 40 + 20}%`,
+                animationDuration: `${(i % 4) + 4}s`,
+                animationDelay: `${(i % 5)}s`
               }}
             />
           ))}
@@ -81,8 +84,9 @@ const About = memo(() => {
           </h1>
 
           <p className="text-slate-600 text-sm md:text-xl max-w-2xl mx-auto leading-relaxed font-semibold">
-            Leading the revolution in water purification technology with innovative solutions for healthier living.
+            “At UNIXA Water Technologies, purity is not just a promise — it’s a legacy crafted through innovation, precision, and trust. Guided by our belief 'A TRUE PROTECTOR OF YOUR FAMILY’, we deliver refined water solutions designed to safeguard every home and every generation.”
           </p>
+
         </div>
 
         {/* Section Separator Overlay */}
@@ -103,7 +107,7 @@ const About = memo(() => {
 
               <div className="space-y-6">
                 <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed">
-                  At <UnixaBrand className="text-base" />, we're committed to revolutionizing water purification technology. Our systems ensure every drop of water you consume is pure, safe, and mineral-rich.
+                  At <UnixaBrand className="text-base" /> Water Technologies, our mission is to redefine water purification with innovation, precision, and uncompromising quality. Inspired by our promise A TRUE PROTECTOR OF YOUR FAMILY™️, we strive to deliver reliable solutions that ensure purity, safety, and lasting trust for every home and industry we serve.
                 </p>
                 <p className="text-base text-slate-400 font-medium leading-relaxed">
                   With cutting-edge RO technology, UV sterilization, and multi-stage filtration, we deliver water that exceeds international quality standards while being environmentally sustainable.
@@ -150,13 +154,13 @@ const About = memo(() => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: <Droplets />, title: "Advanced RO", desc: "State-of-the-art reverse osmosis system removes 99.9% of contaminants." },
-              { icon: <Shield />, title: "UV Guard", desc: "Powerful UV-C light eliminates bacteria and harmful microorganisms." },
-              { icon: <CheckCircle />, title: "Smart IQ", desc: "IoT-enabled systems for real-time water quality and filter monitoring." }
+              { img: iconRO, title: "Advanced RO", desc: "State-of-the-art reverse osmosis system removes 99.9% of contaminants." },
+              { img: iconUV, title: "UV Guard", desc: "Powerful UV-C light eliminates bacteria and harmful microorganisms." },
+              { img: iconIQ, title: "Smart IQ", desc: "IoT-enabled systems for real-time water quality and filter monitoring." }
             ].map((feature, i) => (
               <div key={i} className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-[var(--color-primary)] mb-8 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
-                  {React.cloneElement(feature.icon, { size: 32 })}
+                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-8 border border-slate-100 shrink-0">
+                  <img src={feature.img} alt={feature.title} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-[var(--color-secondary)] uppercase tracking-tight">{feature.title}</h3>
                 <p className="text-slate-500 font-medium leading-relaxed">{feature.desc}</p>

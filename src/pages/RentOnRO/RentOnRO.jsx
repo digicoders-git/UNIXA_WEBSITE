@@ -320,8 +320,8 @@ const RentOnRO = () => {
         <div className="max-w-7xl mx-auto">
            
            {/* Custom Tabs */}
-           <div className="flex justify-center mb-16">
-              <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 inline-flex">
+           <div className="flex justify-start md:justify-center mb-10 md:mb-16 overflow-x-auto pb-4 md:pb-0 -mx-6 px-6 md:mx-auto md:px-0 scrollbar-hide">
+              <div className="bg-white p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 inline-flex min-w-max">
                  {[
                     { id: 'rental', label: 'Rent a Machine', icon: Droplets },
                     { id: 'amc', label: 'Buy AMC Plan', icon: Shield },
@@ -330,13 +330,13 @@ const RentOnRO = () => {
                     <button
                        key={tab.id}
                        onClick={() => setActiveTab(tab.id)}
-                       className={`px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all ${
+                       className={`px-4 md:px-6 py-2.5 md:py-3 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all whitespace-nowrap ${
                           activeTab === tab.id 
                              ? 'bg-slate-900 text-white shadow-md' 
                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                        }`}
                     >
-                       <tab.icon size={14} />
+                       <tab.icon size={14} className={activeTab === tab.id ? "" : "opacity-70"} />
                        {tab.label}
                     </button>
                  ))}

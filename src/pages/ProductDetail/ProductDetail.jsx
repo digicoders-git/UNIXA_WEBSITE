@@ -107,7 +107,7 @@ const ProductDetail = () => {
 
     return (
         <div className="min-h-screen bg-white font-(--font-body) pt-24">
-            <div className="pb-12 px-6 md:px-12 max-w-7xl mx-auto">
+            <div className="pb-12 px-4 md:px-12 max-w-7xl mx-auto">
 
                 {/* Back Link */}
                 <button

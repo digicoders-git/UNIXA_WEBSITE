@@ -539,15 +539,15 @@ const Profile = () => {
 
                     {/* My Orders Section - Proper Integration */}
                     <div className="mt-12">
-                        <div className="flex items-center justify-between mb-8">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                             <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
                                 <Package className="text-[var(--color-primary)]" size={28} /> My Recent <span className="text-[var(--color-primary)]">Orders</span>
                             </h2>
-                            <div className="flex items-center gap-6">
-                                <button onClick={() => navigate('/transactions')} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                            <div className="flex flex-wrap items-center gap-4 md:gap-6">
+                                <button onClick={() => navigate('/transactions')} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-500 flex items-center gap-2 transition-colors border border-slate-100 px-3 py-2 rounded-lg md:border-0 md:p-0">
                                     <CreditCard size={14} /> Payment History
                                 </button>
-                                <button onClick={() => navigate('/orders')} className="text-[10px] font-black uppercase tracking-widest text-blue-500 hover:underline flex items-center gap-1">
+                                <button onClick={() => navigate('/orders')} className="text-[10px] font-black uppercase tracking-widest text-blue-500 hover:underline flex items-center gap-1 border border-blue-50 px-3 py-2 rounded-lg bg-blue-50 md:bg-transparent md:border-0 md:p-0">
                                     View All Orders <ChevronRight size={14} />
                                 </button>
                             </div>

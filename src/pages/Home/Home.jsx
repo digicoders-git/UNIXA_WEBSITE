@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, memo, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom';
 
 import api from '../../services/api';
-import { Shield, Droplets, Heart as HeartIcon, Award, Zap, Activity, Settings, Phone, Wrench, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Shield, Droplets, Settings, Phone, Wrench, CheckCircle2, ArrowRight } from 'lucide-react';
 
 import { throttle } from '../../utils/performance';
 // Lazy load all heavy components
@@ -13,6 +13,15 @@ import UnixaBrand from '../../components/common/UnixaBrand';
 
 // Import images directly
 import water2 from '../../assets/images/mhImage.png';
+
+import iconIndian from '../../assets/images/features/indian_built.svg';
+import iconPlatinum from '../../assets/images/features/platinum_tech.svg';
+import iconPh from '../../assets/images/features/ph_modes.svg';
+import iconNano from '../../assets/images/features/pure_nano.svg';
+import iconElite from '../../assets/images/features/elite_style.svg';
+import iconFast from '../../assets/images/features/fast_ship.svg';
+import iconCare from '../../assets/images/features/pro_care.svg';
+import iconDigi from '../../assets/images/features/digital_iq.svg';
 
 const Home = memo(() => {
   const navigate = useNavigate();
@@ -204,18 +213,18 @@ const Home = memo(() => {
 
           <div className="flex flex-col md:grid md:grid-cols-4 gap-4 md:gap-8">
             {[
-              { t: "INDIAN BUILT", d: "Tuned for water", icon: <Award /> },
-              { t: "PLATINUM TECH", d: "Pure Efficiency", icon: <Zap /> },
-              { t: "PH MODES", d: "Healthy Options", icon: <Droplets /> },
-              { t: "PURE+ NANO", d: "11-Stage Filter", icon: <Shield /> },
-              { t: "ELITE STYLE", d: "Premium Design", icon: <Settings /> },
-              { t: "FAST SHIP", d: "Pan India", icon: <Activity /> },
-              { t: "PRO CARE", d: "Expert help", icon: <HeartIcon /> },
-              { t: "DIGITAL IQ", d: "Live Monitor", icon: <Wrench /> }
+              { t: "INDIAN BUILT", d: "Tuned for water", img: iconIndian },
+              { t: "PLATINUM TECH", d: "Pure Efficiency", img: iconPlatinum },
+              { t: "PH MODES", d: "Healthy Options", img: iconPh },
+              { t: "PURE+ NANO", d: "11-Stage Filter", img: iconNano },
+              { t: "ELITE STYLE", d: "Premium Design", img: iconElite },
+              { t: "FAST SHIP", d: "Pan India", img: iconFast },
+              { t: "PRO CARE", d: "Expert help", img: iconCare },
+              { t: "DIGITAL IQ", d: "Live Monitor", img: iconDigi }
             ].map((item, i) => (
               <div key={i} className="flex items-center md:flex-col md:text-center p-4 md:p-8 bg-white border border-slate-200 rounded-2xl md:rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all group">
-                <div className="p-2 md:p-4 rounded-lg md:rounded-2xl bg-slate-50 text-[var(--color-primary)] group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all shrink-0">
-                  {React.cloneElement(item.icon, { size: 20 })}
+                <div className="p-2 md:p-4 rounded-lg md:rounded-2xl bg-slate-50 transition-all shrink-0">
+                  <img src={item.img} alt={item.t} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
                 </div>
                 <div className="ml-4 md:ml-0 md:mt-4">
                   <h3 className="text-[10px] md:text-xs font-bold tracking-widest leading-none mb-1 md:mb-2">{item.t}</h3>

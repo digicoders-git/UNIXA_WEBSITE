@@ -5,6 +5,13 @@ import Footer from '../../components/layout/Footer';
 import UnixaBrand from '../../components/common/UnixaBrand';
 import Loader from '../../components/common/Loader';
 
+import iconImmunity from '../../assets/images/features/immunity_boost.svg';
+import iconBio from '../../assets/images/features/uv_guard.svg';
+import iconMeta from '../../assets/images/features/metabolism.svg';
+import iconHydra from '../../assets/images/features/hydration_plus.svg';
+import iconNano from '../../assets/images/features/pure_nano.svg';
+import iconRel from '../../assets/images/features/reliability.svg';
+
 // Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, EffectCoverflow } from 'swiper/modules';
@@ -80,12 +87,12 @@ const Testimonials = () => {
               key={i}
               className="absolute rounded-full bg-blue-300/40 border border-white/40 blur-[0.5px] animate-float-bubble"
               style={{
-                width: `${Math.random() * 50 + 15}px`,
-                height: `${Math.random() * 50 + 15}px`,
-                left: `${Math.random() * 100}%`,
-                bottom: `-${Math.random() * 20 + 20}%`,
-                animationDuration: `${Math.random() * 4 + 4}s`,
-                animationDelay: `${Math.random() * 5}s`
+                width: `${(i * 7 + 15) % 50 + 15}px`,
+                height: `${(i * 7 + 15) % 50 + 15}px`,
+                left: `${(i * 13) % 100}%`,
+                bottom: `-${(i * 5 + 20) % 40 + 20}%`,
+                animationDuration: `${(i % 4) + 4}s`,
+                animationDelay: `${(i % 5)}s`
               }}
             />
           ))}
@@ -303,16 +310,16 @@ const Testimonials = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { icon: Heart, title: 'Immunity Boost', desc: 'Hydration that strengthens your defense system.' },
-              { icon: Shield, title: 'Bio-Safe Tech', desc: 'No-touch purification for total sterilization.' },
-              { icon: Zap, title: 'Metabolism', desc: 'Alkaline water that powers your cellular energy.' },
-              { icon: Droplets, title: 'Hydration+', desc: 'Optimized mineral structure for faster absorption.' },
-              { icon: Filter, title: 'Pure Flow', desc: 'Consistent performance even with high-TDS input.' },
-              { icon: Check, title: 'Reliability', desc: 'Built to last with military-grade components.' }
+              { img: iconImmunity, title: 'Immunity Boost', desc: 'Hydration that strengthens your defense system.' },
+              { img: iconBio, title: 'Bio-Safe Tech', desc: 'No-touch purification for total sterilization.' },
+              { img: iconMeta, title: 'Metabolism', desc: 'Alkaline water that powers your cellular energy.' },
+              { img: iconHydra, title: 'Hydration+', desc: 'Optimized mineral structure for faster absorption.' },
+              { img: iconNano, title: 'Pure Flow', desc: 'Consistent performance even with high-TDS input.' },
+              { img: iconRel, title: 'Reliability', desc: 'Built to last with military-grade components.' }
             ].map((b, i) => (
               <div key={i} className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-[var(--color-primary)] mb-8 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
-                  <b.icon size={32} />
+                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 mb-8 shrink-0">
+                  <img src={b.img} alt={b.title} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-[var(--color-secondary)] uppercase tracking-tight">{b.title}</h3>
                 <p className="text-slate-500 font-medium leading-relaxed">{b.desc}</p>

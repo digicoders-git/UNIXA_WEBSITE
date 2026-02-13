@@ -130,7 +130,7 @@ const ReviewSection = ({ productId }) => {
                 <div className="w-full md:w-2/3">
                     
                     {/* Form */}
-                    <div className="bg-white rounded-4xl p-8 border-2 border-slate-50 shadow-xl mb-12">
+                    <div className="bg-white rounded-4xl p-5 md:p-8 border-2 border-slate-50 shadow-xl mb-12">
                         <h4 className="text-xl font-black text-(--color-secondary) mb-6 flex items-center gap-2 uppercase tracking-wider">
                             Share Your Experience
                         </h4>
@@ -152,7 +152,7 @@ const ReviewSection = ({ productId }) => {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Rating</label>
-                                    <div className="flex gap-2 py-3">
+                                    <div className="flex gap-1 md:gap-3 py-3">
                                         {[1, 2, 3, 4, 5].map((num) => (
                                             <button
                                                 key={num}
@@ -163,13 +163,12 @@ const ReviewSection = ({ productId }) => {
                                                 className="transition-transform active:scale-90"
                                             >
                                                 <Star 
-                                                    size={32} 
                                                     fill={(hoverRating || rating) >= num ? "#EAB308" : "none"} 
-                                                    className={(hoverRating || rating) >= num ? "text-yellow-500" : "text-slate-300"}
+                                                    className={`${(hoverRating || rating) >= num ? "text-yellow-500" : "text-slate-300"} w-8 h-8 md:w-8 md:h-8`}
                                                 />
                                             </button>
                                         ))}
-                                        <span className="ml-3 font-black text-(--color-primary) self-center">{rating}/5</span>
+                                        <span className="ml-3 font-black text-(--color-primary) self-center text-lg">{rating}/5</span>
                                     </div>
                                 </div>
                             </div>
