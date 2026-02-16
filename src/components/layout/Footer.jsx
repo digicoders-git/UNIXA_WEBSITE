@@ -15,9 +15,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-16 mb-20">
           {/* Brand Section */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="flex items-center gap-4">
-             <div className="h-30 w-40 md:h-15 md:w-34 flex items-center justify-start transition-transform hover:scale-105">
-                        <img src="/logo1.png" alt="UNIXA" className="w-50 h-50 object-contain object-left" />
+            <div className="flex items-center rounded-xl gap-4">
+             <div className="h-30 w-70 md:h-15 md:w-64 flex  items-center justify-start transition-transform hover:scale-105">
+                        <img src="/14.png" alt="UNIXA" className="w-70 rounded-xl h-20 object-contain object-left" />
                     </div>
               {/* <div>
                 <UnixaBrand className="text-4xl" color="white" />

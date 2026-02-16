@@ -479,9 +479,10 @@ const RentOnRO = () => {
               {/* RENEW / SERVICE */}
               {activeTab === 'renew' && (
                  <div className="max-w-3xl mx-auto bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
-                    <div className="bg-slate-900 p-8 text-center">
-                       <h2 className="text-2xl font-black text-white mb-2">Renew Existing Plan</h2>
-                       <p className="text-slate-400 text-sm">Enter your registered details to request a renewal or service visit.</p>
+                    <div className="bg-white p-8 text-center">
+                       {/* <h2 className="text-2xl font-semibold mb-2 text-blue-500">Renew Existing Plan</h2> */}
+                       <h3 className='text-black text-2xl font-bold'>Renew Existing Plan</h3>
+                       <p className="text-black text-sm">Enter your registered details to request a renewal or service visit.</p>
                     </div>
                     
                     <div className="p-8 md:p-12 space-y-8">
