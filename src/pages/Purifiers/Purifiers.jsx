@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 import { Sparkles, Star, Award, Search, X, Grid, Filter, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
 import ProductCard from '../../components/cards/PurifierCard';
@@ -83,7 +84,12 @@ const Purifiers = () => {
         <div className="bg-[var(--color-surface)] min-h-screen font-['Outfit',sans-serif]">
 
             {/* Catalog Hero */}
-            <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/20 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]">
+            <motion.section 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/20 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]"
+            >
                 {/* Water Bubbles Effect */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
                     {[...Array(15)].map((_, i) => (
@@ -102,8 +108,13 @@ const Purifiers = () => {
                     ))}
                 </div>
 
-                <div className="relative z-10 max-w-4xl mx-auto space-y-8 animate-fade-in px-4">
-                    <div className="space-y-4">
+                <div className="relative z-10 max-w-4xl mx-auto space-y-8 px-4">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.2 }}
+                        className="space-y-4"
+                    >
                         <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white border border-slate-200 rounded-full mx-auto shadow-sm">
                             <Sparkles size={14} className="text-blue-500" />
                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
@@ -118,10 +129,15 @@ const Purifiers = () => {
                         <p className="text-slate-500 text-sm md:text-lg max-w-xl mx-auto leading-relaxed font-bold uppercase tracking-wider opacity-60">
                             Discover the next generation of smart hydration. Engineered for purity, designed for your lifestyle.
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* Integrated Search Bar */}
-                    <div className="max-w-xl mx-auto relative group">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                        className="max-w-xl mx-auto relative group"
+                    >
                         <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-[32px] opacity-0 group-focus-within:opacity-10 blur-xl transition-all duration-500" />
                         <div className="relative flex items-center bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[30px] p-2 shadow-2xl shadow-blue-500/5 hover:border-blue-200 transition-all duration-300">
                             <div className="pl-6 text-slate-400">
@@ -143,11 +159,11 @@ const Purifiers = () => {
                                 </button>
                             )}
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
 
                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-50/50 to-transparent pointer-events-none" />
-            </section>
+            </motion.section>
 
             {/* Purity Control Dashboard (Filters & Sort) */}
             <section className="sticky top-[70px] md:top-[74px] z-50 py-4 px-6 md:px-12 bg-white/70 backdrop-blur-xl border-b border-slate-100 shadow-sm">
@@ -236,21 +252,28 @@ const Purifiers = () => {
                                         {paginatedProducts.map((page, pageIdx) => (
                                             <SwiperSlide key={pageIdx}>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                                    {page.map((product) => (
-                                                        <ProductCard
+                                                    {page.map((product, idx) => (
+                                                        <motion.div
                                                             key={product._id}
-                                                            product={{
-                                                                id: product._id,
-                                                                p_id: product.p_id,
-                                                                name: product.name,
-                                                                img: product.mainImage?.url,
-                                                                price: product.price,
-                                                                finalPrice: product.finalPrice,
-                                                                discountPercent: product.discountPercent,
-                                                                description: product.description,
-                                                                category: product.category?.name
-                                                            }}
-                                                        />
+                                                            initial={{ opacity: 0, y: 30 }}
+                                                            whileInView={{ opacity: 1, y: 0 }}
+                                                            viewport={{ once: true }}
+                                                            transition={{ duration: 0.4, delay: idx * 0.1 }}
+                                                        >
+                                                            <ProductCard
+                                                                product={{
+                                                                    id: product._id,
+                                                                    p_id: product.p_id,
+                                                                    name: product.name,
+                                                                    img: product.mainImage?.url,
+                                                                    price: product.price,
+                                                                    finalPrice: product.finalPrice,
+                                                                    discountPercent: product.discountPercent,
+                                                                    description: product.description,
+                                                                    category: product.category?.name
+                                                                }}
+                                                            />
+                                                        </motion.div>
                                                     ))}
                                                 </div>
                                             </SwiperSlide>
@@ -270,7 +293,12 @@ const Purifiers = () => {
                                     )}
                                 </div>
                             ) : (
-                                <div className="py-32 text-center space-y-6 animate-in fade-in slide-in-from-bottom-5">
+                                <motion.div 
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="py-32 text-center space-y-6"
+                                >
                                     <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
                                         <Filter size={48} strokeWidth={1.5} />
                                     </div>
@@ -284,7 +312,7 @@ const Purifiers = () => {
                                     >
                                         Reset Matrix
                                     </button>
-                                </div>
+                                </motion.div>
                             )}
                         </>
                     )}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
@@ -110,18 +111,26 @@ const ProductDetail = () => {
             <div className="pb-12 px-4 md:px-12 max-w-7xl mx-auto">
 
                 {/* Back Link */}
-                <button
+                <motion.button
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 mb-8 font-bold text-slate-400 hover:text-(--color-secondary) transition-colors"
                 >
                     <ArrowLeft size={18} />
                     Back to Catalog
-                </button>
+                </motion.button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
 
                     {/* Image Section */}
-                    <div className="relative group rounded-[4rem] bg-gradient-to-br from-slate-50 to-blue-50/30 p-12 lg:p-24 flex items-center justify-center overflow-hidden border border-blue-100/50 shadow-2xl shadow-blue-500/5">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.7 }}
+                        className="relative group rounded-[4rem] bg-gradient-to-br from-slate-50 to-blue-50/30 p-12 lg:p-24 flex items-center justify-center overflow-hidden border border-blue-100/50 shadow-2xl shadow-blue-500/5"
+                    >
                         <img
                             src={product?.mainImage?.url || product?.img}
                             alt={product?.name}
@@ -136,10 +145,15 @@ const ProductDetail = () => {
                             <ShieldCheck size={18} className="text-(--color-primary)" />
                             Certified Authentic
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Details Section */}
-                    <div className="flex flex-col h-full pt-4">
+                    <motion.div 
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.7, delay: 0.2 }}
+                        className="flex flex-col h-full pt-4"
+                    >
                         <div className="mb-2">
                             <span className="bg-(--color-primary)/10 text-(--color-secondary) text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full inline-block mb-4">
                                 {product?.category?.name || product?.category || "Purifier"}

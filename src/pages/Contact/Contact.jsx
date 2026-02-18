@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 import { Mail, Phone, MapPin, Loader2, Droplets, ArrowRight } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
@@ -127,7 +128,12 @@ const Contact = () => {
         <div className="bg-[var(--color-surface)] text-[var(--color-text)] font-[var(--font-body)] overflow-x-hidden">
 
             {/* Hero Section - Professional with Bubbles */}
-            <section className="relative pt-20 pb-12 md:pt-28 md:pb-16 px-6 text-center bg-slate-50 border-b border-slate-200 rounded-b-[40px] md:rounded-b-[80px] overflow-hidden">
+            <motion.section 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6 }}
+                className="relative pt-20 pb-12 md:pt-28 md:pb-16 px-6 text-center bg-slate-50 border-b border-slate-200 rounded-b-[40px] md:rounded-b-[80px] overflow-hidden"
+            >
                 {/* High Visibility Water Bubbles */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
                     {[...Array(10)].map((_, i) => (
@@ -158,7 +164,12 @@ const Contact = () => {
                     }
                 `}</style>
 
-                <div className="relative z-10 max-w-4xl mx-auto space-y-4">
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                    className="relative z-10 max-w-4xl mx-auto space-y-4"
+                >
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full mx-auto shadow-sm">
                         <Phone size={16} className="text-(--color-primary)" />
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -173,13 +184,20 @@ const Contact = () => {
                     <p className="text-slate-500 text-sm md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
                         Have questions about our water purifiers? Reach out to our team of experts for professional assistance.
                     </p>
-                </div>
-            </section>
+                </motion.div>
+            </motion.section>
 
             <section className="py-12 md:py-16 px-4 md:px-8 lg:px-24 bg-white">
                 <div className="flex flex-col lg:flex-row gap-12 max-w-7xl mx-auto">
                     {/* Contact Info */}
-                    <div ref={addToRefs} className="flex-1 space-y-6">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        ref={addToRefs} 
+                        className="flex-1 space-y-6"
+                    >
                         <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 space-y-8">
                             <div className="space-y-2">
                                 <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Reach <span className="text-(--color-primary)">Us</span></h2>
@@ -225,10 +243,17 @@ const Contact = () => {
                         </div>
 
 
-                    </div>
+                    </motion.div>
 
                     {/* Contact Form */}
-                    <div ref={addToRefs} className="flex-[1.5] p-8 md:p-10 rounded-3xl bg-white border border-slate-200 shadow-sm">
+                    <motion.div 
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        ref={addToRefs} 
+                        className="flex-[1.5] p-8 md:p-10 rounded-3xl bg-white border border-slate-200 shadow-sm"
+                    >
                         <div className="space-y-2 mb-8">
                             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Send a <span className="text-(--color-primary)">Message</span></h2>
                             <p className="text-slate-500 text-sm font-medium">We'll get back to you as soon as possible.</p>
@@ -308,9 +333,37 @@ const Contact = () => {
                                 {loading ? 'Sending...' : 'Send Message'}
                             </button>
                         </form>
-                    </div>
+                    </motion.div>
                 </div>
             </section>
+
+            {/* Map Section */}
+            <motion.section 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="py-12 px-4 md:px-8 lg:px-24 bg-slate-50"
+            >
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Visit <span className="text-(--color-primary)">Our Office</span></h2>
+                        <p className="text-slate-500 text-sm font-medium">UNIXA Head Office, Industrial Area, New Delhi, India</p>
+                    </div>
+                    <div className="rounded-3xl overflow-hidden border-4 border-white shadow-2xl">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d224345.83923192776!2d77.06889754725782!3d28.52758200617607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b347eb62d%3A0x52c2b7494e204dce!2sNew%20Delhi%2C%20Delhi!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+                            width="100%" 
+                            height="450" 
+                            style={{ border: 0 }} 
+                            allowFullScreen="" 
+                            loading="lazy" 
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title="UNIXA Office Location"
+                        ></iframe>
+                    </div>
+                </div>
+            </motion.section>
 
             <Footer />
         </div>

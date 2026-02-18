@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
-import { Droplets, X, Check, AlertTriangle, Shield, Heart, Zap, Filter, ArrowRight, Star, Quote } from 'lucide-react';
+import { Droplets, X, Check, AlertTriangle, Shield, Heart, Zap, Filter, ArrowRight, Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
 import UnixaBrand from '../../components/common/UnixaBrand';
 import Loader from '../../components/common/Loader';
@@ -12,17 +13,16 @@ import iconHydra from '../../assets/images/features/hydration_plus.svg';
 import iconNano from '../../assets/images/features/pure_nano.svg';
 import iconRel from '../../assets/images/features/reliability.svg';
 
-// Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, EffectCoverflow } from 'swiper/modules';
+import { Autoplay, Navigation } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-coverflow';
+import 'swiper/css/navigation';
 
 const Testimonials = () => {
   const sectionRefs = useRef([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -79,7 +79,12 @@ const Testimonials = () => {
     <div className="min-h-screen bg-[var(--color-surface)]" style={{ fontFamily: `var(--font-body)` }}>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-12 md:pt-24 md:pb-16 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]">
+      <motion.section 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative pt-20 pb-12 md:pt-24 md:pb-16 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]"
+      >
         {/* High Visibility Water Bubbles */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
           {[...Array(12)].map((_, i) => (
@@ -110,7 +115,12 @@ const Testimonials = () => {
             }
         `}</style>
 
-        <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="relative z-10 max-w-4xl mx-auto space-y-6"
+        >
           <div className="inline-flex items-center gap-3 px-5 py-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 rounded-full mx-auto">
             <Droplets size={20} className="text-[var(--color-primary)]" />
             <span className="text-[12px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">
@@ -125,11 +135,11 @@ const Testimonials = () => {
           <p className="text-slate-600 text-sm md:text-xl max-w-2xl mx-auto leading-relaxed font-bold">
             See why thousands of families trust <UnixaBrand className="text-sm md:text-xl" /> for their daily hydration.
           </p>
-        </div>
+        </motion.div>
 
         {/* Section Separator Overlay */}
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[var(--color-primary)]/10 to-transparent pointer-events-none" />
-      </section>
+      </motion.section>
 
       {/* Customer Reviews - Dynamic Slider */}
       <section ref={addToRefs} className="py-24 px-4 md:px-12 bg-white relative overflow-hidden">
@@ -149,45 +159,39 @@ const Testimonials = () => {
                 <Loader text="Loading Reviews..." />
              </div>
           ) : (
-            <div className="testimonials-slider relative px-0 md:px-8">
+            <div className="relative group">
               <Swiper
-                modules={[Autoplay, Pagination, EffectCoverflow]}
-                effect={'coverflow'}
-                grabCursor={true}
-                centeredSlides={true}
-                slidesPerView={'auto'}
-                coverflowEffect={{
-                  rotate: 0,
-                  stretch: 0,
-                  depth: 100,
-                  modifier: 2.5,
-                  slideShadows: false,
-                }}
-                autoplay={{
-                  delay: 3500,
-                  disableOnInteraction: false,
-                }}
-                pagination={{ clickable: true, dynamicBullets: true }}
+                modules={[Autoplay, Navigation]}
+                spaceBetween={30}
+                slidesPerView={3}
                 loop={true}
+                speed={800}
+                autoplay={{
+                  delay: 3000,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true
+                }}
+                navigation={{
+                  prevEl: '.testimonial-prev',
+                  nextEl: '.testimonial-next',
+                }}
+                onSwiper={(swiper) => { swiperRef.current = swiper; }}
                 breakpoints={{
-                  640: {
-                    slidesPerView: 1,
-                    spaceBetween: 20,
-                  },
-                  768: {
-                    slidesPerView: 2,
-                    spaceBetween: 40,
-                  },
-                  1024: {
-                    slidesPerView: 3,
-                    spaceBetween: 50,
-                  },
+                  320: { slidesPerView: 1 },
+                  768: { slidesPerView: 2 },
+                  1024: { slidesPerView: 3 },
                 }}
                 className="py-12"
               >
                 {displayReviews.map((review, i) => (
-                  <SwiperSlide key={i} className="max-w-md w-full">
-                    <div className="bg-slate-50 p-8 md:p-10 rounded-[3rem] border border-slate-100 h-full flex flex-col justify-center relative shadow-lg hover:shadow-2xl hover:bg-white transition-all duration-500 group">
+                  <SwiperSlide key={i}>
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5 }}
+                      className="bg-slate-50 p-8 md:p-10 rounded-[3rem] border border-slate-100 h-full flex flex-col justify-center relative shadow-lg hover:shadow-2xl hover:bg-white transition-all duration-500 group"
+                    >
                       <Quote className="absolute top-8 right-8 text-[var(--color-primary)]/10 rotate-180" size={64} />
                       
                       <div className="flex gap-1 mb-6">
@@ -213,10 +217,17 @@ const Testimonials = () => {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   </SwiperSlide>
                 ))}
-            </Swiper>
+              </Swiper>
+
+              <button className="testimonial-prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
+                <ChevronLeft size={20} />
+              </button>
+              <button className="testimonial-next absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
+                <ChevronRight size={20} />
+              </button>
             </div>
           )}
         </div>

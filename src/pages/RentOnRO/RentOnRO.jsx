@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
 import { 
   CheckCircle2, 
@@ -250,10 +251,20 @@ const RentOnRO = () => {
     <div className="bg-slate-50 min-h-screen font-['Outfit',sans-serif]">
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 md:px-12 bg-white overflow-hidden rounded-b-[60px] shadow-sm">
+      <motion.section 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative pt-32 pb-20 px-6 md:px-12 bg-white overflow-hidden rounded-b-[60px] shadow-sm"
+      >
         <div className="absolute top-0 right-0 w-2/3 h-full bg-blue-50/50 skew-x-12 translate-x-1/4 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 animate-fade-in-up">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="space-y-8"
+          >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full">
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
               <span className="text-blue-600 font-bold text-[10px] uppercase tracking-widest">Rental & AMC Services</span>
@@ -289,9 +300,14 @@ const RentOnRO = () => {
                <span className="flex items-center gap-2"><CheckCircle2 size={14} className="text-green-500"/> Free Installation</span>
                <span className="flex items-center gap-2"><CheckCircle2 size={14} className="text-green-500"/> 24h Support</span>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="relative hidden lg:block">
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="relative hidden lg:block"
+          >
             <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-3xl transform scale-90"></div>
             <img 
                src={water2} 
@@ -311,9 +327,9 @@ const RentOnRO = () => {
                    </div>
                 </div>
              </div>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Main Content Area */}
       <section id="plans-section" className="py-20 px-6 md:px-12">
@@ -355,8 +371,16 @@ const RentOnRO = () => {
                     </div>
                     
                     <div className="grid md:grid-cols-3 gap-8">
-                       {rentalPlans.map(plan => (
-                           <div key={plan.id} className={`group relative p-8 bg-white rounded-[2.5rem] border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${plan.color || 'border-slate-100'} overflow-hidden`}>
+                       {rentalPlans.map((plan, idx) => (
+                           <motion.div 
+                             key={plan.id}
+                             initial={{ opacity: 0, y: 30 }}
+                             whileInView={{ opacity: 1, y: 0 }}
+                             viewport={{ once: true }}
+                             transition={{ duration: 0.5, delay: idx * 0.1 }}
+                             whileHover={{ scale: 1.02, y: -5 }}
+                             className={`group relative p-8 bg-white rounded-[2.5rem] border transition-all duration-300 hover:shadow-xl ${plan.color || 'border-slate-100'} overflow-hidden`}
+                           >
                              
                              {/* Plan Image if available */}
                              {plan.image ? (
@@ -423,7 +447,7 @@ const RentOnRO = () => {
                              >
                                 Rent Now <ArrowRight size={14} />
                              </button>
-                          </div>
+                          </motion.div>
                        ))}
                     </div>
                  </div>
@@ -438,8 +462,16 @@ const RentOnRO = () => {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                       {amcPlans.map(plan => (
-                          <div key={plan.id} className={`group relative p-8 bg-white rounded-[2.5rem] border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${plan.recommended ? 'border-yellow-500 ring-4 ring-yellow-500/10' : 'border-slate-100'}`}>
+                       {amcPlans.map((plan, idx) => (
+                          <motion.div 
+                            key={plan.id}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: idx * 0.1 }}
+                            whileHover={{ scale: 1.02, y: -5 }}
+                            className={`group relative p-8 bg-white rounded-[2.5rem] border transition-all duration-300 hover:shadow-xl ${plan.recommended ? 'border-yellow-500 ring-4 ring-yellow-500/10' : 'border-slate-100'}`}
+                          >
                              {plan.recommended && (
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-md">
                                    Best Value
@@ -470,7 +502,7 @@ const RentOnRO = () => {
                              >
                                 Choose Plan <ArrowRight size={14} />
                              </button>
-                          </div>
+                          </motion.div>
                        ))}
                     </div>
                  </div>

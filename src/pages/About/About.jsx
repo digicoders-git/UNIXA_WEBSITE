@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, memo } from 'react';
+import { motion } from 'framer-motion';
 import { Droplets, Shield, Award, Truck, RotateCcw, FileText, CheckCircle, Zap, Filter, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Footer from '../../components/layout/Footer';
@@ -40,7 +41,12 @@ const About = memo(() => {
     <div className="bg-[var(--color-surface)] text-[var(--color-text)] font-[var(--font-body)] overflow-x-hidden">
 
       {/* Hero Section - Matched to Purifiers/Home Premium Feel */}
-      <section className="relative pt-20 pb-12 md:pt-24 md:pb-16 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]">
+      <motion.section 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative pt-20 pb-12 md:pt-24 md:pb-16 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]"
+      >
         {/* High Visibility Water Bubbles */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
           {[...Array(12)].map((_, i) => (
@@ -71,7 +77,12 @@ const About = memo(() => {
             }
         `}</style>
 
-        <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="relative z-10 max-w-4xl mx-auto space-y-6"
+        >
           <div className="inline-flex items-center gap-3 px-5 py-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 rounded-full mx-auto">
             <Droplets className="w-5 h-5 text-[var(--color-primary)]" />
             <span className="text-[12px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">
@@ -87,17 +98,23 @@ const About = memo(() => {
             “At UNIXA Water Technologies, purity is not just a promise — it’s a legacy crafted through innovation, precision, and trust. Guided by our belief 'A TRUE PROTECTOR OF YOUR FAMILY’, we deliver refined water solutions designed to safeguard every home and every generation.”
           </p>
 
-        </div>
+        </motion.div>
 
         {/* Section Separator Overlay */}
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[var(--color-primary)]/10 to-transparent pointer-events-none" />
-      </section>
+      </motion.section>
 
       {/* Our Mission - Updated with ourMissionImg and Clean CSS */}
       <section ref={addToRefs} className="py-12 px-6 md:px-24 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="space-y-8"
+            >
               <div className="space-y-4">
                 <h2 className="text-3xl md:text-6xl font-bold text-[var(--color-secondary)] tracking-tighter uppercase leading-none">
                   Our <span className="text-[var(--color-primary)]">Mission</span>
@@ -124,9 +141,15 @@ const About = memo(() => {
                   <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-primary)]">Purification Rate</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="relative">
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="relative"
+            >
               <div className="rounded-[40px] overflow-hidden shadow-2xl border-4 border-white transform hover:scale-[1.02] transition-transform duration-700">
                 <img
                   src={ourMissionImg}
@@ -137,7 +160,7 @@ const About = memo(() => {
               {/* Decorative background glow */}
               <div className="absolute -z-10 -top-10 -right-10 w-64 h-64 bg-[var(--color-primary)]/10 blur-[100px] rounded-full" />
               <div className="absolute -z-10 -bottom-10 -left-10 w-64 h-64 bg-cyan-400/10 blur-[100px] rounded-full" />
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -158,13 +181,21 @@ const About = memo(() => {
               { img: iconUV, title: "UV Guard", desc: "Powerful UV-C light eliminates bacteria and harmful microorganisms." },
               { img: iconIQ, title: "Smart IQ", desc: "IoT-enabled systems for real-time water quality and filter monitoring." }
             ].map((feature, i) => (
-              <div key={i} className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group"
+              >
                 <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-8 border border-slate-100 shrink-0">
                   <img src={feature.img} alt={feature.title} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-[var(--color-secondary)] uppercase tracking-tight">{feature.title}</h3>
                 <p className="text-slate-500 font-medium leading-relaxed">{feature.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

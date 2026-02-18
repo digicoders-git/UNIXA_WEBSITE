@@ -1,54 +1,130 @@
-import { Mail, Phone, MapPin, Heart, Instagram, Youtube, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Heart, Instagram, Youtube, MessageCircle, Facebook, Droplet, Award, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import UnixaBrand from '../common/UnixaBrand';
+import { FaWhatsapp } from "react-icons/fa";
+import logo from '../../assets/footer-logo.jpg';
 
 const Footer = () => {
   return (
-    <footer className="pt-24 pb-12 px-8 md:px-24 relative overflow-hidden bg-[var(--color-secondary)] text-white/80">
-      {/* Decorative Top Border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--color-primary)]/50 to-transparent"></div>
+    <footer className="relative overflow-hidden bg-[var(--color-secondary)] text-white/90">
+      {/* Animated Top Wave Border */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--color-primary)] to-transparent">
+        <motion.div
+          animate={{ x: ['-100%', '100%'] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          className="h-full w-1/3 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+        />
+      </div>
 
-      {/* Subtle Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-[var(--color-primary)]/10 blur-[120px] rounded-full"></div>
+      {/* Enhanced Background Effects */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/20 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--color-primary)]/10 blur-[150px] rounded-full"></div>
+      </div>
+      
+      {/* Animated Water Droplets */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 3 + i,
+              repeat: Infinity,
+              delay: i * 0.5,
+            }}
+            className="absolute"
+            style={{
+              left: `${10 + i * 12}%`,
+              top: `${20 + (i % 3) * 20}%`,
+            }}
+          >
+            <Droplet size={16} className="text-cyan-400/20" />
+          </motion.div>
+        ))}
+      </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-16 mb-20">
-          {/* Brand Section */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="flex items-center rounded-xl gap-4">
-             <div className="h-30 w-70 md:h-15 md:w-64 flex  items-center justify-start transition-transform hover:scale-105">
-                        <img src="/14.png" alt="UNIXA" className="w-70 rounded-xl h-20 object-contain object-left" />
-                    </div>
-              {/* <div>
-                <UnixaBrand className="text-4xl" color="white" />
-                <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">Pure Water Solutions</p>
-              </div> */}
+      <div className="max-w-7xl mx-auto relative z-10 px-6 md:px-12 pt-20 pb-8">
+        {/* Top Section with Logo & Trust Badges */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-16 pb-12 border-b border-white/10"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-4">
+              <img src={logo} alt="UNIXA" className="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform" />
             </div>
-
-            <p className="text-xl leading-relaxed text-slate-300 max-w-md font-medium">
-              Revolutionizing hydration with premium technology. We bring the longevity of advanced water purification to every Indian household.
-            </p>
-
-            <div className="flex gap-5">
-              {[Instagram, Youtube, MessageCircle].map((Icon, i) => (
-                <a
+            <div className="flex gap-6">
+              {[
+                { icon: <Award size={20} />, text: 'ISO Certified' },
+                { icon: <Shield size={20} />, text: '5 Year Warranty' },
+                { icon: <Droplet size={20} />, text: 'Pure Water' }
+              ].map((badge, i) => (
+                <motion.div
                   key={i}
-                  href="#"
-                  className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center transition-all hover:bg-[var(--color-primary)] hover:border-[var(--color-primary)] hover:-translate-y-2 text-white group"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
                 >
-                  <Icon className="w-6 h-6 transition-transform group-hover:scale-110" />
-                </a>
+                  <span className="text-[var(--color-primary)]">{badge.icon}</span>
+                  <span className="text-xs font-bold text-white">{badge.text}</span>
+                </motion.div>
               ))}
             </div>
           </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16">
+          {/* Brand Section */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="lg:col-span-2 space-y-6"
+          >
+            <p className="text-base leading-relaxed text-white/90 max-w-md font-medium">
+              Revolutionizing hydration with premium technology. We bring the longevity of advanced water purification to every Indian household.
+            </p>
+
+            <div className="flex gap-3">
+              {[
+                { href: 'https://www.instagram.com/unixawatertechnologies?igsh=aW05ODVkazJhMDRy', icon: <Instagram size={18} />, color: 'from-pink-500 to-purple-600' },
+                { href: 'https://youtube.com/@unixawatertechnologies?si=_hDRleqBGuw2TkgL', icon: <Youtube size={18} />, color: 'from-red-500 to-red-600' },
+                { href: 'https://www.facebook.com/share/1BDkH9zTFx/', icon: <Facebook size={18} />, color: 'from-blue-500 to-blue-600' }
+              ].map((social, i) => (
+                <motion.a
+                  key={i}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-11 h-11 rounded-xl bg-gradient-to-br ${social.color} flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-shadow`}
+                >
+                  {social.icon}
+                </motion.a>
+              ))}
+            </div>
+          </motion.div>
 
           {/* Navigation Links */}
-          <div className="grid grid-cols-2 gap-10 lg:col-span-2">
-            <div>
-              <h4 className="!text-white font-black mb-10 uppercase tracking-[0.3em] text-xs flex items-center gap-3">
-                <span className="w-6 h-[2px] bg-[var(--color-primary)]"></span> Company
+          <div className="grid grid-cols-2 gap-8 lg:col-span-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <h4 className="text-white font-black mb-6 uppercase tracking-[0.3em] text-xs flex items-center gap-2">
+                <span className="w-8 h-[2px] bg-gradient-to-r from-[var(--color-primary)] to-cyan-400"></span> Company
               </h4>
-              <ul className="space-y-5">
+              <ul className="space-y-3">
                 {[
                   { name: 'Home', link: '/' },
                   { name: 'Purifiers', link: '/purifiers' },
@@ -57,77 +133,92 @@ const Footer = () => {
                   { name: 'Support', link: '/contact' }
                 ].map((item) => (
                   <li key={item.name}>
-                    <Link to={item.link} className="text-base font-bold text-slate-200 hover:text-[var(--color-primary)] transition-all no-underline flex items-center gap-2 group">
-                      <span className="w-0 h-0.5 bg-[var(--color-primary)] group-hover:w-3 transition-all"></span>
+                    <Link to={item.link} className="text-sm font-bold text-white/80 hover:text-[var(--color-primary)] transition-all no-underline flex items-center gap-2 group">
+                      <span className="w-0 h-0.5 bg-[var(--color-primary)] group-hover:w-4 transition-all"></span>
                       {item.name}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
-            <div>
-              <h4 className="!text-white font-black mb-10 uppercase tracking-[0.3em] text-xs flex items-center gap-3">
-                <span className="w-6 h-[2px] bg-[var(--color-primary)]"></span> Legal
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <h4 className="text-white font-black mb-6 uppercase tracking-[0.3em] text-xs flex items-center gap-2">
+                <span className="w-8 h-[2px] bg-gradient-to-r from-[var(--color-primary)] to-cyan-400"></span> Legal
               </h4>
-              <ul className="space-y-5">
+              <ul className="space-y-3">
                 {['Shipping Policy', 'Return Policy', 'Terms of Service', 'Privacy Policy'].map((link) => (
                   <li key={link}>
-                    <Link to={`/${link.toLowerCase().replace(/ /g, '-')}`} className="text-base font-bold text-slate-200 hover:text-[var(--color-primary)] transition-all no-underline flex items-center gap-2 group">
-                      <span className="w-0 h-0.5 bg-[var(--color-primary)] group-hover:w-3 transition-all"></span>
+                    <Link to={`/${link.toLowerCase().replace(/ /g, '-')}`} className="text-sm font-bold text-white/80 hover:text-[var(--color-primary)] transition-all no-underline flex items-center gap-2 group">
+                      <span className="w-0 h-0.5 bg-[var(--color-primary)] group-hover:w-4 transition-all"></span>
                       {link}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Contact Strip */}
-        <div className="py-12 border-y border-white/10 grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
-          <div className="flex items-center gap-5 group">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-[var(--color-primary)] border border-blue-500/20 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
-              <Mail size={22} />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--color-primary)] mb-1">Email Support</p>
-              <a href="mailto:info@unixa.com" className="text-lg font-bold text-white hover:text-[var(--color-primary)] transition-colors">info@unixa.com</a>
-            </div>
-          </div>
-          <div className="flex items-center gap-5 group">
-            <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-white transition-all">
-              <Phone size={22} />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-green-400 mb-1">Toll Free</p>
-              <a href="tel:+911800123456" className="text-lg font-bold text-white hover:text-[var(--color-primary)] transition-colors">+91 1800-123-456</a>
-            </div>
-          </div>
-          <div className="flex items-center gap-5 group">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20 group-hover:bg-purple-500 group-hover:text-white transition-all">
-              <MapPin size={22} />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-purple-400 mb-1">Headquarters</p>
-              <p className="text-lg font-bold text-white leading-tight">Industrial Area, New Delhi, India</p>
-            </div>
-          </div>
-        </div>
+        {/* Contact Cards - Premium Design */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="py-10 border-y border-white/10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10"
+        >
+          {[
+            { icon: <Mail size={20} />, label: 'Email', value: 'unixatechnologies@gmail.com', href: 'mailto:unixatechnologies@gmail.com', color: 'from-blue-500/20 to-cyan-500/20', hoverColor: 'group-hover:from-blue-500 group-hover:to-cyan-500' },
+            { icon: <FaWhatsapp  size={20} />, label: 'WhatsApp', value: '+91 9278176663', href: 'https://wa.me/919278176663', color: 'from-green-500/20 to-emerald-500/20', hoverColor: 'group-hover:from-green-500 group-hover:to-emerald-500' },
+            { icon: <Phone size={20} />, label: 'Support', value: '+91 9278176662', href: 'tel:+919278176662', color: 'from-orange-500/20 to-red-500/20', hoverColor: 'group-hover:from-orange-500 group-hover:to-red-500' },
+            { icon: <MapPin size={20} />, label: 'Location', value: 'New Delhi, India', href: null, color: 'from-purple-500/20 to-pink-500/20', hoverColor: 'group-hover:from-purple-500 group-hover:to-pink-500' }
+          ].map((contact, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.02, y: -2 }}
+              className="group"
+            >
+              <a
+                href={contact.href || '#'}
+                target={contact.href?.startsWith('http') ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className={`flex flex-col gap-3 p-5 rounded-2xl bg-gradient-to-br ${contact.color} ${contact.hoverColor} border border-white/10 backdrop-blur-sm transition-all duration-300 h-full ${!contact.href && 'pointer-events-none'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                    {contact.icon}
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white/80">{contact.label}</span>
+                </div>
+                <p className="text-sm font-bold text-white leading-tight break-all">{contact.value}</p>
+              </a>
+            </motion.div>
+          ))}
+        </motion.div>
 
-        {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 pt-4">
-          <p className="text-sm font-bold text-slate-300">
+        {/* Bottom Bar - Premium */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="flex flex-col md:flex-row justify-between items-center gap-6 pt-6"
+        >
+          <p className="text-sm font-bold text-white/70 flex items-center gap-2">
             © {new Date().getFullYear()} <UnixaBrand className="text-sm" color="white" />. All rights reserved.
           </p>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-slate-500 font-medium">Crafted with</span>
-            <Heart size={18} className="text-red-500 fill-red-500 animate-pulse" />
-            <span className="text-slate-500 font-bold">by</span>
-            <a href="https://digicoders.in/" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] font-black text-lg hover:underline transition-all">
-              #TeamDigicoders
+          <div className="flex items-center gap-2">
+            <span className="text-white/60 text-sm font-medium">Crafted with</span>
+            <Heart size={12} className="text-red-500 animate-pulse" fill="currentColor" />
+            <span className="text-white/60 text-sm font-medium">by</span>
+            <a href="https://digicoders.in/" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] font-bold text-sm hover:text-cyan-400 transition-colors">
+              Team Digicoders
             </a>
           </div>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );

@@ -1,7 +1,8 @@
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import Layout from '../components/layout/Layout';
-import Loader from '../components/common/Loader';
+import PageLoader from '../components/common/PageLoader';
 
 // Lazy loaded pages
 const Home = lazy(() => import('../pages/Home/Home'));
@@ -27,15 +28,23 @@ const TermsOfService = lazy(() => import('../pages/Policies/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('../pages/Policies/PrivacyPolicy'));
 const NotFound = lazy(() => import('../pages/NotFound/NotFound'));
 
-function App() {
+const AppContent = () => {
+    const location = useLocation();
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        const timer = setTimeout(() => setLoading(false), 800);
+        return () => clearTimeout(timer);
+    }, [location.pathname]);
+
     return (
-        <Router>
-            <Suspense fallback={
-                <div className="h-screen w-screen flex items-center justify-center bg-white">
-                    <Loader text="Loading Experience..." />
-                </div>
-            }>
-                <Routes>
+        <>
+            <AnimatePresence mode="wait">
+                {loading && <PageLoader key="loader" />}
+            </AnimatePresence>
+            <Suspense fallback={<PageLoader />}>
+                <Routes location={location} key={location.pathname}>
                     <Route path="/" element={<Layout />}>
                         <Route index element={<Home />} />
                         <Route path="purifiers" element={<Purifiers />} />
@@ -62,6 +71,14 @@ function App() {
                     </Route>
                 </Routes>
             </Suspense>
+        </>
+    );
+};
+
+function App() {
+    return (
+        <Router>
+            <AppContent />
         </Router>
     );
 }

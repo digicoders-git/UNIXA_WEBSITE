@@ -46,9 +46,25 @@ const HeroSlider = memo(() => {
         <section className="relative w-full bg-white">
             <div className="relative w-full overflow-hidden h-[50vh] md:h-auto lg:h-[550px]">
                 
+                {/* Animated Water Wave Video Background */}
+                <div className="absolute inset-0 w-full h-full z-0">
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        className="absolute inset-0 w-full h-full object-cover opacity-40"
+                        style={{ pointerEvents: 'none' }}
+                    >
+                        <source src="https://videos.pexels.com/video-files/6985295/6985295-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+                    </video>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-cyan-500/20 to-blue-700/30"></div>
+                </div>
+                
                 {/* Dynamic Background Image Layer */}
                 {!loading && sliders.length > 0 ? (
-                     <div className="absolute inset-0 w-full h-full">
+                     <div className="absolute inset-0 w-full h-full z-10">
                          <Slider {...settings} className="w-full h-full">
                             {sliders.map(slide => (
                                 <div key={slide._id} className="w-full h-full outline-none">
@@ -66,13 +82,13 @@ const HeroSlider = memo(() => {
                     <img
                         src={unixaHero}
                         alt="Welcome to UNIXA"
-                        className="w-full h-[50vh] md:h-auto lg:h-[550px] object-cover object-center block"
+                        className="absolute inset-0 w-full h-[50vh] md:h-auto lg:h-[550px] object-cover object-center block z-10"
                         loading="eager"
                     />
                 )}
 
                 {/* Static Content Overlay (Exact Original Design) */}
-                <div className="absolute inset-0 flex items-end md:items-center bg-gradient-to-t from-black/80 via-black/20 to-transparent md:bg-gradient-to-r md:from-black/70 md:to-transparent pointer-events-none">
+                <div className="absolute inset-0 flex items-end md:items-center bg-gradient-to-t from-black/80 via-black/20 to-transparent md:bg-gradient-to-r md:from-black/70 md:to-transparent pointer-events-none z-20">
                     <div className="max-w-7xl mx-auto px-6 md:px-12 w-full pb-8 md:pb-0 text-center md:text-left">
                         <div className="max-w-xl animate-fade-in-slider pointer-events-auto">
                             <h1
