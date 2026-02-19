@@ -378,7 +378,7 @@ const ProductDetail = () => {
                             </div>
                         </div>
 
-                    </div>
+                    </motion.div>
                 </div>
 
                 {/* Review Section */}
