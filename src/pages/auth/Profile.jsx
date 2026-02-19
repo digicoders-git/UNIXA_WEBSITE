@@ -312,8 +312,19 @@ const Profile = () => {
 
     const handleGoToDashboard = () => {
         const token = getToken();
-        const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL;
-        window.location.href = `${dashboardUrl}/login?token=${token}`;
+        if (!token) {
+            toast.error('Please login first');
+            navigate('/login');
+            return;
+        }
+        
+        const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL || 'http://localhost:5176';
+        
+        // Store token in localStorage for User Panel to access
+        localStorage.setItem('userPanelToken', token);
+        
+        // Open in same tab
+        window.location.href = `${dashboardUrl}/dashboard`;
     };
 
     const handleSaveProfile = async () => {
