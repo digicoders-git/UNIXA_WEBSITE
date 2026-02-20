@@ -10,6 +10,7 @@ import { throttle } from '../../utils/performance';
 const Footer = lazy(() => import('../../components/layout/Footer'));
 const ProductCard = lazy(() => import('../../components/cards/PurifierCard'));
 const HeroSlider = lazy(() => import('../../components/Slider/HeroSlider'));
+const FeaturedBlogs = lazy(() => import('../../components/common/FeaturedBlogs'));
 import UnixaBrand from '../../components/common/UnixaBrand';
 
 // Swiper imports
@@ -40,6 +41,8 @@ const Home = memo(() => {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [sliderReviews, setSliderReviews] = useState([]);
+  const [certificates, setCertificates] = useState([]);
   const swiperRef = useRef(null);
 
   useEffect(() => {
@@ -53,7 +56,7 @@ const Home = memo(() => {
         }
 
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        // Silently handle error
       } finally {
         setLoadingProducts(false);
       }
@@ -70,12 +73,40 @@ const Home = memo(() => {
           setReviews(data.reviews);
         }
       } catch (error) {
-        console.error("Failed to fetch reviews:", error);
+        // Silently handle error
       } finally {
         setLoadingReviews(false);
       }
     };
     fetchReviews();
+  }, []);
+
+  useEffect(() => {
+    const fetchSliderReviews = async () => {
+      try {
+        const { data } = await api.get('/reviews/slider');
+        if (data.success) {
+          setSliderReviews(data.reviews);
+        }
+      } catch (error) {
+        // Silently handle error
+      }
+    };
+    fetchSliderReviews();
+  }, []);
+
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      try {
+        const { data } = await api.get('/certificates/active');
+        if (Array.isArray(data)) {
+          setCertificates(data);
+        }
+      } catch (error) {
+        // Silently handle error
+      }
+    };
+    fetchCertificates();
   }, []);
 
   const observerRef = useRef(null);
@@ -332,71 +363,75 @@ const Home = memo(() => {
             <div className="w-12 h-1 bg-[var(--color-primary)] mx-auto rounded-full"></div>
           </motion.div>
 
-          <div className="relative group">
-            <Swiper
-              modules={[Autoplay, Navigation]}
-              spaceBetween={30}
-              slidesPerView={3}
-              loop={true}
-              speed={800}
-              autoplay={{ delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true }}
-              navigation={{
-                prevEl: '.review-prev',
-                nextEl: '.review-next',
-              }}
-              onSwiper={(swiper) => { swiperRef.current = swiper; }}
-              breakpoints={{
-                320: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-              }}
-              className="pb-4"
-            >
-              {(reviews.length > 0 ? reviews : [
-                { user: "Rahul Sharma", comment: "The water quality from UNIXA is simply amazing. My family has noticed a huge difference.", rating: 5 },
-                { user: "Priya Gupta", comment: "As a professional, I've seen many purifiers, but UNIXA's technology is truly in a league of its own.", rating: 5 },
-                { user: "Sanjay Verma", comment: "Installation was seamless and the smart features are game changers.", rating: 5 },
-                { user: "Anjali Singh", comment: "Best investment for my family's health. Highly recommended!", rating: 5 },
-                { user: "Vikram Patel", comment: "Outstanding service and product quality. Worth every penny.", rating: 5 },
-              ]).map((review, i) => (
-                <SwiperSlide key={i}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: i * 0.1 }}
-                    className="bg-slate-50 p-8 rounded-3xl border border-slate-100 h-full flex flex-col shadow-sm hover:shadow-xl hover:bg-white transition-all duration-500"
-                  >
-                    <Quote className="text-[var(--color-primary)]/10 mb-4" size={40} />
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(review.rating || 5)].map((_, idx) => (
-                        <Star key={idx} size={14} className="text-yellow-400 fill-yellow-400" />
-                      ))}
-                    </div>
-                    <p className="text-slate-600 font-medium italic mb-6 leading-relaxed flex-grow">
-                      "{review.comment || review.text}"
-                    </p>
-                    <div className="flex items-center gap-3 mt-auto">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-lg uppercase">
-                        {(review.user || review.name || 'U')[0]}
+          {(sliderReviews.length > 0 || reviews.filter(r => r.isApproved).length > 0) ? (
+            <div className="relative group">
+              <Swiper
+                modules={[Autoplay, Navigation]}
+                spaceBetween={30}
+                slidesPerView={3}
+                loop={true}
+                speed={800}
+                autoplay={{ delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true }}
+                navigation={{
+                  prevEl: '.review-prev',
+                  nextEl: '.review-next',
+                }}
+                onSwiper={(swiper) => { swiperRef.current = swiper; }}
+                breakpoints={{
+                  320: { slidesPerView: 1 },
+                  768: { slidesPerView: 2 },
+                  1024: { slidesPerView: 3 },
+                }}
+                className="pb-4"
+              >
+                {(sliderReviews.length > 0 ? sliderReviews : reviews.filter(r => r.isApproved)).map((review, i) => (
+                  <SwiperSlide key={i}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      className="bg-slate-50 p-8 rounded-3xl border border-slate-100 h-full flex flex-col shadow-sm hover:shadow-xl hover:bg-white transition-all duration-500"
+                    >
+                      <Quote className="text-[var(--color-primary)]/10 mb-4" size={40} />
+                      <div className="flex gap-1 mb-4">
+                        {[...Array(review.rating || 5)].map((_, idx) => (
+                          <Star key={idx} size={14} className="text-yellow-400 fill-yellow-400" />
+                        ))}
                       </div>
-                      <div>
-                        <h4 className="font-bold text-[var(--color-secondary)] text-sm">{review.user || review.name}</h4>
-                        <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider">{review.role || "Verified Buyer"}</p>
+                      <p className="text-slate-600 font-medium italic mb-6 leading-relaxed flex-grow">
+                        "{review.comment}"
+                      </p>
+                      <div className="flex items-center gap-3 mt-auto">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-lg uppercase">
+                          {review.user[0]}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-[var(--color-secondary)] text-sm">{review.user}</h4>
+                          <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider">{review.role || "Verified Buyer"}</p>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
+                    </motion.div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
 
-            <button className="review-prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
-              <ChevronLeft size={20} />
-            </button>
-            <button className="review-next absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
-              <ChevronRight size={20} />
-            </button>
-          </div>
+              <button className="review-prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
+                <ChevronLeft size={20} />
+              </button>
+              <button className="review-next absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center">
+                <Star size={32} className="text-slate-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-600 mb-2">No Reviews Yet</h3>
+              <p className="text-slate-500">Be the first to share your experience with UNIXA water purifiers!</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -456,27 +491,21 @@ const Home = memo(() => {
             <div className="w-12 h-1 bg-[var(--color-primary)] mx-auto rounded-full"></div>
           </motion.div>
 
+          {certificates.length > 0 ? (
           <Swiper
             modules={[Autoplay]}
             spaceBetween={30}
             slidesPerView={5}
             autoplay={{ delay: 2000, disableOnInteraction: false }}
-            loop={true}
+            loop={certificates.length > 5}
             breakpoints={{
               320: { slidesPerView: 2 },
               640: { slidesPerView: 3 },
               1024: { slidesPerView: 5 },
             }}
           >
-            {[
-              { name: "ISO 9001" },
-              { name: "NSF" },
-              { name: "WQA" },
-              { name: "CE" },
-              { name: "BIS" },
-              { name: "FDA" }
-            ].map((cert, i) => (
-              <SwiperSlide key={i}>
+            {certificates.map((cert, i) => (
+              <SwiperSlide key={cert._id || i}>
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -484,13 +513,27 @@ const Home = memo(() => {
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                   className="bg-white p-8 rounded-2xl border border-slate-200 flex items-center justify-center h-32 hover:shadow-xl transition-all"
                 >
-                  <h3 className="text-xl font-bold text-[var(--color-secondary)]">{cert.name}</h3>
+                  {cert.imageUrl ? (
+                    <img src={cert.imageUrl} alt={cert.title} className="max-h-20 max-w-full object-contain" />
+                  ) : (
+                    <h3 className="text-xl font-bold text-[var(--color-secondary)]">{cert.title}</h3>
+                  )}
                 </motion.div>
               </SwiperSlide>
             ))}
           </Swiper>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-slate-400 text-sm">No certifications available at the moment.</p>
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Featured Blogs Section */}
+      <Suspense fallback={<div className="h-96 bg-white animate-pulse"></div>}>
+        <FeaturedBlogs />
+      </Suspense>
 
       <Suspense fallback={<div className="h-48 bg-white animate-pulse"></div>}>
         <Footer />

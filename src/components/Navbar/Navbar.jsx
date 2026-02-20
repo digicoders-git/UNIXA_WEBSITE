@@ -26,6 +26,7 @@ const Navbar = () => {
         { to: "/purifiers", label: "Purifiers" },
         { to: "/rent-on-ro", label: "Rent on RO" },
         { to: "/ro-parts", label: "RO Parts" },
+        { to: "/blog", label: "Blog" },
         { to: "/about", label: "About Us" },
         { to: "/testimonials", label: "Compare" },
         { to: "/contact", label: "Support" },

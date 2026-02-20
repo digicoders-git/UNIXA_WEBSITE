@@ -1,345 +1,226 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Star, Quote, Send } from 'lucide-react';
 import api from '../../services/api';
-import { Droplets, X, Check, AlertTriangle, Shield, Heart, Zap, Filter, ArrowRight, Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import Footer from '../../components/layout/Footer';
-import UnixaBrand from '../../components/common/UnixaBrand';
-import Loader from '../../components/common/Loader';
+import Swal from 'sweetalert2';
 
-import iconImmunity from '../../assets/images/features/immunity_boost.svg';
-import iconBio from '../../assets/images/features/uv_guard.svg';
-import iconMeta from '../../assets/images/features/metabolism.svg';
-import iconHydra from '../../assets/images/features/hydration_plus.svg';
-import iconNano from '../../assets/images/features/pure_nano.svg';
-import iconRel from '../../assets/images/features/reliability.svg';
-
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
+// Add CSS for sliding animation
+const slideStyles = `
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-scroll {
+    animation: scroll 30s linear infinite;
+  }
+  .animate-scroll:hover {
+    animation-play-state: paused;
+  }
+`;
 
 const Testimonials = () => {
-  const sectionRefs = useRef([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const swiperRef = useRef(null);
+  const [form, setForm] = useState({ user: '', role: '', rating: 5, comment: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [sliderReviews, setSliderReviews] = useState([]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    sectionRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const { data } = await api.get('/reviews/all');
-        if (data.success) {
-          setReviews(data.reviews);
-        }
-      } catch (error) {
-        console.error("Failed to fetch reviews:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchReviews();
+    fetchSliderReviews();
   }, []);
 
-  const addToRefs = (el) => {
-    if (el && !sectionRefs.current.includes(el)) {
-      sectionRefs.current.push(el);
+  const fetchReviews = async () => {
+    try {
+      const { data } = await api.get('/reviews/all');
+      setReviews(data.reviews);
+    } catch (error) {
+      console.error('Failed to fetch reviews:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Fallback reviews if database is empty
-  const fallbackReviews = [
-    { user: "Rahul Sharma", role: "Elite Member", comment: "The water quality from UNIXA is simply amazing. My family has noticed a huge difference in taste and health within just a month of use.", rating: 5 },
-    { user: "Mrs. Priya Gupta", role: "Certified Health Expert", comment: "As a professional, I've seen many purifiers, but UNIXA's multi-stage technology is truly in a league of its own. Purest water I've ever tested.", rating: 5 },
-    { user: "Sanjay Verma", role: "Home Automation Lead", comment: "Installation was seamless and the smart features are game changers. It's the only appliance in my home that I trust 100%.", rating: 5 }
-  ];
+  const fetchSliderReviews = async () => {
+    try {
+      const { data } = await api.get('/reviews/slider');
+      if (data.success) {
+        setSliderReviews(data.reviews);
+      }
+    } catch (error) {
+      console.error('Failed to fetch slider reviews:', error);
+    }
+  };
 
-  const displayReviews = reviews.length > 0 ? reviews : fallbackReviews;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.post('/reviews/add', { ...form, isTestimonial: true });
+      Swal.fire('Success!', 'Your review has been submitted for approval', 'success');
+      setForm({ user: '', role: '', rating: 5, comment: '' });
+    } catch (error) {
+      Swal.fire('Error', 'Failed to submit review', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)]" style={{ fontFamily: `var(--font-body)` }}>
-
-      {/* Hero Section */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative pt-20 pb-12 md:pt-24 md:pb-16 px-6 text-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-white border-b border-slate-100 rounded-b-[40px] md:rounded-b-[80px]"
-      >
-        {/* High Visibility Water Bubbles */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-blue-300/40 border border-white/40 blur-[0.5px] animate-float-bubble"
-              style={{
-                width: `${(i * 7 + 15) % 50 + 15}px`,
-                height: `${(i * 7 + 15) % 50 + 15}px`,
-                left: `${(i * 13) % 100}%`,
-                bottom: `-${(i * 5 + 20) % 40 + 20}%`,
-                animationDuration: `${(i % 4) + 4}s`,
-                animationDelay: `${(i % 5)}s`
-              }}
-            />
-          ))}
-        </div>
-
-        <style>{`
-            @keyframes float-bubble {
-                0% { transform: translateY(0) scale(1); opacity: 0; }
-                20% { opacity: 0.4; }
-                80% { opacity: 0.4; }
-                100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
-            }
-            .animate-float-bubble {
-                animation: float-bubble linear infinite;
-            }
-        `}</style>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="relative z-10 max-w-4xl mx-auto space-y-6"
-        >
-          <div className="inline-flex items-center gap-3 px-5 py-2 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 rounded-full mx-auto">
-            <Droplets size={20} className="text-[var(--color-primary)]" />
-            <span className="text-[12px] font-bold uppercase tracking-[0.4em] text-[var(--color-primary)]">
-              Real Stories. Real Purity.
-            </span>
-          </div>
-
-          <h1 className="text-4xl md:text-8xl font-black tracking-tighter leading-none">
-            Customer <span className="text-[var(--color-primary)]">Voices</span>
-          </h1>
-
-          <p className="text-slate-600 text-sm md:text-xl max-w-2xl mx-auto leading-relaxed font-bold">
-            See why thousands of families trust <UnixaBrand className="text-sm md:text-xl" /> for their daily hydration.
-          </p>
-        </motion.div>
-
-        {/* Section Separator Overlay */}
-        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[var(--color-primary)]/10 to-transparent pointer-events-none" />
-      </motion.section>
-
-      {/* Customer Reviews - Dynamic Slider */}
-      <section ref={addToRefs} className="py-24 px-4 md:px-12 bg-white relative overflow-hidden">
+    <div className="bg-white">
+      <style>{slideStyles}</style>
+      <section className="py-16 px-6 md:px-24 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-400/10 border border-yellow-400/20 rounded-full mx-auto">
-              <Star size={12} className="text-yellow-500 fill-yellow-500" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-600">Rated 4.9/5 by 2000+ Users</span>
-            </div>
-            <h2 className="text-3xl md:text-6xl font-black tracking-tighter uppercase text-[var(--color-secondary)] leading-none">
-              LOVED BY <span className="text-[var(--color-primary)] underline decoration-4 underline-offset-8">THOUSANDS</span>
-            </h2>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold text-[var(--color-secondary)] tracking-tighter uppercase mb-4">
+              Customer <span className="text-[var(--color-primary)]">Testimonials</span>
+            </h1>
+            <div className="w-12 h-1 bg-[var(--color-primary)] mx-auto rounded-full mb-6"></div>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Read what our satisfied customers have to say about their experience with UNIXA water purifiers
+            </p>
+          </motion.div>
 
           {loading ? (
-             <div className="min-h-[300px] flex items-center justify-center">
-                <Loader text="Loading Reviews..." />
-             </div>
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
           ) : (
-            <div className="relative group">
-              <Swiper
-                modules={[Autoplay, Navigation]}
-                spaceBetween={30}
-                slidesPerView={3}
-                loop={true}
-                speed={800}
-                autoplay={{
-                  delay: 3000,
-                  disableOnInteraction: false,
-                  pauseOnMouseEnter: true
-                }}
-                navigation={{
-                  prevEl: '.testimonial-prev',
-                  nextEl: '.testimonial-next',
-                }}
-                onSwiper={(swiper) => { swiperRef.current = swiper; }}
-                breakpoints={{
-                  320: { slidesPerView: 1 },
-                  768: { slidesPerView: 2 },
-                  1024: { slidesPerView: 3 },
-                }}
-                className="py-12"
-              >
-                {displayReviews.map((review, i) => (
-                  <SwiperSlide key={i}>
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5 }}
-                      className="bg-slate-50 p-8 md:p-10 rounded-[3rem] border border-slate-100 h-full flex flex-col justify-center relative shadow-lg hover:shadow-2xl hover:bg-white transition-all duration-500 group"
-                    >
-                      <Quote className="absolute top-8 right-8 text-[var(--color-primary)]/10 rotate-180" size={64} />
-                      
-                      <div className="flex gap-1 mb-6">
-                        {[...Array(review.rating || 5)].map((_, idx) => (
-                          <Star key={idx} size={16} className="text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      
-                      <p className="text-slate-600 font-medium italic mb-8 leading-relaxed text-base md:text-lg flex-grow">
-                        "{review.comment || review.text}"
-                      </p>
-                      
-                      <div className="flex items-center gap-4 mt-auto">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-cyan-400 flex items-center justify-center text-white font-bold text-xl shadow-lg uppercase">
-                          {(review.user || review.name || 'U')[0]}
+            <>
+              {sliderReviews.length > 0 && (
+                <div className="mb-12">
+                  <h3 className="text-2xl font-bold text-center mb-6 text-[var(--color-primary)]">Featured Reviews</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {sliderReviews.map((review, i) => (
+                      <motion.div
+                        key={review._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                        className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-3xl border-2 border-[var(--color-primary)] shadow-lg hover:shadow-2xl transition-all"
+                      >
+                        <Quote className="text-[var(--color-primary)]/20 mb-4" size={40} />
+                        <div className="flex gap-1 mb-4">
+                          {[...Array(5)].map((_, idx) => (
+                            <Star key={idx} size={14} className={idx < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"} />
+                          ))}
                         </div>
-                        <div>
-                          <h4 className="font-bold text-[var(--color-secondary)] tracking-tight text-base leading-none mb-1">
-                            {review.user || review.name}
-                          </h4>
-                          <p className="text-[10px] font-black text-[var(--color-primary)] uppercase tracking-widest">
-                            {review.role || "Verified Buyer"}
-                          </p>
+                        <p className="text-slate-600 font-medium italic mb-6 leading-relaxed">
+                          "{review.comment}"
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-lg uppercase">
+                            {review.user[0]}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-[var(--color-secondary)] text-sm">{review.user}</h4>
+                            <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider">{review.role || "Verified Buyer"}</p>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-
-              <button className="testimonial-prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
-                <ChevronLeft size={20} />
-              </button>
-              <button className="testimonial-next absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center shadow-xl text-slate-900 transition-all opacity-0 group-hover:opacity-100 hover:bg-slate-900 hover:text-white hover:border-slate-900">
-                <ChevronRight size={20} />
-              </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              {reviews.filter(review => !sliderReviews.some(slider => slider._id === review._id)).map((review, i) => (
+                <motion.div
+                  key={review._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all"
+                >
+                  <Quote className="text-[var(--color-primary)]/10 mb-4" size={40} />
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, idx) => (
+                      <Star key={idx} size={14} className={idx < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"} />
+                    ))}
+                  </div>
+                  <p className="text-slate-600 font-medium italic mb-6 leading-relaxed">
+                    "{review.comment}"
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-lg uppercase">
+                      {review.user[0]}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-[var(--color-secondary)] text-sm">{review.user}</h4>
+                      <p className="text-[10px] font-bold text-[var(--color-primary)] uppercase tracking-wider">{review.role || "Verified Buyer"}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
+            </>
           )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="max-w-2xl mx-auto bg-slate-50 p-8 rounded-3xl border border-slate-200"
+          >
+            <h2 className="text-2xl font-bold text-[var(--color-secondary)] mb-6 text-center">Share Your Experience</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="Your Name *"
+                  value={form.user}
+                  onChange={(e) => setForm({ ...form, user: e.target.value })}
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Your Role (e.g., Customer)"
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Rating</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setForm({ ...form, rating: star })}
+                      className="transition-transform hover:scale-110"
+                    >
+                      <Star size={24} className={star <= form.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                placeholder="Write your review *"
+                value={form.comment}
+                onChange={(e) => setForm({ ...form, comment: e.target.value })}
+                className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
+                rows="4"
+                required
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full px-6 py-3 bg-[var(--color-primary)] text-white font-bold rounded-xl hover:bg-[var(--color-secondary)] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {submitting ? 'Submitting...' : <><Send size={18} /> Submit Review</>}
+              </button>
+              <p className="text-xs text-center text-slate-500">Your review will be published after admin approval</p>
+            </form>
+          </motion.div>
         </div>
       </section>
-
-       {/* Scientific Comparison Section */}
-       <section ref={addToRefs} className="py-20 px-6 md:px-12 bg-white relative border-t border-slate-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
-
-            {/* Entry Level Water */}
-            <div className="p-10 rounded-[4rem] bg-slate-50 border border-slate-100 flex flex-col hover:shadow-xl transition-all duration-500">
-              <div className="flex items-center gap-4 mb-10">
-                <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-400">
-                  <AlertTriangle size={32} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-[var(--color-secondary)] tracking-tight uppercase">Standard Tap Water</h3>
-                  <p className="text-[10px] font-black text-red-400 uppercase tracking-[0.3em]">Compromised Quality</p>
-                </div>
-              </div>
-
-              <ul className="space-y-6 flex-grow">
-                {[
-                  'Undetected micro-plastics and silt',
-                  'Residual chlorine from municipality',
-                  'Harmful dissolved solids (TDS)',
-                  'Industrial chemical runoff traces',
-                  'Inconsistent mineral composition',
-                  'Bacterial growth in aging pipes',
-                  'Metallic aftertaste and odor'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-4 text-slate-500 font-semibold text-sm group">
-                    <div className="w-6 h-6 bg-red-100/50 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      <X size={14} className="text-red-400" />
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* HydroLife Standard */}
-            <div className="p-10 rounded-[4rem] bg-white border-2 border-[var(--color-primary)]/20 flex flex-col shadow-2xl shadow-blue-500/10 relative overflow-hidden group hover:-translate-y-2 transition-all duration-500">
-              <div className="absolute top-0 right-0 p-8">
-                <Shield size={80} className="text-[var(--color-primary)]/5 group-hover:scale-110 transition-transform duration-700" />
-              </div>
-
-              <div className="flex items-center gap-4 mb-10 relative z-10">
-                <div className="w-16 h-16 bg-[var(--color-primary)] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[var(--color-primary)]/30">
-                  <Droplets size={32} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-[var(--color-secondary)] tracking-tight uppercase"><UnixaBrand /> HydroLife</h3>
-                  <p className="text-[10px] font-black text-[var(--color-primary)] uppercase tracking-[0.3em]">Certified Purity</p>
-                </div>
-              </div>
-
-              <ul className="space-y-6 flex-grow relative z-10">
-                {[
-                  '7-Stage RO + Copper + UV-C',
-                  'Neutralizes 99.9% pathogens',
-                  'Mineralizer infusion for health',
-                  'Smart TDS control technology',
-                  'Alkaline pH balancing system',
-                  'Nano-silver anti-bacterial tank',
-                  'Sweet, natural spring-like taste'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-4 text-slate-600 font-bold text-sm">
-                    <div className="w-6 h-6 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Check size={14} className="text-[var(--color-primary)]" />
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Advanced Benefits */}
-      <section ref={addToRefs} className="py-24 px-8 md:px-24 bg-slate-50 border-t border-slate-100 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter uppercase text-[var(--color-secondary)]">
-              Why Choose <span className="text-[var(--color-primary)]">UNIXA?</span>
-            </h2>
-            <div className="w-20 h-1.5 bg-[var(--color-primary)] mx-auto rounded-full"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { img: iconImmunity, title: 'Immunity Boost', desc: 'Hydration that strengthens your defense system.' },
-              { img: iconBio, title: 'Bio-Safe Tech', desc: 'No-touch purification for total sterilization.' },
-              { img: iconMeta, title: 'Metabolism', desc: 'Alkaline water that powers your cellular energy.' },
-              { img: iconHydra, title: 'Hydration+', desc: 'Optimized mineral structure for faster absorption.' },
-              { img: iconNano, title: 'Pure Flow', desc: 'Consistent performance even with high-TDS input.' },
-              { img: iconRel, title: 'Reliability', desc: 'Built to last with military-grade components.' }
-            ].map((b, i) => (
-              <div key={i} className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 mb-8 shrink-0">
-                  <img src={b.img} alt={b.title} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-[var(--color-secondary)] uppercase tracking-tight">{b.title}</h3>
-                <p className="text-slate-500 font-medium leading-relaxed">{b.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </div>
   );

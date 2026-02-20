@@ -15,6 +15,8 @@ const Shop = lazy(() => import('../pages/Shop/Shop'));
 const RentOnRO = lazy(() => import('../pages/RentOnRO/RentOnRO'));
 const ROParts = lazy(() => import('../pages/ROParts/ROParts'));
 const Profile = lazy(() => import('../pages/auth/Profile'));
+const Blog = lazy(() => import('../pages/Blog/Blog'));
+const BlogDetail = lazy(() => import('../pages/Blog/BlogDetail'));
 
 
 const Orders = lazy(() => import('../pages/Orders/Orders'));
@@ -55,6 +57,8 @@ const AppContent = () => {
                         <Route path="shop" element={<Shop />} />
                         <Route path="rent-on-ro" element={<RentOnRO />} />
                         <Route path="ro-parts" element={<ROParts />} />
+                        <Route path="blog" element={<Blog />} />
+                        <Route path="blog/:slug" element={<BlogDetail />} />
 
 
                         <Route path="profile" element={<Profile />} />

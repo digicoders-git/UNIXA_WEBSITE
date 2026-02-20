@@ -20,4 +20,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Add response interceptor to suppress console errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Silently handle errors without logging to console
+    return Promise.reject(error);
+  }
+);
+
 export default api;
