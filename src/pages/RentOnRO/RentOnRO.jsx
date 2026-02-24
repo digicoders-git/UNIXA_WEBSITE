@@ -23,6 +23,7 @@ import UnixaBrand from '../../components/common/UnixaBrand';
 import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
 import Swal from 'sweetalert2';
+import { isTokenValid } from '../../utils/auth';
 
 // Assets (reusing existing if possible or placeholders)
 import water2 from '../../assets/images/mhImage.png'; 
@@ -98,6 +99,20 @@ const RentOnRO = () => {
   }, []);
 
   const handleBookClick = (plan) => {
+    if (!isTokenValid()) {
+      Swal.fire({
+        title: 'Login Required',
+        text: 'Please login to book a plan',
+        icon: 'info',
+        confirmButtonText: 'Login Now',
+        confirmButtonColor: 'var(--color-primary)'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', { state: { from: '/rent-on-ro' } });
+        }
+      });
+      return;
+    }
     setSelectedPlan(plan);
     setIsModalOpen(true);
   };
@@ -569,7 +584,7 @@ const RentOnRO = () => {
            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row">
               
               {/* Left Column: Product & Plan Details */}
-              <div className="w-full md:w-3/5 bg-slate-50/50 p-8 overflow-y-auto custom-scrollbar border-r border-slate-100">
+              <div className="w-full md:w-3/5 bg-slate-50/50 p-8 overflow-y-auto max-h-[90vh] custom-scrollbar border-r border-slate-100">
                   <div className="flex justify-between items-start mb-8">
                      <div>
                         <div className="flex items-center gap-2 mb-2">
@@ -674,7 +689,7 @@ const RentOnRO = () => {
               </div>
 
               {/* Right Column: Booking Form */}
-              <div className="w-full md:w-2/5 p-8 flex flex-col items-center justify-center relative bg-white">
+              <div className="w-full md:w-2/5 p-8 flex flex-col items-center justify-center relative bg-white overflow-y-auto max-h-[90vh]">
                   <button 
                      onClick={() => setIsModalOpen(false)} 
                      className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-900"

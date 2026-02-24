@@ -55,8 +55,12 @@ const Login = () => {
                 saveToken(data.token);
                 localStorage.setItem('userId', data.user.id);
                 localStorage.setItem('userData', JSON.stringify(data.user));
+                
+                // Clear old guest cart
+                localStorage.removeItem('sks_cart_guest');
+                
                 toast.success('Login successful!');
-                navigate(-1 || '/');
+                navigate('/', { replace: true });
             }
         } catch (error) {
             console.error("Login Error:", error);

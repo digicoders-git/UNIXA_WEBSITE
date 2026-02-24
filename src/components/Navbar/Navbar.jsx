@@ -18,6 +18,20 @@ const Navbar = () => {
         setIsLoggedIn(tokenValid);
     }, [location.pathname]);
 
+    const handleLogout = () => {
+        // Clear all user data
+        const currentUserId = localStorage.getItem('userId');
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userData');
+        if (currentUserId) {
+            localStorage.removeItem(`sks_cart_${currentUserId}`);
+        }
+        setIsLoggedIn(false);
+        navigate('/');
+        window.location.reload();
+    };
+
     const activeLink = `text-[var(--color-primary)] font-bold text-[13px] uppercase tracking-[0.1em] transition-all relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-[var(--color-primary)]`;
     const normalLink = `text-[var(--color-secondary)]/80 font-bold text-[13px] uppercase tracking-[0.1em] transition-all hover:text-[var(--color-primary)] relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[var(--color-primary)] hover:after:w-full after:transition-all`;
 
@@ -58,7 +72,7 @@ const Navbar = () => {
                 </ul>
 
                 {/* Actions */}
-                <div className="flex items-center gap-3 md:gap-5">
+                <div className="flex items-center gap-6 md:gap-5">
                     <div
                         onClick={() => navigate('/shop')}
                         className="relative cursor-pointer p-2 rounded-xl hover:bg-slate-100 text-[var(--color-secondary)] transition-all group"
@@ -72,13 +86,13 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    <div
+                    {/* <div
                         onClick={() => navigate('/amc-renewals')}
                         className="hidden sm:flex cursor-pointer p-2 rounded-xl hover:bg-blue-50 text-[var(--color-primary)] transition-all group items-center"
                         title="AMC Protection"
                     >
                         <ShieldCheck size={18} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
-                    </div>
+                    </div> */}
 
                     <div
                         onClick={() => navigate(isLoggedIn ? '/profile' : '/login')}
@@ -87,6 +101,16 @@ const Navbar = () => {
                     >
                         <User size={18} strokeWidth={2.5} className={isLoggedIn ? "text-[var(--color-primary)]" : ""} />
                     </div>
+
+                    {/* {isLoggedIn && (
+                        <div
+                            onClick={handleLogout}
+                            className="hidden sm:flex cursor-pointer p-2 rounded-xl hover:bg-red-50 text-red-500 transition-all group"
+                            title="Logout"
+                        >
+                            <LogOut size={18} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                        </div>
+                    )} */}
 
                     <button
                         onClick={() => navigate('/contact')}
@@ -144,6 +168,16 @@ const Navbar = () => {
                             <User size={20} className="text-[var(--color-primary)]" />
                             {isLoggedIn ? 'My Account' : 'Sign In / Register'}
                         </button>
+
+                        {isLoggedIn && (
+                            <button
+                                onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                                className="w-full flex items-center gap-3 p-4 bg-white border border-red-200 rounded-2xl text-red-500 font-bold shadow-sm"
+                            >
+                                <LogOut size={20} />
+                                Logout
+                            </button>
+                        )}
 
                         <div className="grid grid-cols-2 gap-3">
                             <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useCart } from '../../context/CartContext';
-import { ShoppingBag, Trash2, MapPin, CreditCard, CheckCircle2, Plus, Minus, Banknote, Smartphone, X, Home, Briefcase, User, Pencil, Tag, ChevronRight, Check, Lock } from 'lucide-react';
+import { ShoppingBag, Trash2, MapPin, CreditCard, CheckCircle2, Plus, Minus, Smartphone, X, Home, Briefcase, User, Pencil, Tag, ChevronRight, Check, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import Footer from '../../components/layout/Footer';
@@ -11,7 +11,7 @@ import { getToken, isTokenValid } from '../../utils/auth';
 const Shop = () => {
     const navigate = useNavigate();
     const { cart, totalAmount, updateQuantity, removeFromCart, clearCart } = useCart();
-    const [paymentMethod, setPaymentMethod] = useState('cod');
+    const [paymentMethod, setPaymentMethod] = useState('online');
 
     // Address Management State
     const [savedAddresses, setSavedAddresses] = useState([]);
@@ -153,7 +153,8 @@ const Shop = () => {
                     productId: item.id || item._id,
                     quantity: item.quantity,
                     productName: item.name,
-                    productPrice: item.price
+                    productPrice: item.price,
+                    productImage: item.img
                 })),
                 shippingAddress,
                 subtotal: totalAmount,
@@ -237,8 +238,8 @@ const Shop = () => {
                 paymentObject.open();
 
             } else {
-                // COD FLOW
-                const { data } = await api.post(`/orders`, { ...orderDataPayload, paymentMethod: 'COD' });
+                // ONLINE PAYMENT WITHOUT RAZORPAY (Fallback - should not happen)
+                const { data } = await api.post(`/orders`, { ...orderDataPayload, paymentMethod: 'Online' });
                 
                 if (data) {
                     Swal.fire({
@@ -492,14 +493,9 @@ const Shop = () => {
                                         <div className="space-y-4 mb-10">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Payment Selection</p>
                                             <div className="grid grid-cols-1 gap-3">
-                                                <div onClick={() => setPaymentMethod('cod')} className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${paymentMethod === 'cod' ? 'border-(--color-primary) bg-blue-50 text-(--color-primary)' : 'border-slate-100 text-slate-600 hover:border-slate-200'}`}>
-                                                    <Banknote size={20} />
-                                                    <span className="font-bold text-sm">Cash on Delivery</span>
-                                                    {paymentMethod === 'cod' && <Check size={16} className="ml-auto" />}
-                                                </div>
                                                 <div onClick={() => setPaymentMethod('online')} className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${paymentMethod === 'online' ? 'border-(--color-primary) bg-blue-50 text-(--color-primary)' : 'border-slate-100 text-slate-600 hover:border-slate-200'}`}>
                                                     <Smartphone size={20} />
-                                                    <span className="font-bold text-sm">Online (Razorpay)</span>
+                                                    <span className="font-bold text-sm">Online Payment (Razorpay)</span>
                                                     {paymentMethod === 'online' && <Check size={16} className="ml-auto" />}
                                                 </div>
                                             </div>

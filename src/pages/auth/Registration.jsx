@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronDown, MapPin } from 'lucide-react';
 // import { createUserApi } from '../../api/user';
 import { saveToken } from '../../utils/auth';
 import { toast } from 'react-toastify';
@@ -16,7 +16,11 @@ const Registration = () => {
         gender: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        address: '',
+        city: '',
+        state: '',
+        pincode: ''
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -77,6 +81,24 @@ const Registration = () => {
             newErrors.confirmPassword = 'Passwords do not match';
         }
 
+        if (!formData.address.trim()) {
+            newErrors.address = 'Address is required';
+        }
+
+        if (!formData.city.trim()) {
+            newErrors.city = 'City is required';
+        }
+
+        if (!formData.state.trim()) {
+            newErrors.state = 'State is required';
+        }
+
+        if (!formData.pincode) {
+            newErrors.pincode = 'Pincode is required';
+        } else if (!/^\d{6}$/.test(formData.pincode)) {
+            newErrors.pincode = 'Pincode must be 6 digits';
+        }
+
         return newErrors;
     };
 
@@ -93,12 +115,9 @@ const Registration = () => {
                 };
                 const { data } = await api.post(`/users/register`, submissionData);
                 
-                if (data.token) {
-                    saveToken(data.token);
-                    localStorage.setItem('userId', data.user.id);
-                    localStorage.setItem('userData', JSON.stringify(data.user));
-                    toast.success('Registration successful!');
-                    navigate('/');
+                if (data) {
+                    toast.success('Registration successful! Please login to continue.');
+                    navigate('/login');
                 }
             } catch (error) {
                 console.error('Registration failed:', error);
@@ -362,6 +381,84 @@ const Registration = () => {
                                 />
                             </div>
                             {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Address</label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-3" style={{ color: `var(--color-text-muted)` }} size={20} />
+                                <textarea
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    rows="2"
+                                    className={`w-full pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.address ? 'border-red-500' : ''}`}
+                                    style={{
+                                        backgroundColor: `white`,
+                                        border: `1px solid ${errors.address ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
+                                        color: `var(--color-text)`
+                                    }}
+                                    placeholder="Enter your address"
+                                />
+                            </div>
+                            {errors.address && <p className="text-red-400 text-sm mt-1">{errors.address}</p>}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                            <div>
+                                <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>City</label>
+                                <input
+                                    type="text"
+                                    name="city"
+                                    value={formData.city}
+                                    onChange={handleChange}
+                                    className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.city ? 'border-red-500' : ''}`}
+                                    style={{
+                                        backgroundColor: `white`,
+                                        border: `1px solid ${errors.city ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
+                                        color: `var(--color-text)`
+                                    }}
+                                    placeholder="City"
+                                />
+                                {errors.city && <p className="text-red-400 text-sm mt-1">{errors.city}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>State</label>
+                                <input
+                                    type="text"
+                                    name="state"
+                                    value={formData.state}
+                                    onChange={handleChange}
+                                    className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.state ? 'border-red-500' : ''}`}
+                                    style={{
+                                        backgroundColor: `white`,
+                                        border: `1px solid ${errors.state ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
+                                        color: `var(--color-text)`
+                                    }}
+                                    placeholder="State"
+                                />
+                                {errors.state && <p className="text-red-400 text-sm mt-1">{errors.state}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Pincode</label>
+                                <input
+                                    type="text"
+                                    name="pincode"
+                                    value={formData.pincode}
+                                    onChange={handleChange}
+                                    className={`w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.pincode ? 'border-red-500' : ''}`}
+                                    style={{
+                                        backgroundColor: `white`,
+                                        border: `1px solid ${errors.pincode ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
+                                        color: `var(--color-text)`
+                                    }}
+                                    placeholder="Pincode"
+                                    maxLength="6"
+                                />
+                                {errors.pincode && <p className="text-red-400 text-sm mt-1">{errors.pincode}</p>}
+                            </div>
                         </div>
 
                         <button

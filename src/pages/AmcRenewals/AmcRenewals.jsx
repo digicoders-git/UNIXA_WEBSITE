@@ -481,13 +481,47 @@ const AmcRenewals = () => {
     const fetchAmcData = async () => {
         try {
             setLoading(true);
-            const { data } = await api.get(`/amc-user/my-subscriptions`);
+            const { data } = await api.get(`/amc-user`);
 
-            if (data.success) {
-                setAmcData(data.amc);
-                // Transform service history if available
-                if (data.serviceHistory) {
-                    const logs = data.serviceHistory.map((log, i) => ({
+            console.log('AMC Data Response:', data);
+
+            if (data && data.amcs) {
+                // Transform the data to match the expected format
+                const transformedAmcs = data.amcs.map(amc => {
+                    // Calculate if AMC is new (created within last 7 days)
+                    const createdDate = new Date(amc.createdAt);
+                    const daysSinceCreation = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+                    const isNew = daysSinceCreation <= 7;
+
+                    return {
+                        _id: amc._id,
+                        planName: amc.amcPlanName,
+                        productName: amc.productName,
+                        price: amc.amcPlanPrice,
+                        startDate: amc.startDate,
+                        expiryDate: amc.endDate,
+                        status: amc.status,
+                        isNew: isNew,
+                        orderId: amc.orderId || null,
+                        servicesTotal: amc.servicesTotal || 4,
+                        servicesUsed: amc.servicesUsed || 0,
+                        daysRemaining: amc.daysRemaining || 0,
+                        productImage: amc.productImage || ''
+                    };
+                });
+                
+                // Sort AMCs - new ones first, then by start date
+                transformedAmcs.sort((a, b) => {
+                    if (a.isNew && !b.isNew) return -1;
+                    if (!a.isNew && b.isNew) return 1;
+                    return new Date(b.startDate) - new Date(a.startDate);
+                });
+                
+                setAmcData(transformedAmcs);
+                
+                // Transform service history from first AMC if available
+                if (data.amcs && data.amcs[0] && data.amcs[0].serviceHistory) {
+                    const logs = data.amcs[0].serviceHistory.map((log, i) => ({
                         id: i,
                         type: log.type,
                         date: new Date(log.date).toLocaleDateString(),
@@ -499,8 +533,8 @@ const AmcRenewals = () => {
                 }
 
                 // Update Timeline based on first active AMC
-                if (data.amc && data.amc.length > 0) {
-                    const latest = data.amc[0];
+                if (transformedAmcs && transformedAmcs.length > 0) {
+                    const latest = transformedAmcs[0];
                     const start = new Date(latest.startDate);
                     const end = new Date(latest.expiryDate);
                     const now = new Date();
@@ -753,13 +787,53 @@ const AmcRenewals = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                     <div className="lg:col-span-2 space-y-10">
+                        {/* New AMC Welcome Banner */}
+                        {amcData.some(amc => amc.isNew) && (
+                            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-[50px] p-10 text-white shadow-2xl shadow-green-500/20 animate-in fade-in slide-in-from-top-10 duration-700">
+                                <div className="flex items-center gap-6">
+                                    <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-[30px] flex items-center justify-center shrink-0">
+                                        <ShieldCheck size={40} strokeWidth={3} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Welcome to Premium Protection!</h3>
+                                        <p className="text-white/80 text-xs font-bold uppercase tracking-wider">
+                                            Your new AMC plan is now active. Enjoy hassle-free maintenance and priority support.
+                                        </p>
+                                    </div>
+                                    {amcData.filter(amc => amc.isNew).length > 0 && amcData.find(amc => amc.isNew)?.orderId && (
+                                        <div className="text-right">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-white/60 mb-1">Order ID</p>
+                                            <p className="text-sm font-black">{amcData.find(amc => amc.isNew)?.orderId?.slice(-8).toUpperCase()}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-500">
-                            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
-                                <Shield size={24} className="text-blue-500" strokeWidth={3} /> Active Subscriptions
-                            </h2>
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight flex items-center gap-3">
+                                    <Shield size={24} className="text-blue-500" strokeWidth={3} /> Active Subscriptions
+                                </h2>
+                                {amcData.some(amc => amc.isNew) && (
+                                    <span className="px-4 py-2 bg-green-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse">
+                                        {amcData.filter(amc => amc.isNew).length} New AMC Added
+                                    </span>
+                                )}
+                            </div>
                             <div className="space-y-8">
                                 {amcData.map((amc) => (
-                                    <div key={amc._id} className="relative group overflow-hidden rounded-[50px] bg-white border border-slate-100 shadow-xl p-1 md:p-2 transition-all hover:shadow-2xl hover:-translate-y-1">
+                                    <div key={amc._id} className={`relative group overflow-hidden rounded-[50px] bg-white border shadow-xl p-1 md:p-2 transition-all hover:shadow-2xl hover:-translate-y-1 ${
+                                        amc.isNew ? 'border-green-500 border-2 animate-pulse' : 'border-slate-100'
+                                    }`}>
+                                        {amc.isNew && (
+                                            <div className="absolute -top-3 -right-3 z-20">
+                                                <span className="px-4 py-2 bg-green-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
+                                                    <span className="w-2 h-2 bg-white rounded-full animate-ping" />
+                                                    Recently Added
+                                                </span>
+                                            </div>
+                                        )}
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 opacity-0 group-hover:opacity-40 rounded-full -mr-32 -mt-32 transition-opacity duration-700" />
                                         <div className="relative p-10 flex flex-col md:flex-row gap-10 items-center">
                                             <div className="w-40 h-40 bg-slate-900 rounded-[40px] flex flex-col items-center justify-center text-white shrink-0 shadow-2xl relative overflow-hidden group-hover:rotate-3 transition-transform">
@@ -777,6 +851,31 @@ const AmcRenewals = () => {
                                                     </div>
                                                     <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">{amc.planName}</h3>
                                                     <p className="text-sm font-bold text-slate-400 mt-2">{amc.productName} Standard Edition</p>
+                                                    
+                                                    {/* Status & Services Badge */}
+                                                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                                            amc.status === 'Active' ? 'bg-green-50 text-green-600' :
+                                                            amc.status === 'Expired' ? 'bg-red-50 text-red-600' :
+                                                            amc.status === 'Cancelled' ? 'bg-gray-50 text-gray-600' :
+                                                            'bg-yellow-50 text-yellow-600'
+                                                        }`}>
+                                                            {amc.status}
+                                                        </span>
+                                                        {amc.servicesTotal > 0 && (
+                                                            <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[9px] font-black uppercase tracking-widest">
+                                                                {amc.servicesTotal - amc.servicesUsed}/{amc.servicesTotal} Services
+                                                            </span>
+                                                        )}
+                                                        {amc.orderId && (
+                                                            <button
+                                                                onClick={() => navigate('/orders')}
+                                                                className="px-3 py-1 bg-slate-50 text-slate-600 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-1"
+                                                            >
+                                                                <Package size={10} /> View Order
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="flex flex-wrap justify-center md:justify-start gap-8 border-t border-slate-50 pt-6">
                                                     <div>

@@ -12,6 +12,7 @@ import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
 import UnixaBrand from '../../components/common/UnixaBrand';
 import ReviewSection from '../../components/product/ReviewSection';
+import { isTokenValid } from '../../utils/auth';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -89,7 +90,13 @@ const ProductDetail = () => {
 
     const handleAddToCart = async () => {
         if (!product) return;
-        
+
+        if (!isTokenValid()) {
+            toast.info('Please login to add items to cart');
+            navigate('/login', { state: { from: `/product/${id}` } });
+            return;
+        }
+
         addToCart({
             _id: product._id || product.id,
             id: product._id || product.id,
@@ -125,7 +132,7 @@ const ProductDetail = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
 
                     {/* Image Section */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.7 }}
@@ -148,7 +155,7 @@ const ProductDetail = () => {
                     </motion.div>
 
                     {/* Details Section */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: 30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.7, delay: 0.2 }}
@@ -165,7 +172,7 @@ const ProductDetail = () => {
                         </h1>
 
 
-                        <button 
+                        <button
                             onClick={() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' })}
                             className="flex items-center gap-4 mb-8 hover:opacity-80 transition-opacity cursor-pointer"
                         >
@@ -204,11 +211,11 @@ const ProductDetail = () => {
                                     .filter(([, value]) => value && value !== "")
                                     .map(([key, value]) => (
 
-                                    <div key={key} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{key}</p>
-                                        <p className="font-bold text-(--color-secondary)">{value}</p>
-                                    </div>
-                                ))}
+                                        <div key={key} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{key}</p>
+                                            <p className="font-bold text-(--color-secondary)">{value}</p>
+                                        </div>
+                                    ))}
                             </div>
                         )}
 
@@ -244,20 +251,20 @@ const ProductDetail = () => {
                         {(() => {
                             // Get AMC plans from various possible locations
                             const amcPlans = product.amcPlans || product.amcPlansData || [];
-                            
+
                             // Filter out non-object entries (in case IDs are present)
-                            const validPlans = amcPlans.filter(plan => 
+                            const validPlans = amcPlans.filter(plan =>
                                 plan && typeof plan === 'object' && plan.name
                             );
-                            
-                            console.log('AMC Plans Debug:', { 
-                                raw: amcPlans, 
+
+                            console.log('AMC Plans Debug:', {
+                                raw: amcPlans,
                                 valid: validPlans,
-                                count: validPlans.length 
+                                count: validPlans.length
                             });
-                            
+
                             if (validPlans.length === 0) return null;
-                            
+
                             return (
                                 <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                                     <div className="flex items-center justify-between mb-6">
@@ -266,13 +273,13 @@ const ProductDetail = () => {
                                         </h3>
                                         <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Protect Your Investment</span>
                                     </div>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                                         {validPlans.map((plan) => (
                                             <div key={plan._id || plan.id} className="relative p-6 rounded-[2.5rem] border-2 border-slate-100 bg-white hover:border-(--color-primary)/30 hover:shadow-xl hover:shadow-blue-500/5 transition-all group overflow-hidden">
                                                 {/* Glow Effect */}
                                                 <div className="absolute -right-8 -top-8 w-24 h-24 bg-blue-500/5 blur-3xl group-hover:bg-blue-500/10 transition-colors" />
-                                                
+
                                                 <div className="relative z-10">
                                                     <div className="flex justify-between items-start mb-6">
                                                         <div>
@@ -337,7 +344,7 @@ const ProductDetail = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    
+
                                     <div className="mt-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
                                         <p className="text-xs text-slate-500 text-center font-medium">
                                             <ShieldCheck size={12} className="inline mr-1 text-(--color-primary)" />
@@ -384,7 +391,7 @@ const ProductDetail = () => {
                 {/* Review Section */}
                 <ReviewSection productId={product?._id || product?.id} />
 
-                
+
             </div>
             <Footer />
         </div>
