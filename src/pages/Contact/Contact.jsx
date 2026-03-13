@@ -252,83 +252,83 @@ const Contact = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
                         ref={addToRefs} 
-                        className="flex-[1.5] p-8 md:p-10 rounded-3xl bg-white border border-slate-200 shadow-sm"
+                        className="flex-[2] p-8 md:p-10 rounded-3xl bg-white border border-slate-200 shadow-sm"
                     >
                         <div className="space-y-2 mb-8">
-                            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Send a <span className="text-(--color-primary)">Message</span></h2>
-                            <p className="text-slate-500 text-sm font-medium">We'll get back to you as soon as possible.</p>
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Send a <span className="text-(--color-primary)">Message</span></h2>
+                            <p className="text-slate-500 text-sm md:text-base font-medium">We'll get back to you as soon as possible.</p>
                         </div>
 
-                        <form className="space-y-5" onSubmit={handleSubmit}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-600 ml-1">Full Name *</label>
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-600 ml-1">Full Name *</label>
                                     <input
                                         type="text"
                                         name="name"
                                         value={formData.name}
                                         onChange={handleChange}
                                         placeholder="Ricky Singh"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
+                                        className="w-full px-6 py-4 text-base rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                         required
                                     />
-                                    {errors.name && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.name}</p>}
+                                    {errors.name && <p className="text-red-500 text-xs font-bold ml-1">{errors.name}</p>}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-600 ml-1">Email Address</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-600 ml-1">Email Address</label>
                                     <input
                                         type="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
                                         placeholder="ricky@example.com"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
+                                        className="w-full px-6 py-4 text-base rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-600 ml-1">Phone Number *</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-600 ml-1">Phone Number *</label>
                                     <input
                                         type="tel"
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleChange}
                                         placeholder="9876543210"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
+                                        className="w-full px-6 py-4 text-base rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                         required
                                     />
-                                    {errors.phone && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.phone}</p>}
+                                    {errors.phone && <p className="text-red-500 text-xs font-bold ml-1">{errors.phone}</p>}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-600 ml-1">Subject</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-600 ml-1">Subject</label>
                                     <input
                                         type="text"
                                         name="subject"
                                         value={formData.subject}
                                         onChange={handleChange}
                                         placeholder="Inquiry Topic"
-                                        className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
+                                        className="w-full px-6 py-4 text-base rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all"
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-600 ml-1">Message *</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-600 ml-1">Message *</label>
                                 <textarea
                                     name="message"
                                     value={formData.message}
                                     onChange={handleChange}
                                     placeholder="Tell us how we can help..."
-                                    rows="4"
-                                    className="w-full px-5 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all resize-none"
+                                    rows="5"
+                                    className="w-full px-6 py-4 text-base rounded-xl outline-none border border-slate-200 bg-white focus:border-(--color-primary) transition-all resize-none"
                                     required
                                 ></textarea>
-                                {errors.message && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.message}</p>}
+                                {errors.message && <p className="text-red-500 text-xs font-bold ml-1">{errors.message}</p>}
                             </div>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-all bg-(--color-primary) text-white hover:bg-slate-900 disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="w-full py-5 rounded-xl font-bold uppercase tracking-widest text-base transition-all bg-(--color-primary) text-white hover:bg-slate-900 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? 'Sending...' : 'Send Message'}
                             </button>

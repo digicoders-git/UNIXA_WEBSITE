@@ -9,6 +9,7 @@ const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { cart } = useCart();
     const [isLoggedIn, setIsLoggedIn] = useState(isTokenValid());
+    const [userData, setUserData] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -16,7 +17,36 @@ const Navbar = () => {
         setIsMenuOpen(false);
         const tokenValid = isTokenValid();
         setIsLoggedIn(tokenValid);
+        
+        // Load user data from localStorage
+        if (tokenValid) {
+            const userDataStr = localStorage.getItem('userData');
+            if (userDataStr) {
+                try {
+                    setUserData(JSON.parse(userDataStr));
+                } catch (e) {
+                    console.error('Error parsing userData:', e);
+                }
+            }
+        }
     }, [location.pathname]);
+
+    // Listen for storage changes to update profile picture
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const userDataStr = localStorage.getItem('userData');
+            if (userDataStr) {
+                try {
+                    setUserData(JSON.parse(userDataStr));
+                } catch (e) {
+                    console.error('Error parsing userData:', e);
+                }
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
 
     const handleLogout = () => {
         // Clear all user data
@@ -95,11 +125,25 @@ const Navbar = () => {
                     </div> */}
 
                     <div
-                        onClick={() => navigate(isLoggedIn ? '/profile' : '/login')}
-                        className="hidden sm:flex cursor-pointer p-2 rounded-xl hover:bg-slate-100 text-[var(--color-secondary)] transition-all group"
-                        title={isLoggedIn ? "My Profile" : "Sign In"}
+                        onClick={() => {
+                            if (isLoggedIn) {
+                                navigate('/profile');
+                            } else {
+                                navigate('/login');
+                            }
+                        }}
+                        className="hidden sm:flex cursor-pointer p-2 rounded-xl hover:bg-slate-100 text-[var(--color-secondary)] transition-all group items-center justify-center"
+                        title={isLoggedIn ? "Profile" : "Sign In"}
                     >
-                        <User size={18} strokeWidth={2.5} className={isLoggedIn ? "text-[var(--color-primary)]" : ""} />
+                        {isLoggedIn && userData?.profilePicture ? (
+                            <img 
+                                src={userData.profilePicture} 
+                                alt="Profile" 
+                                className="w-8 h-8 rounded-full object-cover border-2 border-[var(--color-primary)] group-hover:scale-110 transition-transform" 
+                            />
+                        ) : (
+                            <User size={18} strokeWidth={2.5} className={isLoggedIn ? "text-[var(--color-primary)]" : ""} />
+                        )}
                     </div>
 
                     {/* {isLoggedIn && (
@@ -114,10 +158,10 @@ const Navbar = () => {
 
                     <button
                         onClick={() => navigate('/contact')}
-                        className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-[var(--color-secondary)] text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[var(--color-primary)] transition-all active:scale-95 shadow-md hover:shadow-lg shadow-blue-500/10"
+                        className="hidden cursor-pointer lg:flex items-center gap-2 px-5 py-2.5 bg-[var(--color-secondary)] text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-[var(--color-primary)] transition-all active:scale-95 shadow-md hover:shadow-lg shadow-blue-500/10"
                     >
                         <PhoneCall size={14} />
-                        Free Demo
+                        Free Water Testing
                     </button>
 
                     {/* Mobile Toggle */}
@@ -162,11 +206,18 @@ const Navbar = () => {
                     
                     <div className="mt-auto p-6 space-y-4 bg-slate-50/50 border-t border-slate-100">
                         <button
-                            onClick={() => { navigate(isLoggedIn ? '/profile' : '/login'); setIsMenuOpen(false); }}
+                            onClick={() => { 
+                                if (isLoggedIn) {
+                                    navigate('/profile');
+                                } else {
+                                    navigate('/login');
+                                }
+                                setIsMenuOpen(false); 
+                            }}
                             className="w-full flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-2xl text-[var(--color-secondary)] font-bold shadow-sm"
                         >
                             <User size={20} className="text-[var(--color-primary)]" />
-                            {isLoggedIn ? 'My Account' : 'Sign In / Register'}
+                            {isLoggedIn ? 'Profile' : 'Sign In / Register'}
                         </button>
 
                         {isLoggedIn && (
@@ -209,7 +260,7 @@ const Navbar = () => {
                             className="w-full py-4 bg-[var(--color-secondary)] text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
                             <PhoneCall size={16} />
-                            Request Free Demo
+                           Free Water Testing
                         </button>
                     </div>
                 </div>

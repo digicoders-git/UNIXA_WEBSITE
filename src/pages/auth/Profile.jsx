@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { getToken, removeToken, isTokenValid } from '../../utils/auth';
-import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, ChevronRight, Package, Download, Calendar, ShoppingBag, ShieldCheck, Zap, RefreshCw, Clock, Info, CreditCard } from 'lucide-react';
+import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, ChevronRight, Package, Download, Calendar, ShoppingBag, ShieldCheck, Zap, RefreshCw, Clock, Info, CreditCard, Upload, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Footer from '../../components/layout/Footer';
 import Swal from 'sweetalert2';
@@ -205,8 +205,16 @@ const Profile = () => {
         lastName: '',
         email: '',
         phone: '',
-        gender: ''
+        gender: '',
+        address: '',
+        city: '',
+        state: '',
+        pincode: '',
+        profilePicture: ''
     });
+
+    const [profilePictureFile, setProfilePictureFile] = useState(null);
+    const [profilePicturePreview, setProfilePicturePreview] = useState('');
 
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -220,35 +228,63 @@ const Profile = () => {
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     const fetchProfileAndOrders = async () => {
-        if (!isTokenValid()) {
+        const token = getToken();
+        if (!token) {
+            toast.error('Please login to access your profile');
             navigate('/login');
             return;
         }
 
         setIsInitialLoading(true);
         try {
-            // Fetch Profile
-            const profileRes = await api.get(`/users/profile`);
-            if (profileRes.data.user) {
+            let profileData, ordersData;
+            
+            try {
+                // Try real API calls first
+                const profileRes = await api.get(`/users/profile`);
+                profileData = profileRes.data.user;
+                
+                const userId = localStorage.getItem('userId');
+                if (userId) {
+                    const ordersRes = await api.get(`/orders/user/${userId}`);
+                    ordersData = ordersRes.data.orders || [];
+                }
+            } catch (apiError) {
+                console.log('API calls failed, checking localStorage');
+                // Fallback to localStorage data if API fails
+                const userData = localStorage.getItem('userData');
+                if (userData) {
+                    profileData = JSON.parse(userData);
+                } else {
+                    toast.error('No user data found. Please login again.');
+                    navigate('/login');
+                    return;
+                }
+                ordersData = []; // Empty orders for demo
+            }
+            
+            if (profileData) {
                 setProfileData({
-                    firstName: profileRes.data.user.firstName || '',
-                    lastName: profileRes.data.user.lastName || '',
-                    email: profileRes.data.user.email || '',
-                    phone: profileRes.data.user.phone || '',
-                    gender: profileRes.data.user.gender || ''
+                    firstName: profileData.firstName || '',
+                    lastName: profileData.lastName || '',
+                    email: profileData.email || '',
+                    phone: profileData.phone || '',
+                    gender: profileData.gender || '',
+                    address: profileData.address || '',
+                    city: profileData.city || '',
+                    state: profileData.state || '',
+                    pincode: profileData.pincode || '',
+                    profilePicture: profileData.profilePicture || ''
                 });
-                localStorage.setItem('userData', JSON.stringify(profileRes.data.user));
+                localStorage.setItem('userData', JSON.stringify(profileData));
             }
-
-            // Fetch Orders
-            const userId = localStorage.getItem('userId');
-            if (userId) {
-                const ordersRes = await api.get(`/orders/user/${userId}`);
-                setOrders(ordersRes.data.orders || []);
-            }
+            
+            setOrders(ordersData);
+            
         } catch (error) {
             console.error("Fetch profile/orders error:", error);
-            if (error.response?.status === 401) {
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                toast.error('Session expired. Please login again.');
                 handleLogout(true);
             }
         } finally {
@@ -259,6 +295,13 @@ const Profile = () => {
     useEffect(() => {
         fetchProfileAndOrders();
     }, []);
+
+    // Re-fetch profile when editing is turned off (after save)
+    useEffect(() => {
+        if (!isEditing && !isLoading) {
+            fetchProfileAndOrders();
+        }
+    }, [isEditing, isLoading]);
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -275,6 +318,24 @@ const Profile = () => {
 
     const handleProfileChange = (e) => {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
+    };
+
+    const handleProfilePictureChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setProfilePictureFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfilePicturePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeProfilePicture = () => {
+        setProfilePictureFile(null);
+        setProfilePicturePreview('');
+        setProfileData({ ...profileData, profilePicture: '' });
     };
 
     const handlePasswordDataChange = (e) => {
@@ -330,9 +391,42 @@ const Profile = () => {
     const handleSaveProfile = async () => {
         setIsLoading(true);
         try {
-            const { data } = await api.put(`/users/profile`, profileData);
-            setProfileData(data.user);
+            const formData = new FormData();
+            
+            formData.append('firstName', profileData.firstName);
+            formData.append('lastName', profileData.lastName);
+            formData.append('phone', profileData.phone);
+            formData.append('gender', profileData.gender);
+            formData.append('address', profileData.address);
+            formData.append('city', profileData.city);
+            formData.append('state', profileData.state);
+            formData.append('pincode', profileData.pincode);
+            
+            // Add profile picture if selected
+            if (profilePictureFile) {
+                formData.append('profilePicture', profilePictureFile);
+            }
+            
+            const { data } = await api.put(`/users/profile`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            setProfileData({
+                ...data.user,
+                profilePicture: data.user.profilePicture || ''
+            });
+            setProfilePictureFile(null);
+            setProfilePicturePreview('');
             setIsEditing(false);
+            
+            // Update localStorage so Navbar also updates
+            localStorage.setItem('userData', JSON.stringify(data.user));
+            
+            // Trigger storage event for other components
+            window.dispatchEvent(new Event('storage'));
+            
             toast.success('Profile updated successfully!');
         } catch (error) {
             console.error("Update profile error:", error);
@@ -406,7 +500,15 @@ const Profile = () => {
 
                 <div className="relative z-10 max-w-4xl mx-auto space-y-3">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full mx-auto shadow-sm">
-                        <User size={16} className="text-[var(--color-primary)]" />
+                        {profileData.profilePicture ? (
+                            <img 
+                                src={profileData.profilePicture} 
+                                alt="Profile" 
+                                className="w-6 h-6 rounded-full object-cover border border-[var(--color-primary)]" 
+                            />
+                        ) : (
+                            <User size={16} className="text-[var(--color-primary)]" />
+                        )}
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                             Member Profile
                         </span>
@@ -424,6 +526,53 @@ const Profile = () => {
 
             <div className="relative z-10 py-10 md:py-16 px-4 md:px-8 lg:px-24">
                 <div className="max-w-6xl mx-auto">
+                    {/* Profile Picture Section */}
+                    <div className="mb-12 bg-white p-8 md:p-12 rounded-[32px] border border-slate-100 shadow-sm">
+                        <h2 className="text-2xl font-bold text-slate-900 mb-8">My Account</h2>
+                        
+                        <div className="flex flex-col md:flex-row items-center gap-8">
+                            {/* Profile Picture Display/Upload */}
+                            <div className="relative group">
+                                <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center overflow-hidden border-4 border-slate-200 shadow-lg">
+                                    {profileData.profilePicture ? (
+                                        <img src={profileData.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User size={60} className="text-slate-300" />
+                                    )}
+                                </div>
+                                
+                                {isEditing && (
+                                    <label className="absolute bottom-0 right-0 w-12 h-12 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-[var(--color-secondary)] transition-all shadow-lg group-hover:scale-110 transform">
+                                        <Upload size={20} />
+                                        <input type="file" accept="image/*" onChange={handleProfilePictureChange} className="hidden" />
+                                    </label>
+                                )}
+                            </div>
+                            
+                            {/* Profile Info */}
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className="text-3xl font-black text-slate-900 mb-2">
+                                    {profileData.firstName} {profileData.lastName}
+                                </h3>
+                                <p className="text-slate-500 font-medium mb-4 flex items-center gap-2 justify-center md:justify-start">
+                                    <Mail size={16} /> {profileData.email}
+                                </p>
+                                <p className="text-slate-500 font-medium flex items-center gap-2 justify-center md:justify-start">
+                                    <Phone size={16} /> {profileData.phone}
+                                </p>
+                                
+                                {isEditing && profilePicturePreview && (
+                                    <button 
+                                        onClick={removeProfilePicture}
+                                        className="mt-4 flex items-center gap-2 px-4 py-2 text-red-600 text-sm font-bold hover:bg-red-50 rounded-xl transition-all mx-auto md:mx-0"
+                                    >
+                                        <X size={16} /> Remove Picture
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Profile Info */}
                         <div className="lg:col-span-2 bg-white p-6 md:p-10 rounded-[32px] border border-slate-100 shadow-sm">
@@ -437,6 +586,8 @@ const Profile = () => {
                                 </button>
                             </div>
 
+
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">First Name</label>
@@ -447,14 +598,53 @@ const Profile = () => {
                                     <input name="lastName" value={profileData.lastName} onChange={handleProfileChange} disabled={!isEditing} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50" />
                                 </div>
                                 <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
+                                    <input name="phone" value={profileData.phone} onChange={handleProfileChange} disabled={!isEditing} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Gender</label>
+                                    <input name="gender" value={profileData.gender} onChange={handleProfileChange} disabled={!isEditing} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50" />
+                                </div>
+                                <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
                                     <input name="email" value={profileData.email} disabled className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold opacity-50 cursor-not-allowed" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
-                                    <input name="phone" value={profileData.phone} onChange={handleProfileChange} disabled={!isEditing} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50" />
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Address</label>
+                                    <textarea name="address" value={profileData.address} onChange={handleProfileChange} disabled={!isEditing} rows="2" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50 resize-none" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">City</label>
+                                    <input name="city" value={profileData.city} onChange={handleProfileChange} disabled={!isEditing} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">State</label>
+                                    <input name="state" value={profileData.state} onChange={handleProfileChange} disabled={!isEditing} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pincode</label>
+                                    <input name="pincode" value={profileData.pincode} onChange={handleProfileChange} disabled={!isEditing} className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all disabled:opacity-50" />
                                 </div>
                             </div>
+
+                            {isEditing && (
+                                <button
+                                    onClick={handleSaveProfile}
+                                    disabled={isLoading}
+                                    className="mt-8 w-full py-4 bg-[var(--color-primary)] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save size={16} /> Save Profile
+                                        </>
+                                    )}
+                                </button>
+                            )}
                         </div>
 
                         {/* Right Sidebar Section */}
@@ -482,64 +672,6 @@ const Profile = () => {
                                 {/* Decorative elements */}
                                 <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl group-hover:bg-blue-600/40 transition-all duration-500"></div>
                                 <div className="absolute top-0 right-0 w-full h-full bg-[url('/water-bg.png')] opacity-5 mix-blend-overlay"></div>
-                            </div>
-
-                            {/* Security Section */}
-                            <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
-                                <h2 className="text-xl font-bold mb-6 text-slate-900 flex items-center gap-2">
-                                    <Lock size={20} className="text-[var(--color-primary)]" /> Update Password
-                                </h2>
-                                <div className="space-y-4">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
-                                        <div className="relative">
-                                            <input
-                                                type={showCurrentPassword ? "text" : "password"}
-                                                name="currentPassword"
-                                                value={passwordData.currentPassword}
-                                                onChange={handlePasswordDataChange}
-                                                className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all"
-                                                placeholder="••••••••"
-                                            />
-                                            <button onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                                {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Password</label>
-                                        <div className="relative">
-                                            <input
-                                                type={showNewPassword ? "text" : "password"}
-                                                name="newPassword"
-                                                value={passwordData.newPassword}
-                                                onChange={handlePasswordDataChange}
-                                                className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all"
-                                                placeholder="••••••••"
-                                            />
-                                            <button onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Confirm New Password</label>
-                                        <input
-                                            type="password"
-                                            name="confirmPassword"
-                                            value={passwordData.confirmPassword}
-                                            onChange={handlePasswordDataChange}
-                                            className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 font-bold outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all"
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={handleUpdatePassword}
-                                        className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
-                                    >
-                                        Update Password
-                                    </button>
-                                </div>
                             </div>
 
                             <button onClick={handleLogout} className="w-full py-4 bg-red-50 text-red-600 rounded-2xl font-black uppercase tracking-widest border border-red-100 hover:bg-red-100 transition-all flex items-center justify-center gap-2">

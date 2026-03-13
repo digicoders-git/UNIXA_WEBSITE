@@ -26,11 +26,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Add response interceptor to suppress console errors
+// Add response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Silently handle errors without logging to console
+    // Handle 401 Unauthorized errors only for real API failures
+    if (error.response?.status === 401 && !error.config?.url?.includes('mock')) {
+      const token = localStorage.getItem('userToken');
+      // Only clear token if it's not a mock token
+      if (token && !token.includes('mock_jwt_token')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userData');
+        
+        // Only redirect if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+      }
+    }
     return Promise.reject(error);
   }
 );

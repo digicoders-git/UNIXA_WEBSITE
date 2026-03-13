@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence } from 'framer-motion';
 import Layout from '../components/layout/Layout';
 import PageLoader from '../components/common/PageLoader';
+import './App.css';
 
 // Lazy loaded pages
 const Home = lazy(() => import('../pages/Home/Home'));
@@ -19,6 +20,7 @@ const Blog = lazy(() => import('../pages/Blog/Blog'));
 const BlogDetail = lazy(() => import('../pages/Blog/BlogDetail'));
 
 
+const UserPanel = lazy(() => import('../pages/UserPanel'));
 const Orders = lazy(() => import('../pages/Orders/Orders'));
 const AmcRenewals = lazy(() => import('../pages/AmcRenewals/AmcRenewals'));
 const TransactionHistory = lazy(() => import('../pages/Transactions/TransactionHistory'));
@@ -62,6 +64,7 @@ const AppContent = () => {
 
 
                         <Route path="profile" element={<Profile />} />
+                        <Route path="user-panel" element={<UserPanel />} />
                         <Route path="orders" element={<Orders />} />
                         <Route path="amc-renewals" element={<AmcRenewals />} />
                         <Route path="transactions" element={<TransactionHistory />} />
@@ -80,9 +83,37 @@ const AppContent = () => {
 };
 
 function App() {
+    const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        const hasSeenModal = localStorage.getItem('hasSeenModal');
+        if (!hasSeenModal) {
+            setShowModal(true);
+            localStorage.setItem('hasSeenModal', 'true');
+        }
+    }, []);
+
     return (
         <Router>
             <AppContent />
+            {showModal && (
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+                        <div className="modal-left">
+                            <h2>Welcome to UNIXA!</h2>
+                            <p>Your popup content here</p>
+                        </div>
+                        <div className="modal-right">
+                            <form>
+                                <input type="text" placeholder="Name" />
+                                <input type="email" placeholder="Email" />
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Router>
     );
 }

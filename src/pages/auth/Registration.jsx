@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronDown, MapPin } from 'lucide-react';
-// import { createUserApi } from '../../api/user';
-import { saveToken } from '../../utils/auth';
+import { User, Mail, Phone, ChevronDown, MapPin } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -15,30 +13,30 @@ const Registration = () => {
         phone: '',
         gender: '',
         email: '',
-        password: '',
-        confirmPassword: '',
         address: '',
         city: '',
         state: '',
         pincode: ''
     });
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showGenderDropdown, setShowGenderDropdown] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-        if (errors[e.target.name]) {
-            setErrors({
-                ...errors,
-                [e.target.name]: ''
-            });
+        const { name, value } = e.target;
+        if (name === 'phone') {
+            const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 10);
+            setFormData({ ...formData, [name]: numbersOnly });
+        } else if (name === 'pincode') {
+            const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 6);
+            setFormData({ ...formData, [name]: numbersOnly });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+        
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
         }
     };
 
@@ -63,22 +61,8 @@ const Registration = () => {
             newErrors.gender = 'Gender is required';
         }
 
-        if (!formData.email) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'Email is invalid';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
-        }
-
-        if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Confirm password is required';
-        } else if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Passwords do not match';
         }
 
         if (!formData.address.trim()) {
@@ -110,18 +94,38 @@ const Registration = () => {
             setIsLoading(true);
             try {
                 const submissionData = {
-                    ...formData,
-                    gender: formData.gender.toLowerCase()
+                    firstName: formData.firstName.trim(),
+                    lastName: formData.lastName.trim(),
+                    phone: formData.phone,
+                    gender: formData.gender.toLowerCase(),
+                    email: formData.email.trim() || undefined,
+                    address: formData.address.trim(),
+                    city: formData.city.trim(),
+                    state: formData.state.trim(),
+                    pincode: formData.pincode
                 };
+                
+                console.log('Sending registration data:', submissionData);
+                
+                // Real API call to register user
                 const { data } = await api.post(`/users/register`, submissionData);
                 
                 if (data) {
-                    toast.success('Registration successful! Please login to continue.');
+                    toast.success('Registration successful! Please login with OTP.');
                     navigate('/login');
                 }
             } catch (error) {
                 console.error('Registration failed:', error);
-                toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+                console.error('Error response:', error.response?.data);
+                
+                if (error.response?.status === 409) {
+                    toast.error('User already exists with this phone number or email.');
+                } else if (error.response?.status === 400) {
+                    const errorMsg = error.response?.data?.message || 'Invalid data provided';
+                    toast.error(errorMsg);
+                } else {
+                    toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -225,70 +229,6 @@ const Registration = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
-                                <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Password</label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: `var(--color-text-muted)` }} size={20} />
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        className={`w-full pl-12 pr-12 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.password ? 'border-red-500' : ''}`}
-                                        style={{
-                                            backgroundColor: `white`,
-                                            border: `1px solid ${errors.password ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
-                                            color: `var(--color-text)`
-                                        }}
-                                        placeholder="Enter password"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
-                                        style={{ color: `var(--color-text-muted)` }}
-                                        onMouseEnter={(e) => e.target.style.color = 'var(--color-text)'}
-                                        onMouseLeave={(e) => e.target.style.color = 'var(--color-text-muted)'}
-                                    >
-                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
-                                </div>
-                                {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Confirm Password</label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: `var(--color-text-muted)` }} size={20} />
-                                    <input
-                                        type={showConfirmPassword ? 'text' : 'password'}
-                                        name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        className={`w-full pl-12 pr-12 py-3 rounded-xl focus:ring-2 focus:ring-cyan-200 outline-none transition-all ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                                        style={{
-                                            backgroundColor: `white`,
-                                            border: `1px solid ${errors.confirmPassword ? '#ef4444' : 'rgba(6, 182, 212, 0.2)'}`,
-                                            color: `var(--color-text)`
-                                        }}
-                                        placeholder="Confirm password"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
-                                        style={{ color: `var(--color-text-muted)` }}
-                                        onMouseEnter={(e) => e.target.style.color = 'var(--color-text)'}
-                                        onMouseLeave={(e) => e.target.style.color = 'var(--color-text-muted)'}
-                                    >
-                                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
-                                </div>
-                                {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            <div>
                                 <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Phone Number</label>
                                 <div className="relative">
                                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: `var(--color-text-muted)` }} size={20} />
@@ -341,16 +281,8 @@ const Registration = () => {
                                                             setErrors({ ...errors, gender: '' });
                                                         }
                                                     }}
-                                                    className="w-full px-4 py-3 text-left transition-all"
+                                                    className="w-full px-4 py-3 text-left transition-all hover:bg-blue-50"
                                                     style={{ color: `var(--color-text)` }}
-                                                    onMouseEnter={(e) => {
-                                                        e.target.style.backgroundColor = 'var(--color-secondary)';
-                                                        e.target.style.color = 'white';
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.target.style.backgroundColor = 'transparent';
-                                                        e.target.style.color = 'var(--color-text)';
-                                                    }}
                                                 >
                                                     {option}
                                                 </button>
@@ -363,7 +295,7 @@ const Registration = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Email Address</label>
+                            <label className="block text-sm font-bold mb-2" style={{ color: `var(--color-text)` }}>Email Address (Optional)</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: `var(--color-text-muted)` }} size={20} />
                                 <input
@@ -486,7 +418,7 @@ const Registration = () => {
                         <p style={{ color: `var(--color-text-muted)` }}>
                             Already have an account?{' '}
                             <Link to="/login" className="font-bold hover:underline" style={{ color: `var(--color-secondary)` }}>
-                                Sign In
+                                Sign In with OTP
                             </Link>
                         </p>
                     </div>
