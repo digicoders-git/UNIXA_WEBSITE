@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Package, CreditCard, Settings, LogOut, Bell, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar/Navbar';
-import Footer from '../components/layout/Footer';}
+import Footer from '../components/layout/Footer';
 
 const UserPanel = () => {
     const navigate = useNavigate();
