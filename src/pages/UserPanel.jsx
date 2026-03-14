@@ -1,1 +1,167 @@
-import React, { useState, useEffect } from 'react';\nimport { useNavigate } from 'react-router-dom';\nimport { User, Package, CreditCard, Settings, LogOut, Bell, Shield } from 'lucide-react';\nimport { toast } from 'react-toastify';\nimport Navbar from '../../components/Navbar/Navbar';\nimport Footer from '../../components/layout/Footer';\n\nconst UserPanel = () => {\n    const navigate = useNavigate();\n    const [user, setUser] = useState(null);\n    const [activeTab, setActiveTab] = useState('profile');\n\n    useEffect(() => {\n        const userData = localStorage.getItem('userData');\n        if (!userData) {\n            navigate('/login');\n            return;\n        }\n        setUser(JSON.parse(userData));\n    }, [navigate]);\n\n    const handleLogout = () => {\n        localStorage.removeItem('token');\n        localStorage.removeItem('userData');\n        localStorage.removeItem('userId');\n        toast.success('Logged out successfully');\n        navigate('/');\n    };\n\n    const menuItems = [\n        { id: 'profile', label: 'Profile', icon: User },\n        { id: 'orders', label: 'Orders', icon: Package },\n        { id: 'transactions', label: 'Transactions', icon: CreditCard },\n        { id: 'notifications', label: 'Notifications', icon: Bell },\n        { id: 'security', label: 'Security', icon: Shield },\n        { id: 'settings', label: 'Settings', icon: Settings },\n    ];\n\n    const renderContent = () => {\n        switch (activeTab) {\n            case 'profile':\n                return (\n                    <div className=\"bg-white rounded-xl p-6 shadow-sm\">\n                        <h3 className=\"text-xl font-bold mb-4\">Profile Information</h3>\n                        <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n                            <div>\n                                <label className=\"block text-sm font-medium mb-2\">Name</label>\n                                <input \n                                    type=\"text\" \n                                    value={`${user?.firstName || ''} ${user?.lastName || ''}`}\n                                    className=\"w-full p-3 border rounded-lg\"\n                                    readOnly\n                                />\n                            </div>\n                            <div>\n                                <label className=\"block text-sm font-medium mb-2\">Email</label>\n                                <input \n                                    type=\"email\" \n                                    value={user?.email || ''}\n                                    className=\"w-full p-3 border rounded-lg\"\n                                    readOnly\n                                />\n                            </div>\n                            <div>\n                                <label className=\"block text-sm font-medium mb-2\">Phone</label>\n                                <input \n                                    type=\"tel\" \n                                    value={user?.phone || ''}\n                                    className=\"w-full p-3 border rounded-lg\"\n                                    readOnly\n                                />\n                            </div>\n                        </div>\n                    </div>\n                );\n            case 'orders':\n                return (\n                    <div className=\"bg-white rounded-xl p-6 shadow-sm\">\n                        <h3 className=\"text-xl font-bold mb-4\">My Orders</h3>\n                        <div className=\"text-center py-8\">\n                            <Package size={48} className=\"mx-auto mb-4 text-gray-400\" />\n                            <p className=\"text-gray-500\">No orders found</p>\n                        </div>\n                    </div>\n                );\n            case 'transactions':\n                return (\n                    <div className=\"bg-white rounded-xl p-6 shadow-sm\">\n                        <h3 className=\"text-xl font-bold mb-4\">Transaction History</h3>\n                        <div className=\"text-center py-8\">\n                            <CreditCard size={48} className=\"mx-auto mb-4 text-gray-400\" />\n                            <p className=\"text-gray-500\">No transactions found</p>\n                        </div>\n                    </div>\n                );\n            default:\n                return (\n                    <div className=\"bg-white rounded-xl p-6 shadow-sm\">\n                        <h3 className=\"text-xl font-bold mb-4\">{menuItems.find(item => item.id === activeTab)?.label}</h3>\n                        <p className=\"text-gray-500\">Content coming soon...</p>\n                    </div>\n                );\n        }\n    };\n\n    if (!user) return null;\n\n    return (\n        <div>\n            <Navbar />\n            <div className=\"min-h-screen bg-gray-50 pt-20\">\n                <div className=\"max-w-7xl mx-auto px-4 py-8\">\n                    <div className=\"grid grid-cols-1 lg:grid-cols-4 gap-6\">\n                        {/* Sidebar */}\n                        <div className=\"lg:col-span-1\">\n                            <div className=\"bg-white rounded-xl shadow-sm p-6\">\n                                <div className=\"text-center mb-6\">\n                                    <div className=\"w-20 h-20 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4\">\n                                        <User size={32} className=\"text-white\" />\n                                    </div>\n                                    <h2 className=\"font-bold text-lg\">{user.firstName} {user.lastName}</h2>\n                                    <p className=\"text-gray-500 text-sm\">{user.email}</p>\n                                </div>\n                                \n                                <nav className=\"space-y-2\">\n                                    {menuItems.map((item) => {\n                                        const Icon = item.icon;\n                                        return (\n                                            <button\n                                                key={item.id}\n                                                onClick={() => setActiveTab(item.id)}\n                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${\n                                                    activeTab === item.id \n                                                        ? 'bg-cyan-50 text-cyan-600 border-l-4 border-cyan-500' \n                                                        : 'text-gray-600 hover:bg-gray-50'\n                                                }`}\n                                            >\n                                                <Icon size={20} />\n                                                {item.label}\n                                            </button>\n                                        );\n                                    })}\n                                    \n                                    <button\n                                        onClick={handleLogout}\n                                        className=\"w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors\"\n                                    >\n                                        <LogOut size={20} />\n                                        Logout\n                                    </button>\n                                </nav>\n                            </div>\n                        </div>\n\n                        {/* Main Content */}\n                        <div className=\"lg:col-span-3\">\n                            {renderContent()}\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <Footer />\n        </div>\n    );\n};\n\nexport default UserPanel;
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Package, CreditCard, Settings, LogOut, Bell, Shield } from 'lucide-react';
+import { toast } from 'react-toastify';
+import Navbar from '../../components/Navbar/Navbar';
+import Footer from '../../components/layout/Footer';
+
+const UserPanel = () => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+    const [activeTab, setActiveTab] = useState('profile');
+
+    useEffect(() => {
+        const userData = localStorage.getItem('userData');
+        if (!userData) {
+            navigate('/login');
+            return;
+        }
+        setUser(JSON.parse(userData));
+    }, [navigate]);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userId');
+        toast.success('Logged out successfully');
+        navigate('/');
+    };
+
+    const menuItems = [
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'orders', label: 'Orders', icon: Package },
+        { id: 'transactions', label: 'Transactions', icon: CreditCard },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'security', label: 'Security', icon: Shield },
+        { id: 'settings', label: 'Settings', icon: Settings },
+    ];
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'profile':
+                return (
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                        <h3 className="text-xl font-bold mb-4">Profile Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Name</label>
+                                <input 
+                                    type="text" 
+                                    value={`${user?.firstName || ''} ${user?.lastName || ''}`}
+                                    className="w-full p-3 border rounded-lg"
+                                    readOnly
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Email</label>
+                                <input 
+                                    type="email" 
+                                    value={user?.email || ''}
+                                    className="w-full p-3 border rounded-lg"
+                                    readOnly
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Phone</label>
+                                <input 
+                                    type="tel" 
+                                    value={user?.phone || ''}
+                                    className="w-full p-3 border rounded-lg"
+                                    readOnly
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'orders':
+                return (
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                        <h3 className="text-xl font-bold mb-4">My Orders</h3>
+                        <div className="text-center py-8">
+                            <Package size={48} className="mx-auto mb-4 text-gray-400" />
+                            <p className="text-gray-500">No orders found</p>
+                        </div>
+                    </div>
+                );
+            case 'transactions':
+                return (
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                        <h3 className="text-xl font-bold mb-4">Transaction History</h3>
+                        <div className="text-center py-8">
+                            <CreditCard size={48} className="mx-auto mb-4 text-gray-400" />
+                            <p className="text-gray-500">No transactions found</p>
+                        </div>
+                    </div>
+                );
+            default:
+                return (
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                        <h3 className="text-xl font-bold mb-4">{menuItems.find(item => item.id === activeTab)?.label}</h3>
+                        <p className="text-gray-500">Content coming soon...</p>
+                    </div>
+                );
+        }
+    };
+
+    if (!user) return null;
+
+    return (
+        <div>
+            <Navbar />
+            <div className="min-h-screen bg-gray-50 pt-20">
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        {/* Sidebar */}
+                        <div className="lg:col-span-1">
+                            <div className="bg-white rounded-xl shadow-sm p-6">
+                                <div className="text-center mb-6">
+                                    <div className="w-20 h-20 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <User size={32} className="text-white" />
+                                    </div>
+                                    <h2 className="font-bold text-lg">{user.firstName} {user.lastName}</h2>
+                                    <p className="text-gray-500 text-sm">{user.email}</p>
+                                </div>
+                                
+                                <nav className="space-y-2">
+                                    {menuItems.map((item) => {
+                                        const Icon = item.icon;
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => setActiveTab(item.id)}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                                                    activeTab === item.id 
+                                                        ? 'bg-cyan-50 text-cyan-600 border-l-4 border-cyan-500' 
+                                                        : 'text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <Icon size={20} />
+                                                {item.label}
+                                            </button>
+                                        );
+                                    })}
+                                    
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                                    >
+                                        <LogOut size={20} />
+                                        Logout
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="lg:col-span-3">
+                            {renderContent()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <Footer />
+        </div>
+    );
+};
+
+export default UserPanel;
