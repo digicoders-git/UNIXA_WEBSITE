@@ -1,7 +1,7 @@
 import React, { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-
+import { getImageUrl } from '../../services/api';
 import { ShoppingCart, CheckCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -12,7 +12,7 @@ const ProductCard = memo(({ product }) => {
 
 
     const name = product?.name;
-    const img = product?.mainImage?.url || product?.img;
+    const img = getImageUrl(product?.mainImage?.url || product?.img);
     const description = product?.description;
     const id = product?.p_id || product?.slug || product?.id || product?._id;
     const techId = product?._id || product?.id;

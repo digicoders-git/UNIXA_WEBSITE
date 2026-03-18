@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from 'react-slick';
-import api from '../../services/api';
+import api, { getImageUrl } from '../../services/api';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -70,7 +70,7 @@ const HeroSlider = memo(() => {
                                 <div className="absolute inset-0 w-full h-full z-10">
                                     {slide.video?.url ? (
                                         <video
-                                            src={slide.video.url}
+                                            src={getImageUrl(slide.video.url)}
                                             autoPlay
                                             loop
                                             muted
@@ -79,7 +79,7 @@ const HeroSlider = memo(() => {
                                         />
                                     ) : slide.image?.url ? (
                                         <img 
-                                            src={slide.image.url} 
+                                            src={getImageUrl(slide.image.url)} 
                                             alt={slide.title} 
                                             className="w-full h-[50vh] md:h-auto lg:h-[550px] object-cover object-center block"
                                         />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import api from '../../services/api';
+import api, { getImageUrl } from '../../services/api';
 import { 
   CheckCircle2, 
   Droplets, 
@@ -67,7 +67,7 @@ const RentOnRO = () => {
               features: plan.features,
               recommended: !!plan.tag,
               tagLabel: plan.tag,
-              image: plan.image?.url,
+              image: getImageUrl(plan.image?.url),
               amcPlans: plan.amcPlans || [],
               description: plan.description || "",
               product: plan.productId || null,

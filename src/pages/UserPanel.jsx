@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Package, CreditCard, Settings, LogOut, Bell, Shield } from 'lucide-react';
+import { User, Package, CreditCard, Settings, LogOut, Bell, Shield, WifiOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Navbar from '../components/Navbar/Navbar';
 import Footer from '../components/layout/Footer';
+import api from '../services/api';
+import { getToken } from '../utils/auth';
 
 const UserPanel = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('profile');
+    const [orders, setOrders] = useState([]);
+    const [transactions, setTransactions] = useState([]);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
     useEffect(() => {
         const userData = localStorage.getItem('userData');
@@ -17,12 +22,60 @@ const UserPanel = () => {
             return;
         }
         setUser(JSON.parse(userData));
+
+        // Load cached data immediately (works offline too)
+        const cachedOrders = localStorage.getItem('cachedOrders');
+        const cachedTx = localStorage.getItem('cachedTransactions');
+        if (cachedOrders) setOrders(JSON.parse(cachedOrders));
+        if (cachedTx) setTransactions(JSON.parse(cachedTx));
+
+        // If online, fetch fresh data and update cache
+        if (navigator.onLine) {
+            const token = getToken();
+            if (token) {
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                Promise.allSettled([
+                    api.get('/users/profile'),
+                    api.get('/user-orders'),
+                    api.get('/transactions')
+                ]).then(([profileRes, ordersRes, txRes]) => {
+                    if (profileRes.status === 'fulfilled') {
+                        const freshUser = profileRes.value.data.user;
+                        setUser(freshUser);
+                        localStorage.setItem('userData', JSON.stringify(freshUser));
+                    }
+                    if (ordersRes.status === 'fulfilled') {
+                        const data = ordersRes.value.data;
+                        const list = Array.isArray(data) ? data : (data.orders || []);
+                        setOrders(list);
+                        localStorage.setItem('cachedOrders', JSON.stringify(list));
+                    }
+                    if (txRes.status === 'fulfilled') {
+                        const data = txRes.value.data;
+                        const list = Array.isArray(data) ? data : (data.transactions || []);
+                        setTransactions(list);
+                        localStorage.setItem('cachedTransactions', JSON.stringify(list));
+                    }
+                });
+            }
+        }
+
+        const handleOnline = () => setIsOffline(false);
+        const handleOffline = () => setIsOffline(true);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
     }, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userData');
         localStorage.removeItem('userId');
+        localStorage.removeItem('cachedOrders');
+        localStorage.removeItem('cachedTransactions');
         toast.success('Logged out successfully');
         navigate('/');
     };
@@ -77,20 +130,54 @@ const UserPanel = () => {
                 return (
                     <div className="bg-white rounded-xl p-6 shadow-sm">
                         <h3 className="text-xl font-bold mb-4">My Orders</h3>
-                        <div className="text-center py-8">
-                            <Package size={48} className="mx-auto mb-4 text-gray-400" />
-                            <p className="text-gray-500">No orders found</p>
-                        </div>
+                        {orders.length === 0 ? (
+                            <div className="text-center py-8">
+                                <Package size={48} className="mx-auto mb-4 text-gray-400" />
+                                <p className="text-gray-500">No orders found</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {orders.map(order => (
+                                    <div key={order._id} className="border rounded-lg p-4 flex justify-between items-center">
+                                        <div>
+                                            <p className="font-semibold text-sm">Order #{order._id?.slice(-6)}</p>
+                                            <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-bold">₹{order.totalAmount || order.total || 0}</p>
+                                            <span className="text-xs px-2 py-1 rounded-full bg-cyan-50 text-cyan-600">{order.status}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 );
             case 'transactions':
                 return (
                     <div className="bg-white rounded-xl p-6 shadow-sm">
                         <h3 className="text-xl font-bold mb-4">Transaction History</h3>
-                        <div className="text-center py-8">
-                            <CreditCard size={48} className="mx-auto mb-4 text-gray-400" />
-                            <p className="text-gray-500">No transactions found</p>
-                        </div>
+                        {transactions.length === 0 ? (
+                            <div className="text-center py-8">
+                                <CreditCard size={48} className="mx-auto mb-4 text-gray-400" />
+                                <p className="text-gray-500">No transactions found</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {transactions.map(tx => (
+                                    <div key={tx._id} className="border rounded-lg p-4 flex justify-between items-center">
+                                        <div>
+                                            <p className="font-semibold text-sm">{tx.type || 'Payment'}</p>
+                                            <p className="text-xs text-gray-500">{new Date(tx.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-bold">₹{tx.amount || 0}</p>
+                                            <span className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-600">{tx.status || 'Completed'}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 );
             default:
@@ -108,6 +195,11 @@ const UserPanel = () => {
     return (
         <div>
             <Navbar />
+            {isOffline && (
+                <div className="fixed top-16 left-0 right-0 z-50 bg-yellow-500 text-white text-center text-sm py-1 flex items-center justify-center gap-2">
+                    <WifiOff size={14} /> Offline — showing cached data
+                </div>
+            )}
             <div className="min-h-screen bg-gray-50 pt-20">
                 <div className="max-w-7xl mx-auto px-4 py-8">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

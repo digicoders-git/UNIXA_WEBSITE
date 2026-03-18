@@ -3,7 +3,7 @@ import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Phone, Shield, ArrowRight } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { saveToken, getToken } from '../../utils/auth';
+import { saveToken } from '../../utils/auth';
 import Footer from '../../components/layout/Footer';
 import Navbar from '../../components/Navbar/Navbar';
 
@@ -93,15 +93,29 @@ const Login = () => {
             
             // Clear old guest cart
             localStorage.removeItem('sks_cart_guest');
+
+            // Prefetch and cache user data for offline use
+            try {
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                const [ordersRes, txRes] = await Promise.allSettled([
+                    api.get('/user-orders'),
+                    api.get('/transactions')
+                ]);
+                if (ordersRes.status === 'fulfilled') {
+                    localStorage.setItem('cachedOrders', JSON.stringify(ordersRes.value.data));
+                }
+                if (txRes.status === 'fulfilled') {
+                    localStorage.setItem('cachedTransactions', JSON.stringify(txRes.value.data));
+                }
+            } catch (_) {}
             
             toast.success('Login successful!');
             
             // Force navbar to update auth state
             window.dispatchEvent(new Event('storage'));
             
-            // Direct redirect to user panel with token
-            const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL || 'http://localhost:5176';
-            window.location.href = `${dashboardUrl}/login?token=${token}`;
+            // Redirect to profile page
+            window.location.href = '/profile';
             
         } catch (error) {
             console.error("OTP Verification Error:", error);
@@ -115,18 +129,6 @@ const Login = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleUserPanelRedirect = () => {
-        const token = getToken();
-        if (!token) {
-            toast.error('Please login first');
-            return;
-        }
-        
-        const dashboardUrl = import.meta.env.VITE_USER_PANEL_URL || 'http://localhost:5176';
-        localStorage.setItem('userPanelToken', token);
-        window.location.href = `${dashboardUrl}/dashboard`;
     };
 
     const resetForm = () => {
@@ -276,21 +278,8 @@ const Login = () => {
                                     {isLoading ? (
                                         <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"></div>
                                     ) : (
-                                        'Login to Website'
+                                        'Login'
                                     )}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={handleUserPanelRedirect}
-                                    disabled={isLoading || formData.otp !== '123456'}
-                                    className="w-full py-3 rounded-xl font-bold transition-all shadow-lg disabled:opacity-50 border-2 hover:bg-slate-50 flex items-center justify-center gap-2 transform hover:scale-[1.01]"
-                                    style={{
-                                        borderColor: `var(--color-primary)`,
-                                        color: `var(--color-primary)`
-                                    }}
-                                >
-                                    Go to User Panel
                                 </button>
                             </div>
 

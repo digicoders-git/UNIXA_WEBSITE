@@ -4,6 +4,7 @@ import { ShoppingCart, User, Menu, X, PhoneCall, ShieldCheck, LogOut } from 'luc
 import UnixaBrand from '../common/UnixaBrand';
 import { useCart } from '../../context/CartContext';
 import { isTokenValid } from '../../utils/auth';
+import { getImageUrl } from '../../services/api';
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -137,7 +138,7 @@ const Navbar = () => {
                     >
                         {isLoggedIn && userData?.profilePicture ? (
                             <img 
-                                src={userData.profilePicture} 
+                                src={getImageUrl(userData.profilePicture)} 
                                 alt="Profile" 
                                 className="w-8 h-8 rounded-full object-cover border-2 border-[var(--color-primary)] group-hover:scale-110 transition-transform" 
                             />

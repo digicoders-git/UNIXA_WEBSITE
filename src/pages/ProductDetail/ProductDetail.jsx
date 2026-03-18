@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../services/api';
+import api, { getImageUrl } from '../../services/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 
@@ -102,7 +102,7 @@ const ProductDetail = () => {
             id: product._id || product.id,
             name: product.name,
             price: product.finalPrice || product.price,
-            img: product.mainImage?.url || product.img,
+            img: getImageUrl(product.mainImage?.url || product.img),
             quantity: 1
         });
 
@@ -139,7 +139,7 @@ const ProductDetail = () => {
                         className="relative group rounded-[4rem] bg-gradient-to-br from-slate-50 to-blue-50/30 p-12 lg:p-24 flex items-center justify-center overflow-hidden border border-blue-100/50 shadow-2xl shadow-blue-500/5"
                     >
                         <img
-                            src={product?.mainImage?.url || product?.img}
+                            src={getImageUrl(product?.mainImage?.url || product?.img)}
                             alt={product?.name}
                             className="w-full max-w-md h-auto object-contain relative z-10 transition-transform duration-1000 group-hover:scale-110"
                         />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import api, { getImageUrl } from '../../services/api';
 import { getToken, removeToken, isTokenValid } from '../../utils/auth';
 import { User, Mail, Phone, Lock, Eye, EyeOff, LogOut, Edit2, Save, ChevronRight, Package, Download, Calendar, ShoppingBag, ShieldCheck, Zap, RefreshCw, Clock, Info, CreditCard, Upload, X } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -391,42 +391,35 @@ const Profile = () => {
     const handleSaveProfile = async () => {
         setIsLoading(true);
         try {
-            const formData = new FormData();
-            
-            formData.append('firstName', profileData.firstName);
-            formData.append('lastName', profileData.lastName);
-            formData.append('phone', profileData.phone);
-            formData.append('gender', profileData.gender);
-            formData.append('address', profileData.address);
-            formData.append('city', profileData.city);
-            formData.append('state', profileData.state);
-            formData.append('pincode', profileData.pincode);
-            
-            // Add profile picture if selected
+            // Upload profile picture first if selected
             if (profilePictureFile) {
-                formData.append('profilePicture', profilePictureFile);
+                const userId = localStorage.getItem('userId');
+                const fd = new FormData();
+                fd.append('profilePicture', profilePictureFile);
+                const picRes = await api.put(`/users/${userId}/profile-picture`, fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                profileData.profilePicture = picRes.data.profilePicture;
             }
-            
-            const { data } = await api.put(`/users/profile`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+
+            const { data } = await api.put(`/users/profile`, {
+                firstName: profileData.firstName,
+                lastName: profileData.lastName,
+                phone: profileData.phone,
+                gender: profileData.gender,
+                address: profileData.address,
+                city: profileData.city,
+                state: profileData.state,
+                pincode: profileData.pincode,
             });
-            
-            setProfileData({
-                ...data.user,
-                profilePicture: data.user.profilePicture || ''
-            });
+
+            const updatedUser = { ...data.user, profilePicture: profileData.profilePicture || data.user.profilePicture || '' };
+            setProfileData(updatedUser);
             setProfilePictureFile(null);
             setProfilePicturePreview('');
             setIsEditing(false);
-            
-            // Update localStorage so Navbar also updates
-            localStorage.setItem('userData', JSON.stringify(data.user));
-            
-            // Trigger storage event for other components
+            localStorage.setItem('userData', JSON.stringify(updatedUser));
             window.dispatchEvent(new Event('storage'));
-            
             toast.success('Profile updated successfully!');
         } catch (error) {
             console.error("Update profile error:", error);
@@ -502,7 +495,7 @@ const Profile = () => {
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full mx-auto shadow-sm">
                         {profileData.profilePicture ? (
                             <img 
-                                src={profileData.profilePicture} 
+                                src={getImageUrl(profileData.profilePicture)} 
                                 alt="Profile" 
                                 className="w-6 h-6 rounded-full object-cover border border-[var(--color-primary)]" 
                             />
@@ -534,8 +527,10 @@ const Profile = () => {
                             {/* Profile Picture Display/Upload */}
                             <div className="relative group">
                                 <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center overflow-hidden border-4 border-slate-200 shadow-lg">
-                                    {profileData.profilePicture ? (
-                                        <img src={profileData.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                                    {profilePicturePreview ? (
+                                        <img src={profilePicturePreview} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : profileData.profilePicture ? (
+                                        <img src={getImageUrl(profileData.profilePicture)} alt="Profile" className="w-full h-full object-cover" />
                                     ) : (
                                         <User size={60} className="text-slate-300" />
                                     )}
