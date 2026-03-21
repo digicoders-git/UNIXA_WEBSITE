@@ -1,14 +1,15 @@
 import { Phone, X } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 
 const FloatingContact = () => {
   const [showForm, setShowForm] = useState(false);
-  const [isLandscape, setIsLandscape] = useState(false);
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,25 +20,17 @@ const FloatingContact = () => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    const checkOrientation = () => {
-      setIsLandscape(window.innerWidth > window.innerHeight);
-    };
-    
-    checkOrientation();
-    
-    // Show form after 2 seconds on page load if landscape
+    // Home page pe popup nahi aayega
+    if (location.pathname === '/') return;
+    // Agar pehle submit kar chuka hai toh dubara nahi aayega
+    if (localStorage.getItem('enquiry_submitted')) return;
+
     const timer = setTimeout(() => {
-      if (window.innerWidth > window.innerHeight) {
-        setShowForm(true);
-      }
-    }, 2000);
-    
-    window.addEventListener('resize', checkOrientation);
-    return () => {
-      window.removeEventListener('resize', checkOrientation);
-      clearTimeout(timer);
-    };
-  }, []);
+      setShowForm(true);
+    }, 60000); // 1 minute delay
+
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -96,6 +89,7 @@ const FloatingContact = () => {
     try {
       await api.post(`/enquiry`, formData);
       toast.success("Thank you! Your message has been sent.");
+      localStorage.setItem('enquiry_submitted', 'true');
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setErrors({});
       setShowForm(false);
@@ -130,7 +124,7 @@ const FloatingContact = () => {
       </div>
 
       <AnimatePresence>
-        {showForm && isLandscape && (
+        {showForm && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -200,14 +194,21 @@ const FloatingContact = () => {
                 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-600 ml-1">Subject</label>
-                  <input
-                    type="text"
+                  <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    placeholder="Inquiry Topic"
-                    className="w-full px-4 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-blue-600 transition-all"
-                  />
+                    className="w-full px-4 py-3 rounded-xl outline-none border border-slate-200 bg-white focus:border-blue-600 transition-all text-slate-700"
+                  >
+                    <option value="">Select a subject...</option>
+                    <option value="Product Inquiry">Product Inquiry</option>
+                    <option value="AMC / Service Plan">AMC / Service Plan</option>
+                    <option value="Installation Request">Installation Request</option>
+                    <option value="Repair & Maintenance">Repair & Maintenance</option>
+                    <option value="Rental Plan">Rental Plan</option>
+                    <option value="Complaint">Complaint</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
                 
                 <div className="space-y-1.5">

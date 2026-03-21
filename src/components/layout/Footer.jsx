@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import UnixaBrand from '../common/UnixaBrand';
 import { FaWhatsapp } from "react-icons/fa";
-import logo from '../../assets/footer-logo.jpg';
+import logo from '../../assets/footer-logo.png';
 
 const Footer = () => {
   return (
@@ -23,7 +23,7 @@ const Footer = () => {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/20 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--color-primary)]/10 blur-[150px] rounded-full"></div>
       </div>
-      
+
       {/* Animated Water Droplets */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(8)].map((_, i) => (
@@ -51,7 +51,7 @@ const Footer = () => {
 
       <div className="max-w-7xl mx-auto relative z-10 px-6 md:px-12 pt-20 pb-8">
         {/* Top Section with Logo & Trust Badges */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -82,7 +82,7 @@ const Footer = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand Section */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -165,7 +165,7 @@ const Footer = () => {
         </div>
 
         {/* Contact Cards - Premium Design */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -173,7 +173,7 @@ const Footer = () => {
         >
           {[
             { icon: <Mail size={20} />, label: 'Email', value: 'unixatechnologies@gmail.com', href: 'mailto:unixatechnologies@gmail.com', color: 'from-blue-500/20 to-cyan-500/20', hoverColor: 'group-hover:from-blue-500 group-hover:to-cyan-500' },
-            { icon: <FaWhatsapp  size={20} />, label: 'WhatsApp', value: '+91 9278176663', href: 'https://wa.me/919278176663', color: 'from-green-500/20 to-emerald-500/20', hoverColor: 'group-hover:from-green-500 group-hover:to-emerald-500' },
+            { icon: <FaWhatsapp size={20} />, label: 'WhatsApp', value: '+91 9278176663', href: 'https://wa.me/919278176663', color: 'from-green-500/20 to-emerald-500/20', hoverColor: 'group-hover:from-green-500 group-hover:to-emerald-500' },
             { icon: <Phone size={20} />, label: 'Support', value: '+91 9278176662', href: 'tel:+919278176662', color: 'from-orange-500/20 to-red-500/20', hoverColor: 'group-hover:from-orange-500 group-hover:to-red-500' },
             { icon: <MapPin size={20} />, label: 'Location', value: 'New Delhi, India', href: null, color: 'from-purple-500/20 to-pink-500/20', hoverColor: 'group-hover:from-purple-500 group-hover:to-pink-500' }
           ].map((contact, i) => (
@@ -201,7 +201,7 @@ const Footer = () => {
         </motion.div>
 
         {/* Bottom Bar - Premium */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
