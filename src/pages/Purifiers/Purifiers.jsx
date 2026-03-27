@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../services/api';
+import api, { getImageUrl } from '../../services/api';
 import { Sparkles, Star, Award, Search, X, Grid, Filter, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
 import ProductCard from '../../components/cards/PurifierCard';
 import Footer from '../../components/layout/Footer';
@@ -265,12 +265,13 @@ const Purifiers = () => {
                                                                     id: product._id,
                                                                     p_id: product.p_id,
                                                                     name: product.name,
-                                                                    img: product.mainImage?.url,
+                                                                    img: getImageUrl(product.mainImage?.url),
                                                                     price: product.price,
                                                                     finalPrice: product.finalPrice,
                                                                     discountPercent: product.discountPercent,
                                                                     description: product.description,
-                                                                    category: product.category?.name
+                                                                    category: product.category?.name,
+                                                                    stock: product.stock
                                                                 }}
                                                             />
                                                         </motion.div>

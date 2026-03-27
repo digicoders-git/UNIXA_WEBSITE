@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import api from '../../services/api';
+import api, { getImageUrl } from '../../services/api';
 import { Settings, Search, X, Filter, ArrowUpDown, ChevronDown, Check, Wrench, ShieldCheck, Truck, Plus } from 'lucide-react';
 import ProductCard from '../../components/cards/PurifierCard';
 import Footer from '../../components/layout/Footer';
@@ -240,12 +240,14 @@ const ROParts = () => {
                                                         id: product._id,
                                                         p_id: product.p_id,
                                                         name: product.name,
-                                                        img: product.mainImage?.url,
+                                                        img: getImageUrl(product.mainImage?.url),
                                                         price: product.price,
                                                         finalPrice: product.finalPrice,
                                                         discountPercent: product.discountPercent,
                                                         description: product.description,
-                                                        category: product.category?.name
+                                                        category: product.category?.name,
+                                                        warrantyYears: product.warrantyYears,
+                                                        stock: product.stock ?? 0
                                                     }}
                                                 />
                                             </div>
@@ -267,12 +269,14 @@ const ROParts = () => {
                                                         id: product._id,
                                                         p_id: product.p_id,
                                                         name: product.name,
-                                                        img: product.mainImage?.url,
+                                                        img: getImageUrl(product.mainImage?.url),
                                                         price: product.price,
                                                         finalPrice: product.finalPrice,
                                                         discountPercent: product.discountPercent,
                                                         description: product.description,
-                                                        category: product.category?.name
+                                                        category: product.category?.name,
+                                                        warrantyYears: product.warrantyYears,
+                                                        stock: product.stock ?? 0
                                                     }}
                                                 />
                                             </div>

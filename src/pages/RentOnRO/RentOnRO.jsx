@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api, { getImageUrl } from '../../services/api';
@@ -25,16 +25,28 @@ import Footer from '../../components/layout/Footer';
 import Loader from '../../components/common/Loader';
 import Swal from 'sweetalert2';
 import { isTokenValid } from '../../utils/auth';
+import BookingModal from '../../components/common/BookingModal';
 
 // Assets (reusing existing if possible or placeholders)
 import water2 from '../../assets/images/mhImage.png'; 
 
 const RentOnRO = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('rental'); // 'rental' | 'amc' | 'renew'
+  const [activeTab, setActiveTab] = useState('rental');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null); // Plan details for modal
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [amcBookingOpen, setAmcBookingOpen] = useState(false);
+  const [selectedAmcPlan, setSelectedAmcPlan] = useState(null);
+  const [amcDetailOpen, setAmcDetailOpen] = useState(false);
+  const [detailPlan, setDetailPlan] = useState(null);
+  const [amcSelection, setAmcSelection] = useState({});
+  const [amcForm, setAmcForm] = useState({ name: '', phone: '', address: '', message: '' });
+  const [amcOrders, setAmcOrders] = useState([]);
+  const [amcSelectedProduct, setAmcSelectedProduct] = useState(null);
+  const [fetchingAmcOrders, setFetchingAmcOrders] = useState(false);
+  const [amcSubmitting, setAmcSubmitting] = useState(false);
+  const phoneTimerRef = React.useRef(null);
 
   // Booking Form State
   const [formData, setFormData] = useState({
@@ -86,6 +98,10 @@ const RentOnRO = () => {
               durationMonths: p.durationMonths,
               features: p.features || [],
               recommended: p.isPopular,
+              amcType: p.amcType,
+              servicesIncluded: p.servicesIncluded,
+              partsIncluded: p.partsIncluded,
+              productConfigs: p.productConfigs || [],
               color: p.isPopular ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-slate-50 text-slate-700 border-slate-200'
            }));
            setAmcPlans(mappedAmc);
@@ -98,6 +114,66 @@ const RentOnRO = () => {
     };
     fetchPlans();
   }, []);
+
+  const handleAmcPhoneChange = (val) => {
+    setAmcForm(p => ({ ...p, phone: val }));
+    clearTimeout(phoneTimerRef.current);
+    const digits = val.replace(/\D/g, '');
+    if (digits.length === 10) {
+      phoneTimerRef.current = setTimeout(async () => {
+        setFetchingAmcOrders(true);
+        try {
+          const { data } = await api.get(`/amc-enquiries/orders-by-phone/${digits}`);
+          const orders = data.orders || [];
+          setAmcOrders(orders);
+          if (orders[0]?.shippingAddress?.name && !amcForm.name) {
+            setAmcForm(p => ({ ...p, name: orders[0].shippingAddress.name, address: orders[0].shippingAddress.city || '' }));
+          }
+        } catch { setAmcOrders([]); }
+        finally { setFetchingAmcOrders(false); }
+      }, 600);
+    } else {
+      setAmcOrders([]);
+      setAmcSelectedProduct(null);
+    }
+  };
+
+  const openAmcDetail = (plan) => {
+    setDetailPlan(plan);
+    setAmcSelection({});
+    setAmcForm({ name: '', phone: '', address: '', message: '' });
+    setAmcOrders([]);
+    setAmcSelectedProduct(null);
+    setAmcDetailOpen(true);
+  };
+
+  const handleAmcSubmit = async () => {
+    if (!amcForm.name || !amcForm.phone) {
+      Swal.fire('Error', 'Name and Phone are required!', 'error');
+      return;
+    }
+    const durSelections = Object.values(amcSelection).filter(Boolean);
+    setAmcSubmitting(true);
+    try {
+      await api.post('/amc-enquiries/guest', {
+        name: amcForm.name,
+        phone: amcForm.phone,
+        address: amcForm.address,
+        amcPlanName: detailPlan.name,
+        amcPlanId: detailPlan.id,
+        productName: amcSelectedProduct?.productName || durSelections[0]?.productName || '',
+        productId: amcSelectedProduct?.productId || null,
+        duration: durSelections[0]?.label || '',
+        price: durSelections[0]?.finalRate || 0,
+        notes: `${amcForm.message}${amcSelectedProduct ? `\nProduct: ${amcSelectedProduct.productName}\nOrdered: ${new Date(amcSelectedProduct.orderDate).toLocaleDateString('en-IN')}${amcSelectedProduct.deliveredAt ? '\nDelivered: ' + new Date(amcSelectedProduct.deliveredAt).toLocaleDateString('en-IN') : ''}\nAddress: ${amcSelectedProduct.address?.addressLine1}, ${amcSelectedProduct.address?.city}, ${amcSelectedProduct.address?.state} - ${amcSelectedProduct.address?.pincode}` : ''}`,
+        source: 'website',
+      });
+      setAmcDetailOpen(false);
+      Swal.fire({ title: 'Request Sent!', text: 'Our team will contact you shortly.', icon: 'success', confirmButtonColor: 'var(--color-primary)' });
+    } catch {
+      Swal.fire('Error', 'Failed to submit. Please try again.', 'error');
+    } finally { setAmcSubmitting(false); }
+  };
 
   const handleBookClick = (plan) => {
     if (!isTokenValid()) {
@@ -478,7 +554,12 @@ const RentOnRO = () => {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                       {amcPlans.map((plan, idx) => (
+                       {amcPlans.map((plan, idx) => {
+                         const firstCfg = plan.productConfigs?.[0];
+                         const disc = firstCfg?.discount || 0;
+                         const afterDisc = (r) => disc > 0 ? Math.round(r - r * disc / 100) : r;
+                         const lowestRate = firstCfg ? Math.min(...[firstCfg.rateOneYear, firstCfg.rateTwoYear, firstCfg.rateThreeYear].filter(r => r > 0)) : 0;
+                         return (
                           <motion.div 
                             key={plan.id}
                             initial={{ opacity: 0, y: 30 }}
@@ -486,40 +567,49 @@ const RentOnRO = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: idx * 0.1 }}
                             whileHover={{ scale: 1.02, y: -5 }}
-                            className={`group relative p-8 bg-white rounded-[2.5rem] border transition-all duration-300 hover:shadow-xl ${plan.recommended ? 'border-yellow-500 ring-4 ring-yellow-500/10' : 'border-slate-100'}`}
+                            onClick={() => { openAmcDetail(plan); setAmcDetailOpen(true); }}
+                            className={`group relative p-8 bg-white rounded-[2.5rem] border transition-all duration-300 hover:shadow-xl cursor-pointer ${plan.recommended ? 'border-yellow-500 ring-4 ring-yellow-500/10' : 'border-slate-100'}`}
                           >
                              {plan.recommended && (
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-md">
                                    Best Value
                                 </div>
                              )}
-                             <h3 className="text-lg font-black text-slate-900 uppercase tracking-wider mb-2">{plan.name}</h3>
-                             <div className="flex items-baseline gap-1 mb-6">
-                                <span className="text-4xl font-black text-slate-900">₹{plan.price}</span>
-                                <span className="text-slate-400 text-sm font-bold">/yr</span>
-                             </div>
-                             
-                             <ul className="space-y-4 mb-8">
-                                {plan.features.map((feat, i) => (
-                                   <li key={i} className="flex items-start gap-3 text-sm font-medium text-slate-600">
-                                      <Star size={16} className={`shrink-0 mt-0.5 ${plan.id === 'platinum-amc' ? 'text-slate-900 fill-slate-900' : 'text-yellow-500 fill-yellow-500'}`} />
-                                      {feat}
+                             <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 ${plan.amcType === 'Free' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{plan.amcType || 'Paid'}</span>
+                             <h3 className="text-lg font-black text-slate-900 uppercase tracking-wider mb-1">{plan.name}</h3>
+                             {plan.productConfigs?.length > 0 && (
+                               <p className="text-xs text-slate-400 font-bold mb-4">{plan.productConfigs.map(c => c.productId?.name).filter(Boolean).join(', ')}</p>
+                             )}
+
+                             {/* Starting from price */}
+                             {lowestRate > 0 && (
+                               <div className="mb-5">
+                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Starting from</p>
+                                 <div className="flex items-baseline gap-2">
+                                   <span className="text-3xl font-black text-slate-900">₹{afterDisc(lowestRate)}</span>
+                                   {disc > 0 && <span className="text-sm line-through text-slate-300 font-bold">₹{lowestRate}</span>}
+                                   {disc > 0 && <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-black rounded-full">{disc}% OFF</span>}
+                                 </div>
+                               </div>
+                             )}
+
+                             <ul className="space-y-2 mb-8">
+                                {plan.features.slice(0,3).map((feat, i) => (
+                                   <li key={i} className="flex items-start gap-2 text-sm font-medium text-slate-600">
+                                      <Star size={13} className="shrink-0 mt-0.5 text-yellow-500 fill-yellow-500" />{feat}
                                    </li>
                                 ))}
                              </ul>
 
                              <button 
-                                onClick={() => handleBookClick(plan)}
-                                className={`w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-xs transition-all ${
-                                   plan.id === 'platinum-amc' 
-                                      ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20' 
-                                      : 'bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white'
-                                }`}
+                                onClick={e => { e.stopPropagation(); openAmcDetail(plan); }}
+                                className="w-full py-4 rounded-xl flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-xs transition-all bg-slate-900 text-white hover:bg-blue-600 hover:shadow-lg"
                              >
-                                Choose Plan <ArrowRight size={14} />
+                                View & Book <ArrowRight size={14} />
                              </button>
                           </motion.div>
-                       ))}
+                         );
+                       })}
                     </div>
                  </div>
               )}
@@ -791,6 +881,197 @@ const RentOnRO = () => {
       )}
 
       <Footer />
+      <BookingModal
+        isOpen={amcBookingOpen}
+        onClose={() => setAmcBookingOpen(false)}
+        item={selectedAmcPlan ? { name: selectedAmcPlan.name, price: selectedAmcPlan.price } : null}
+        type="amc"
+      />
+
+      {/* AMC Detail Modal — with product selection + booking form */}
+      {amcDetailOpen && detailPlan && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setAmcDetailOpen(false)}>
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-slate-100 flex justify-between items-start z-10">
+              <div>
+                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${detailPlan.amcType === 'Free' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{detailPlan.amcType || 'Paid'}</span>
+                {detailPlan.recommended && <span className="ml-2 inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-yellow-100 text-yellow-700">⭐ Best Value</span>}
+                <h2 className="text-2xl font-black text-slate-900 mt-1">{detailPlan.name}</h2>
+              </div>
+              <button onClick={() => setAmcDetailOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><span className="text-xl font-bold">×</span></button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Plan Info */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50 rounded-2xl p-3 text-center">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Services</p>
+                  <p className="text-xl font-black text-slate-900">{detailPlan.servicesIncluded || 0}</p>
+                </div>
+                <div className="bg-slate-50 rounded-2xl p-3 text-center">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Parts</p>
+                  <p className="text-sm font-black text-slate-900">{detailPlan.partsIncluded ? '✅ Included' : '❌ Chargeable'}</p>
+                </div>
+              </div>
+
+              {/* Step 1: Phone + auto-fetch orders */}
+              <div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Step 1 — Enter Your Phone</p>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input type="tel" required placeholder="10-digit mobile number"
+                    value={amcForm.phone} onChange={e => handleAmcPhoneChange(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                  />
+                  {fetchingAmcOrders && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-blue-400 font-bold animate-pulse">Fetching...</span>}
+                </div>
+              </div>
+
+              {/* Step 2: Select Your Product */}
+              {(amcOrders.length > 0 || (amcForm.phone.replace(/\D/g,'').length === 10 && !fetchingAmcOrders)) && (
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Step 2 — Select Your Product</p>
+                  {amcOrders.length > 0 ? (
+                    <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                      {amcOrders.flatMap(order =>
+                        order.items.map((item, ii) => ({
+                          productId: item.product,
+                          productName: item.productName,
+                          orderDate: order.createdAt,
+                          deliveredAt: order.deliveredAt,
+                          address: order.shippingAddress,
+                          key: `${order._id}-${ii}`
+                        }))
+                      ).map(p => (
+                        <button key={p.key} type="button"
+                          onClick={() => setAmcSelectedProduct(amcSelectedProduct?.productId === p.productId ? null : p)}
+                          className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${
+                            amcSelectedProduct?.productId === p.productId ? 'border-blue-500 bg-blue-50' : 'border-slate-100 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-black text-sm text-slate-800">{p.productName}</p>
+                              <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                                Ordered: {new Date(p.orderDate).toLocaleDateString('en-IN')}
+                                {p.deliveredAt && ` · Delivered: ${new Date(p.deliveredAt).toLocaleDateString('en-IN')}`}
+                              </p>
+                              <p className="text-[10px] text-slate-400 font-bold">{p.address?.city}, {p.address?.state}</p>
+                            </div>
+                            {amcSelectedProduct?.productId === p.productId && <CheckCircle2 size={16} className="text-blue-500 shrink-0" />}
+                          </div>
+                        </button>
+                      ))}
+                      <button type="button"
+                        onClick={() => setAmcSelectedProduct(amcSelectedProduct === 'other' ? null : 'other')}
+                        className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all ${
+                          amcSelectedProduct === 'other' ? 'border-blue-500 bg-blue-50' : 'border-slate-100 hover:border-slate-300'
+                        }`}
+                      >
+                        <p className="font-black text-sm text-slate-600">Other / Not in list</p>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-400 font-bold text-center py-3 bg-slate-50 rounded-xl border border-slate-100">
+                      No delivered orders found — we'll cover any product you have
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 3: Select Duration */}
+              {detailPlan.productConfigs?.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Step 3 — Select Duration</p>
+                  <div className="space-y-3">
+                    {detailPlan.productConfigs.map((c, i) => {
+                      const disc = c.discount || 0;
+                      const afterDisc = (r) => disc > 0 ? Math.round(r - r * disc / 100) : r;
+                      const productKey = c.productId?._id || String(i);
+                      const selectedDur = amcSelection[productKey];
+                      return (
+                        <div key={i} className={`border-2 rounded-2xl overflow-hidden transition-all ${selectedDur ? 'border-blue-500' : 'border-slate-100'}`}>
+                          <div className="bg-slate-50 px-4 py-2.5 flex justify-between items-center">
+                            <p className="font-black text-sm text-slate-800">{c.productId?.name || 'Plan'}</p>
+                            <div className="flex items-center gap-2">
+                              {disc > 0 && <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-black rounded-full">{disc}% OFF</span>}
+                              <span className="text-[10px] font-bold text-slate-400">{c.serviceSchedule?.type || 'Half Yearly'}</span>
+                            </div>
+                          </div>
+                          <div className="p-3 grid grid-cols-3 gap-2">
+                            {[{ label: '1 Year', rate: c.rateOneYear, key: '1Y' }, { label: '2 Years', rate: c.rateTwoYear, key: '2Y' }, { label: '3 Years', rate: c.rateThreeYear, key: '3Y' }]
+                              .filter(d => d.rate > 0).map(d => (
+                              <button key={d.key} type="button"
+                                onClick={() => setAmcSelection(prev => ({ ...prev, [productKey]: selectedDur?.key === d.key ? null : { ...d, productName: c.productId?.name || 'Plan', productId: productKey, disc, finalRate: afterDisc(d.rate) } }))}
+                                className={`rounded-xl p-3 border-2 text-center transition-all ${selectedDur?.key === d.key ? 'border-blue-500 bg-blue-50' : 'border-slate-100 hover:border-slate-300'}`}
+                              >
+                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{d.label}</p>
+                                <p className="font-black text-slate-900 text-sm">₹{afterDisc(d.rate)}</p>
+                                {disc > 0 && <p className="text-[10px] line-through text-slate-300">₹{d.rate}</p>}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Contact Details */}
+              <div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Step 4 — Your Details</p>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input type="text" required placeholder="Full Name"
+                      value={amcForm.name} onChange={e => setAmcForm(p => ({ ...p, name: e.target.value }))}
+                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    />
+                  </div>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input type="text" placeholder="City / Locality"
+                      value={amcForm.address} onChange={e => setAmcForm(p => ({ ...p, address: e.target.value }))}
+                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    />
+                  </div>
+                  <textarea rows={2} placeholder="Any specific requirement..."
+                    value={amcForm.message} onChange={e => setAmcForm(p => ({ ...p, message: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Summary */}
+              {(amcSelectedProduct || Object.values(amcSelection).some(Boolean)) && (
+                <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100 space-y-1">
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Summary</p>
+                  {amcSelectedProduct && amcSelectedProduct !== 'other' && (
+                    <div className="flex justify-between text-sm font-bold text-slate-700">
+                      <span>Product</span><span>{amcSelectedProduct.productName}</span>
+                    </div>
+                  )}
+                  {Object.values(amcSelection).filter(Boolean).map((s, i) => (
+                    <div key={i} className="flex justify-between text-sm font-bold text-slate-700">
+                      <span>{s.label}</span><span className="text-blue-600">₹{s.finalRate}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Submit */}
+              <button type="button" onClick={handleAmcSubmit} disabled={amcSubmitting}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-600 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-60"
+              >
+                {amcSubmitting ? 'Submitting...' : <><span>Submit AMC Request</span><ArrowRight size={16} /></>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

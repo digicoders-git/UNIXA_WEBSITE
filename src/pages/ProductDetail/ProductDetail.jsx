@@ -13,6 +13,7 @@ import Loader from '../../components/common/Loader';
 import UnixaBrand from '../../components/common/UnixaBrand';
 import ReviewSection from '../../components/product/ReviewSection';
 import { isTokenValid } from '../../utils/auth';
+import BookingModal from '../../components/common/BookingModal';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -22,6 +23,7 @@ const ProductDetail = () => {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [bookingOpen, setBookingOpen] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -88,8 +90,14 @@ const ProductDetail = () => {
         return true; // Skipping auth check for static version
     };
 
+    const isOutOfStock = (product?.stock ?? 0) <= 0;
+
     const handleAddToCart = async () => {
         if (!product) return;
+        if (isOutOfStock) {
+            toast.error('This product is currently out of stock.');
+            return;
+        }
 
         if (!isTokenValid()) {
             toast.info('Please login to add items to cart');
@@ -197,6 +205,19 @@ const ProductDetail = () => {
                                         Save {product.discountPercent}%
                                     </span>
                                 </>
+                            )}
+                            {isOutOfStock ? (
+                                <span className="text-xs font-black text-white bg-red-500 px-3 py-1 rounded-full uppercase tracking-wider">
+                                    Out of Stock
+                                </span>
+                            ) : product.stock <= 5 ? (
+                                <span className="text-xs font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+                                    Only {product.stock} Left
+                                </span>
+                            ) : (
+                                <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-wider">
+                                    In Stock
+                                </span>
                             )}
                         </div>
 
@@ -359,19 +380,26 @@ const ProductDetail = () => {
                         <div className="flex gap-4 mt-auto">
                             <button
                                 onClick={handleAddToCart}
-                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 bg-[var(--color-secondary)] text-white hover:bg-[var(--color-primary)] transition-all shadow-[0_10px_30px_rgba(15,23,42,0.15)] active:scale-95"
+                                disabled={isOutOfStock}
+                                className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 transition-all shadow-[0_10px_30px_rgba(15,23,42,0.15)] active:scale-95 ${
+                                    isOutOfStock
+                                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                                        : 'bg-[var(--color-secondary)] text-white hover:bg-[var(--color-primary)]'
+                                }`}
                             >
                                 <ShoppingCart size={18} />
-                                Add to Cart
+                                {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                             </button>
                             <button
-                                onClick={() => {
-                                    handleAddToCart();
-                                    navigate('/shop');
-                                }}
-                                className="flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 border-2 border-(--color-secondary) text-(--color-secondary) hover:bg-(--color-secondary) hover:text-white transition-all active:scale-95"
+                                onClick={() => { if (!isOutOfStock) setBookingOpen(true); }}
+                                disabled={isOutOfStock}
+                                className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-wider text-xs flex items-center justify-center gap-3 transition-all active:scale-95 ${
+                                    isOutOfStock
+                                        ? 'border-2 border-slate-200 text-slate-300 cursor-not-allowed'
+                                        : 'border-2 border-(--color-secondary) text-(--color-secondary) hover:bg-(--color-secondary) hover:text-white'
+                                }`}
                             >
-                                Buy Now
+                                {isOutOfStock ? 'Unavailable' : 'Book Now'}
                             </button>
 
                         </div>
@@ -391,8 +419,13 @@ const ProductDetail = () => {
                 {/* Review Section */}
                 <ReviewSection productId={product?._id || product?.id} />
 
-
             </div>
+            <BookingModal
+                isOpen={bookingOpen}
+                onClose={() => setBookingOpen(false)}
+                item={product}
+                type="product"
+            />
             <Footer />
         </div>
     );

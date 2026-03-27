@@ -348,25 +348,127 @@ const ReceiptModal = ({ amc, isOpen, onClose }) => {
     );
 };
 
-// ... existing PlanSelectorModal, etc ...
-const PlanSelectorModal = ({ isOpen, onClose, onSelect }) => {
-    const [plans, setPlans] = useState([]);
+const DURATION_LABELS = { rateOneYear: '1 Year', rateTwoYear: '2 Years', rateThreeYear: '3 Years' };
+const DURATION_KEYS = ['rateOneYear', 'rateTwoYear', 'rateThreeYear'];
+
+const AmcEnquiryModal = ({ isOpen, onClose, plan, product, onSuccess }) => {
+    const [form, setForm] = useState({ name: '', phone: '', email: '', address: '' });
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        const fetchPlans = async () => {
+        if (isOpen) {
             try {
-                const { data } = await api.get(`/amc-plans?activeOnly=true`);
-                if (data.success) {
-                    setPlans(data.plans);
-                }
-            } catch (error) {
-                console.error("Failed to fetch AMC plans", error);
-                // Fallback or show error
-            }
-        };
-
-        if (isOpen) fetchPlans();
+                const u = JSON.parse(localStorage.getItem('userData') || '{}');
+                setForm(f => ({
+                    ...f,
+                    name: u.firstName ? `${u.firstName} ${u.lastName || ''}`.trim() : '',
+                    phone: u.phone || '',
+                    email: u.email || '',
+                }));
+            } catch (e) {}
+        }
     }, [isOpen]);
+
+    if (!isOpen || !plan) return null;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!form.name || !form.phone) return toast.error('Name and phone are required');
+        setSubmitting(true);
+        try {
+            await api.post('/amc-enquiries', {
+                name: form.name,
+                phone: form.phone,
+                email: form.email,
+                address: form.address,
+                brandName: product?.specifications?.brand || '',
+                productId: product?._id,
+                productName: product?.name,
+                amcPlanId: plan._id,
+                amcPlanName: plan.name,
+                duration: plan.duration,
+                price: plan.price,
+            });
+            onSuccess();
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to submit enquiry');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+            <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Confirm <span className="text-blue-500">Enquiry</span></h2>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{plan.name} · {plan.duration} · ₹{plan.price}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-2xl"><X size={22} className="text-slate-400" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-8 space-y-5">
+                    <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-100 text-[11px] font-bold text-blue-700">
+                        Product: <span className="font-black">{product?.name}</span>
+                    </div>
+                    {[['name','Your Full Name','text',true],['phone','Phone Number','tel',true],['email','Email (optional)','email',false],['address','Address (optional)','text',false]].map(([key, placeholder, type, required]) => (
+                        <div key={key}>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">{placeholder}</label>
+                            <input
+                                type={type}
+                                required={required}
+                                value={form[key]}
+                                onChange={e => setForm(f => ({...f, [key]: e.target.value}))}
+                                placeholder={placeholder}
+                                className="w-full p-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            />
+                        </div>
+                    ))}
+                    <button
+                        type="submit"
+                        disabled={submitting}
+                        className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-[10px] hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                        {submitting ? 'Submitting...' : 'Submit AMC Enquiry'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+const PlanSelectorModal = ({ isOpen, onClose, onSelect }) => {
+    const [brands, setBrands] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [plans, setPlans] = useState([]);
+    const [selectedBrand, setSelectedBrand] = useState('');
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [loadingProducts, setLoadingProducts] = useState(false);
+    const [loadingPlans, setLoadingPlans] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) { setSelectedBrand(''); setSelectedProduct(null); setProducts([]); setPlans([]); return; }
+        api.get('/brands').then(({ data }) => setBrands((data.brands || []).filter(b => b.isActive))).catch(() => {});
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!selectedBrand) { setProducts([]); setSelectedProduct(null); setPlans([]); return; }
+        setLoadingProducts(true);
+        api.get('/products').then(({ data }) => {
+            const filtered = (data.products || []).filter(p => p.specifications?.brand?.toLowerCase() === selectedBrand.toLowerCase());
+            setProducts(filtered);
+            setSelectedProduct(null);
+            setPlans([]);
+        }).catch(() => {}).finally(() => setLoadingProducts(false));
+    }, [selectedBrand]);
+
+    useEffect(() => {
+        if (!selectedProduct) { setPlans([]); return; }
+        setLoadingPlans(true);
+        api.get(`/amc-plans/rates/${selectedProduct._id}`).then(({ data }) => {
+            setPlans(data.plans || []);
+        }).catch(() => {}).finally(() => setLoadingPlans(false));
+    }, [selectedProduct]);
 
     if (!isOpen) return null;
 
@@ -375,47 +477,95 @@ const PlanSelectorModal = ({ isOpen, onClose, onSelect }) => {
             <div className="bg-white w-full max-w-4xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-300">
                 <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Select <span className="text-blue-500">Protection</span> Plan</h2>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Global Standard Water Care</p>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Book <span className="text-blue-500">AMC</span> Plan</h2>
+                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Select Brand → Product → Plan</p>
                     </div>
-                    <button onClick={onClose} className="p-3 hover:bg-slate-50 rounded-2xl transition-colors">
-                        <X size={24} className="text-slate-400" />
-                    </button>
+                    <button onClick={onClose} className="p-3 hover:bg-slate-50 rounded-2xl transition-colors"><X size={24} className="text-slate-400" /></button>
                 </div>
-                
-                <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {plans.map((plan) => (
-                        <div key={plan._id} className={`relative flex flex-col p-8 rounded-[32px] border-2 transition-all cursor-pointer group ${plan.popular ? 'border-blue-500 bg-blue-50/20 shadow-xl shadow-blue-500/5' : 'border-slate-50 hover:border-blue-100 hover:bg-slate-50/50'}`}>
-                            {plan.popular && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-blue-500/20">
-                                    Best Value
+
+                <div className="p-8 overflow-y-auto space-y-8">
+                    {/* Step 1: Brand */}
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Step 1 — Select Brand</label>
+                        <div className="flex flex-wrap gap-3">
+                            {brands.map(b => (
+                                <button key={b._id} onClick={() => setSelectedBrand(b.name)}
+                                    className={`px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider border-2 transition-all ${
+                                        selectedBrand === b.name ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-100 text-slate-600 hover:border-slate-300'
+                                    }`}>
+                                    {b.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Step 2: Product */}
+                    {selectedBrand && (
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Step 2 — Select Product</label>
+                            {loadingProducts ? (
+                                <p className="text-[11px] text-slate-400 font-bold">Loading products...</p>
+                            ) : products.length === 0 ? (
+                                <p className="text-[11px] text-slate-400 font-bold">No products found for this brand.</p>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {products.map(p => (
+                                        <button key={p._id} onClick={() => setSelectedProduct(p)}
+                                            className={`flex flex-col items-center gap-3 p-5 rounded-[24px] border-2 transition-all text-left ${
+                                                selectedProduct?._id === p._id ? 'border-blue-500 bg-blue-50/30' : 'border-slate-100 hover:border-blue-200'
+                                            }`}>
+                                            {p.mainImage?.url && <img src={p.mainImage.url} alt={p.name} className="w-16 h-16 object-contain rounded-xl" />}
+                                            <span className="text-[11px] font-black text-slate-800 uppercase tracking-tight text-center leading-tight">{p.name}</span>
+                                        </button>
+                                    ))}
                                 </div>
                             )}
-                            <div className="mb-8">
-                                <h3 className="text-lg font-black text-slate-900 tracking-tight mb-2 uppercase">{plan.name}</h3>
-                                <div className="flex items-end gap-1">
-                                    <span className="text-4xl font-black text-slate-900 tracking-tighter">₹{plan.price}</span>
-                                    <span className="text-slate-400 text-[9px] font-black uppercase pb-1.5 tracking-widest">/ Year</span>
-                                </div>
-                            </div>
-                            <ul className="space-y-4 mb-10 flex-1">
-                                {plan.features.map((feature, i) => (
-                                    <li key={i} className="flex items-start gap-3">
-                                        <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
-                                            <Check size={10} className="text-blue-600" strokeWidth={5} />
-                                        </div>
-                                        <span className="text-[11px] font-bold text-slate-600 leading-tight">{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <button 
-                                onClick={() => onSelect(plan)}
-                                className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${plan.popular ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-900 text-white'}`}
-                            >
-                                Secure Now
-                            </button>
                         </div>
-                    ))}
+                    )}
+
+                    {/* Step 3: Plans with 1yr/2yr/3yr rates */}
+                    {selectedProduct && (
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Step 3 — Choose Plan & Duration</label>
+                            {loadingPlans ? (
+                                <p className="text-[11px] text-slate-400 font-bold">Loading plans...</p>
+                            ) : plans.length === 0 ? (
+                                <p className="text-[11px] text-slate-400 font-bold">No AMC plans available for this product.</p>
+                            ) : (
+                                <div className="space-y-6">
+                                    {plans.map(plan => (
+                                        <div key={plan._id} className={`rounded-[28px] border-2 p-6 ${ plan.isPopular ? 'border-blue-500 bg-blue-50/20' : 'border-slate-100' }`}>
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">{plan.name}</h3>
+                                                {plan.isPopular && <span className="px-3 py-1 bg-blue-500 text-white text-[8px] font-black uppercase rounded-full">Best Value</span>}
+                                                {plan.partsIncluded && <span className="px-3 py-1 bg-green-50 text-green-600 text-[8px] font-black uppercase rounded-full">Parts Included</span>}
+                                            </div>
+                                            {plan.features.length > 0 && (
+                                                <ul className="flex flex-wrap gap-x-6 gap-y-1 mb-5">
+                                                    {plan.features.map((f, i) => (
+                                                        <li key={i} className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
+                                                            <Check size={10} className="text-blue-500" strokeWidth={4} />{f}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {DURATION_KEYS.map(key => plan[key] > 0 && (
+                                                    <button key={key}
+                                                        onClick={() => onSelect({ ...plan, price: plan[key], duration: DURATION_LABELS[key], durationKey: key }, selectedProduct)}
+                                                        className="flex flex-col items-center gap-1 p-4 rounded-2xl bg-white border border-slate-100 hover:border-blue-400 hover:bg-blue-50/30 transition-all active:scale-95 group">
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-blue-500">{DURATION_LABELS[key]}</span>
+                                                        <span className="text-xl font-black text-slate-900">₹{plan[key]}</span>
+                                                        {plan.discount > 0 && <span className="text-[8px] font-bold text-green-500">{plan.discount}% off</span>}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -434,7 +584,7 @@ const SuccessModal = ({ isOpen, onClose, plan, transactionId }) => {
                 </div>
                 <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tighter uppercase">Contract Active</h2>
                 <p className="text-slate-500 font-medium text-xs leading-relaxed mb-10 tracking-wide uppercase opacity-80">
-                    Your {plan?.name} premium protection is now live. Complete digital agreement sent to your dashboard.
+                    Your {plan?.name}{plan?.duration ? ` (${plan.duration})` : ''} premium protection is now live. Complete digital agreement sent to your dashboard.
                 </p>
                 <div className="bg-slate-50 rounded-3xl p-6 mb-10 border border-slate-100">
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-2">
@@ -605,10 +755,9 @@ const AmcRenewals = () => {
         setIsPlanModalOpen(false);
         setSelectedPlan(plan);
         
-        // Authenticating simulation
         Swal.fire({
             title: 'Verifying Coverage...',
-            html: '<div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authenticating Device Signature</div>',
+            html: '<div class="text-[10px] font-black uppercase tracking-widest text-slate-400">Authenticating Device Signature</div>',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             timer: 2000,
@@ -617,15 +766,18 @@ const AmcRenewals = () => {
         }).then(async () => {
              try {
                 await api.post(`/amc-user/subscribe`, {
+                    planId: plan._id,
                     planName: plan.name,
-                    price: plan.price
+                    price: plan.price,
+                    duration: plan.duration,
+                    durationKey: plan.durationKey,
                 });
 
                 const tid = `UX_${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
                 setTransactionId(tid);
                 setIsSuccessModalOpen(true);
                 toast.success("Security contract established!");
-                fetchAmcData(); // Refresh list
+                fetchAmcData();
              } catch (error) {
                 console.error("Purchase failed", error);
                 toast.error("Failed to purchase plan. Please try again.");
