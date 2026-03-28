@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import api from '../../services/api';
+import api, { getImageUrl } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { isTokenValid, getToken } from '../../utils/auth';
@@ -584,7 +584,7 @@ const Orders = () => {
                                     <div className="shrink-0">
                                         <div className="w-32 h-32 bg-slate-50 rounded-xl overflow-hidden border border-slate-100">
                                             <img 
-                                                src={order.items[0]?.productImage || order.items[0]?.product?.mainImage?.url || "https://via.placeholder.com/150"} 
+                                                src={getImageUrl(order.items[0]?.productImage || order.items[0]?.product?.mainImage?.url)} 
                                                 alt="product" 
                                                 className="w-full h-full object-cover" 
                                             />
